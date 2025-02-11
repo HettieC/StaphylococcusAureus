@@ -20,12 +20,12 @@ save_model(convert(JSONFBCModels.JSONFBCModel,escher_model),"escher_model.json")
 
 ####################################
 
-get_reactions_with_ec("1.2.1.38")
+get_reactions_with_ec("2.6.1.11")
 
-get_reaction(21588)
+get_reaction(18049)
 
 
-id_tag["lcl|AM990992.1_prot_CAQ48634.1_194"]
+id_tag["lcl|AM990992.1_prot_CAQ48638.1_198"]
 
 
 
