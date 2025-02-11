@@ -1,5 +1,8 @@
+"""
+$(TYPEDSIGNATURES)
 
-
+Parse the chemical formula from a RheaReaction.formula
+"""
 function parse_formula(x::Union{Nothing,String})
     if isnothing(x)
         return nothing
@@ -47,7 +50,6 @@ function extend_model!(model, dfs)
             push!(model.reactions[string(rid)].gene_association_dnf, grr)
 
         else # first time seeing this reaction
-
             rxn = get_reaction(rid)
 
             coeff_mets = get_reaction_metabolites(rid)
@@ -58,7 +60,7 @@ function extend_model!(model, dfs)
 
             append!(ms, last.(coeff_mets))
 
-            ecs = isnothing(rxn.ec) ? df.EC : rxn.ec
+            ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x,'/';limit=2)[2] for x in rxn.ec]
             name = rxn.name
 
             model.reactions[string(rid)] = CM.Reaction(;
