@@ -123,7 +123,7 @@ function gapfill!(model)
 
         append!(ms, last.(coeff_mets))
 
-        ecs = isnothing(rxn.ec) ? [row.EC] : rxn.ec
+        ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
         name = rxn.name
 
         model.reactions[string(rid)] = CM.Reaction(;
@@ -184,15 +184,16 @@ function change_reaction_names(model)
 
     rhea_id_gene_id = Dict{String,String}()
     for (r, rxn) in model.reactions
-        isnothing(rxn.gene_association_dnf) && continue
         g_name = ""
         if !isnothing(rxn.annotations) && haskey(rxn.annotations, "EC")
             for ec in split(rxn.annotations["EC"][1])
                 g_name *= "$ec, "
             end
         end
-        for g in unique([eggnog_dict[tag_id[g]] for g in vcat(rxn.gene_association_dnf...)])
-            g_name *= "$g, "
+        if !isnothing(rxn.gene_association_dnf)
+            for g in unique([eggnog_dict[tag_id[g]] for g in vcat(rxn.gene_association_dnf...)])
+                g_name *= "$g, "
+            end
         end
         rhea_id_gene_id[r] = g_name
     end
