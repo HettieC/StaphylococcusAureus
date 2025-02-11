@@ -60,7 +60,7 @@ function extend_model!(model, dfs)
 
             append!(ms, last.(coeff_mets))
 
-            ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x,'/';limit=2)[2] for x in rxn.ec]
+            ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
             name = rxn.name
 
             model.reactions[string(rid)] = CM.Reaction(;
@@ -157,4 +157,49 @@ function gapfill!(model)
     end
 
     model
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Make model with ec number and gene ids as reaction names
+"""
+function change_reaction_names(model)
+    id_tag = Dict{String,String}()
+    open("data/databases/ST398.txt") do io
+        locus_tag = ""
+        id = ""
+        for ln in eachline(io)
+            if startswith(ln, '>')
+                id = split(ln; limit=2)[1][2:end]
+                locus_tag = split(split(ln, "locus_tag=")[2], ']'; limit=2)[1]
+            end
+            id_tag[id] = locus_tag
+        end
+    end
+    tag_id = Dict(y => x for (x, y) in id_tag)
+
+    eggnog = DataFrame(CSV.File("data/databases/MM_hla1w34o.emapper.annotations.tsv"))
+    eggnog_dict = Dict(Pair.(eggnog.query, eggnog.Preferred_name))
+
+    rhea_id_gene_id = Dict{String,String}()
+    for (r, rxn) in model.reactions
+        isnothing(rxn.gene_association_dnf) && continue
+        g_name = ""
+        if !isnothing(rxn.annotations) && haskey(rxn.annotations, "EC")
+            for ec in split(rxn.annotations["EC"][1])
+                g_name *= "$ec, "
+            end
+        end
+        for g in unique([eggnog_dict[tag_id[g]] for g in vcat(rxn.gene_association_dnf...)])
+            g_name *= "$g, "
+        end
+        rhea_id_gene_id[r] = g_name
+    end
+
+    g_model = deepcopy(model)
+    for (rid, g_name) in rhea_id_gene_id
+        g_model.reactions[rid].name = g_name
+    end
+    return g_model
 end
