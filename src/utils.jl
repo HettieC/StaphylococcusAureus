@@ -111,7 +111,7 @@ function gapfill!(model)
     for row in eachrow(unique(df))
         rid = parse(Int64, split(row.RHEA_ID, ':')[2])
         haskey(model.reactions, string(rid)) && continue
-        
+
         rxn = get_reaction(rid)
 
         coeff_mets = get_reaction_metabolites(rid)
@@ -123,7 +123,7 @@ function gapfill!(model)
 
         append!(ms, last.(coeff_mets))
 
-        ecs = isnothing(rxn.ec) ? [row.EC] : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
+        ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
         name = rxn.name
 
         model.reactions[string(rid)] = CM.Reaction(;
@@ -140,7 +140,6 @@ function gapfill!(model)
                 "reason" => ["gapfilling"]
             ),
         )
-        println(rid)
     end
 
     # add metabolites 
