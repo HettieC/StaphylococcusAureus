@@ -24,3 +24,6 @@ docs/site/
 Manifest.toml
 
 temp.jl
+
+data/model.json
+escher_model.json
