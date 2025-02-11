@@ -1,2 +1,4 @@
 Type,Metabolite,CHEBI,Protein,Stoichiometry,Subunit
-PTS,glucose,CHEBI:15903,,,
+PTS,glucose,CHEBI:15903,SAPIG2588,1,0
+PTS,glucose,CHEBI:15903,SAPIG0207,1,0
+PTS,glucose,CHEBI:15903,SAPIG2309,1,0
