@@ -20,3 +20,4 @@ function build_model()
 
     model
 end
+export build_model
