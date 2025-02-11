@@ -16,7 +16,7 @@ save_model(convert(JSONFBCModels.JSONFBCModel,model),"data/model.json")
 
 # make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
-save_model(convert(JSONFBCModels.JSONFBCModel,escher_model),"escher_model.json")
+save_model(convert(JSONFBCModels.JSONFBCModel,escher_model),"data/escher_model.json")
 
 
 ####################################
