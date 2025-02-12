@@ -205,6 +205,7 @@ function change_reaction_names(model)
     end
     return g_model
 end
+export change_reaction_names
 
 """
 $(TYPEDSIGNATURES)
