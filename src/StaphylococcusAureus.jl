@@ -10,6 +10,5 @@ using JSONFBCModels
 
 include("utils.jl")
 include("reconstruct.jl")
-include("add_oxphos.jl")
 
 end

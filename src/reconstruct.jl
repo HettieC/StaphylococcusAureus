@@ -15,9 +15,10 @@ function build_model()
     extend_model!(model, ghomos)
     extend_model!(model, gheteros)
     gapfill!(model)
-    oxphos!(model)
     add_sources!(model)
     add_sinks!(model)
+    add_oxphos!(model)
+    change_bounds!(model)
 
     model
 end
