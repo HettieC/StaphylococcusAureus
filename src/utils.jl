@@ -262,7 +262,7 @@ function add_sinks!(model)
         chebi = split(row.CHEBI_ID,':')[2]
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
-            name = "row.Name exchange",
+            name = "$(row.Name) exchange",
             lower_bound = -1000.0,
             upper_bound = 0.0,
             stoichiometry = Dict(row.CHEBI_ID => 1),
