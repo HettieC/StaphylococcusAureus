@@ -162,6 +162,28 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Get the SAPIG ID of a gene.
+"""
+function id_tag(gene)
+    id_tag = Dict{String,String}()
+    open("data/databases/ST398.txt") do io
+        locus_tag = ""
+        id = ""
+        for ln in eachline(io)
+            if startswith(ln, '>')
+                id = split(ln; limit=2)[1][2:end]
+                locus_tag = split(split(ln, "locus_tag=")[2], ']'; limit=2)[1]
+            end
+            id_tag[id] = locus_tag
+        end
+    end
+    return id_tag[gene]
+end
+export id_tag
+
+"""
+$(TYPEDSIGNATURES)
+
 Make model with ec number and gene ids as reaction names
 """
 function change_reaction_names(model)
