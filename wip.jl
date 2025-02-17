@@ -11,9 +11,10 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-id_tag("lcl|AM990992.1_prot_CAQ49335.1_895")
+id_tag("lcl|AM990992.1_prot_CAQ48964.1_524")
 ####################################
 
+model = build_model()
 model.reactions["biomass"] = CM.Reaction(
     ;
     name="Biomass based on Staph epidermis RP62A",
@@ -76,7 +77,7 @@ fba_sol = flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
 
 ex_fluxes = Dict(
     ("CHEBI:$(split(string(x),"EX_")[2])", model.metabolites["CHEBI:$(split(string(x),"EX_")[2])"].name,x) => y
-    for (x, y) in fba_sol.fluxes if y < 0 && startswith(string(x), "EX")
+    for (x, y) in fba_sol.fluxes if startswith(string(x), "EX")
 )
 
 open("fluxes.json", "w") do io
