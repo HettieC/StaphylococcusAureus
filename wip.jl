@@ -11,7 +11,7 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-id_tag("lcl|AM990992.1_prot_CAQ48964.1_524")
+id_tag("lcl|AM990992.1_prot_CAQ48875.1_435")
 ####################################
 
 model = build_model()
@@ -68,6 +68,8 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:58315" => -0.119, #L-tyrosine
         "CHEBI:58048" => -0.1,  #L-asparagine
         "CHEBI:57305" => -0.1,  #glycine
+        #"CHEBI:59789" => -0.084,
+        #"CHEBI:57856" => -0.084,
     ),
     objective_coefficient=1.0,
     notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
