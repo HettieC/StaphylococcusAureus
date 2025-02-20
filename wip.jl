@@ -11,9 +11,10 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-
+id_tag("lcl|AM990992.1_prot_CAQ48875.1_435")
 ####################################
 
+model = build_model()
 model.reactions["biomass"] = CM.Reaction(
     ;
     name="Biomass based on Staph epidermis RP62A",
@@ -46,7 +47,6 @@ model.reactions["biomass"] = CM.Reaction(
         #"CHEBI:7896" => -1.0,     #hexadecanoate
         #"CHEBI:18262" => -1.0,    #dodecanoate
         "CHEBI:27689" => -1.0,    #decanoate
-        
         "CHEBI:57427" => -0.282,  #L-leucine
         "CHEBI:32682" => -0.111,  #L-arginine  
         "CHEBI:57762" => -0.207,  #L-valine  
@@ -68,7 +68,8 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:58315" => -0.119, #L-tyrosine
         "CHEBI:58048" => -0.1,  #L-asparagine
         "CHEBI:57305" => -0.1,  #glycine
-
+        #"CHEBI:59789" => -0.084,
+        #"CHEBI:57856" => -0.084,
     ),
     objective_coefficient=1.0,
     notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
@@ -76,35 +77,10 @@ model.reactions["biomass"] = CM.Reaction(
 
 fba_sol = flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
 
-Dict(string(x) => y for (x, y) in fba_sol.fluxes if abs(y) > 1e-5)
-
-
-### make sinks 
-for (m, met) in model.metabolites
-    haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
-    model.reactions["EX_$(split(m,':')[2])"] = CM.Reaction(;
-        stoichiometry=Dict(m => 1),
-        notes=Dict("reason" => ["added as sink"]),
-        upper_bound=0.0
-    )
-end
-
-fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
-
-### delete unneeded sinks 
-for (m, met) in model.metabolites
-    if abs(fba_sol.fluxes["EX_$(split(m,':')[2])"]) < 1e-5
-        delete!(model.reactions, "EX_$(split(m,':')[2])")
-    end
-end
-
-fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
-
 ex_fluxes = Dict(
-    ("CHEBI:$(split(string(x),"EX_")[2])", model.metabolites["CHEBI:$(split(string(x),"EX_")[2])"].name) => y
-    for (x, y) in fba_sol.fluxes if y < 0 && startswith(string(x), "EX")
+    ("CHEBI:$(split(string(x),"EX_")[2])", model.metabolites["CHEBI:$(split(string(x),"EX_")[2])"].name,x) => y
+    for (x, y) in fba_sol.fluxes if startswith(string(x), "EX")
 )
-
 
 open("fluxes.json", "w") do io
     JSON.print(io, Dict(string(x) => y for (x, y) in fba_sol.fluxes))
@@ -113,4 +89,7 @@ end
 open("fluxes_rhea.json", "w") do io
     JSON.print(io, Dict("RHEA:$(string(x))" => y for (x, y) in fba_sol.fluxes))
 end
+
+
+delete!(model.reactions,"EX_29969")
 

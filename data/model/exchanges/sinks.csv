@@ -1,7 +1,4 @@
 CHEBI_ID,Name
-CHEBI:16526,Co2 
-CHEBI:15378,H+
-CHEBI:58702,phosphoenolpyruvate
-CHEBI:59789,S-adenosyl-l-methionine
-CHEBI:57451,dihydrofolate
-CHEBI:15636,5-10-Methylenetetrahydrofolate
+CHEBI:16567,anthranilate
+CHEBI:57856,S-adenosyl-L-homocysteine
+CHEBI:59789,S-adenosyl-L-methionine
