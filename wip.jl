@@ -91,8 +91,8 @@ model.reactions["10535"].lower_bound = 0
 fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
 
 ex_fluxes = Dict(
-    ("CHEBI:$(split(string(x),"EX_")[2])", model.metabolites["CHEBI:$(split(string(x),"EX_")[2])"].name, x) => y
-    for (x, y) in fba_sol.fluxes if startswith(string(x), "EX")
+    ("CHEBI:$(split(string(x),"EX_")[2])", model.metabolites["CHEBI:$(split(string(x),"EX_")[2])"].name,x) => y
+    for (x, y) in fba_sol.fluxes if startswith(string(x), "EX") && abs(y)>1e-5
 )
 
 open("fluxes.json", "w") do io
@@ -104,34 +104,20 @@ open("fluxes_rhea.json", "w") do io
 end
 
 
-delete!(model.reactions, "EX_29969")
-
-
-### make sinks 
-for (m, met) in model.metabolites
-    haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
-    model.reactions["EX_$(split(m,':')[2])"] = CM.Reaction(; stoichiometry=Dict(m => 1), notes=Dict("reason" => ["added as sink"]), upper_bound=0.0)
-end
-
-
-fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+delete!(model.reactions,"EX_29969")
 
 
 
+Dict(escher_model.reactions[string(x)].name=>y for (x,y) in fba_sol.fluxes if abs(y)>1e-5 && string(x)!="biomass")
 
-
-### delete unneeded sinks 
-
-for (m, met) in model.metabolites
-    if abs(fba_sol.fluxes["EX_$(split(m,':')[2])"]) < 1e-5
-        delete!(model.reactions, "EX_$(split(m,':')[2])")
+open("atp_fluxes.txt","w") do io 
+    for (x,y) in fba_sol.fluxes 
+        abs(y)<1 && continue
+        string(x)=="biomass" && continue 
+        for ec in model.reactions[string(x)].annotations["EC"]
+            for z in split(ec)
+                println(io,z)
+            end
+        end
     end
 end
-
-
-
-
-
-fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
-
-

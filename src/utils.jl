@@ -63,13 +63,30 @@ function extend_model!(model, dfs)
             ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
             name = rxn.name
 
+            # direction 
+            # reversibility_index_threshold = 5 
+            # rev_ind = ismissing(first(df.RevIndex)) ? nothing : first(df.RevIndex) 
+
+            # if isnothing(rev_ind) || (abs(rev_ind) <= reversibility_index_threshold)
+            #     lb = -1000
+            #     ub = 1000
+            # elseif rev_ind < -reversibility_index_threshold # forward
+            #     lb = 0
+            #     ub = 1000
+            # elseif rev_ind > reversibility_index_threshold # reverse
+            #     lb = -1000
+            #     ub = 0
+            # end
+            lb = -1000
+            ub = 1000
+
             model.reactions[string(rid)] = CM.Reaction(;
                 name=name,
-                lower_bound=-1000.0,
-                upper_bound=1000.0,
-                stoichiometry=stoichiometry,
-                gene_association_dnf=[grr],
-                annotations=Dict(
+                lower_bound = lb,
+                upper_bound = ub,
+                stoichiometry = stoichiometry,
+                gene_association_dnf = [grr],
+                annotations = Dict(
                     "REACTION" => [rxn.equation],
                     "EC" => ecs,
                     "KEGG" => unique(df.KEGG_ID)
