@@ -36,17 +36,16 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:61429" => -0.099,   #dGTP
         "CHEBI:61481" => -0.099,   #dCTP
         #
-        #"CHEBI:57783" => -2e-5, #NADPH 
-        #"CHEBI:57945" => -2e-5, #NADH
-        #"CHEBI:58349" => -2e-5, #NADP(+)
-        #"CHEBI:57540" => -2e-5, #NAD(+)
-
+        "CHEBI:57783" => -2e-5, #NADPH 
+        "CHEBI:57945" => -2e-5, #NADH
+        "CHEBI:58349" => -2e-5, #NADP(+)
+        "CHEBI:57540" => -2e-5, #NAD(+)
 
         #"CHEBI:30807" => -1.0,    #tetradecanoate
-        "CHEBI:25646" => -1.0,    #octanoate
+        #"CHEBI:25646" => -1.0,    #octanoate
         #"CHEBI:7896" => -1.0,     #hexadecanoate
         #"CHEBI:18262" => -1.0,    #dodecanoate
-        "CHEBI:27689" => -1.0,    #decanoate
+        #"CHEBI:27689" => -1.0,    #decanoate
         "CHEBI:57427" => -0.282,  #L-leucine
         "CHEBI:32682" => -0.111,  #L-arginine  
         "CHEBI:57762" => -0.207,  #L-valine  
@@ -75,11 +74,30 @@ model.reactions["biomass"] = CM.Reaction(
     notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
 )
 
-fba_sol = flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+
+# make sinks
+for (m, met) in model.metabolites
+    haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
+    model.reactions["EX_$(split(m,':')[2])"] = CM.Reaction(;
+        stoichiometry=Dict(m => 1),
+        notes=Dict("reason" => ["added as sink"]),
+        upper_bound=0.0
+    )
+end
+
+fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+
+
+
+
+
+
+
 
 ex_fluxes = Dict(
     ("CHEBI:$(split(string(x),"EX_")[2])", model.metabolites["CHEBI:$(split(string(x),"EX_")[2])"].name,x) => y
-    for (x, y) in fba_sol.fluxes if startswith(string(x), "EX")
+    for (x, y) in fba_sol.fluxes if startswith(string(x), "EX") && abs(y)>1e-5
 )
 
 open("fluxes.json", "w") do io
@@ -93,3 +111,18 @@ end
 
 delete!(model.reactions,"EX_29969")
 
+
+
+Dict(escher_model.reactions[string(x)].name=>y for (x,y) in fba_sol.fluxes if abs(y)>1e-5 && string(x)!="biomass")
+
+open("atp_fluxes.txt","w") do io 
+    for (x,y) in fba_sol.fluxes 
+        abs(y)<1 && continue
+        string(x)=="biomass" && continue 
+        for ec in model.reactions[string(x)].annotations["EC"]
+            for z in split(ec)
+                println(io,z)
+            end
+        end
+    end
+end
