@@ -41,10 +41,10 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:61481" => -0.099,   #dCTP
         #"CHEBI:15377" => -0.061,   #H2O
 
-        #"CHEBI:30807" => -1.0,    #tetradecanoate
+        "CHEBI:30807" => -1.0,    #tetradecanoate
         "CHEBI:25646" => -1.0,    #octanoate
-        #"CHEBI:7896" => -1.0,     #hexadecanoate
-        #"CHEBI:18262" => -1.0,    #dodecanoate
+        "CHEBI:7896" => -1.0,     #hexadecanoate
+        "CHEBI:18262" => -1.0,    #dodecanoate
         "CHEBI:27689" => -1.0,    #decanoate
 
         "CHEBI:57427" => -0.282,  #L-leucine
