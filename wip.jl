@@ -95,17 +95,9 @@ ex_fluxes = Dict(
     for (x, y) in fba_sol.fluxes if startswith(string(x), "EX") && abs(y)>1e-5
 )
 
-open("fluxes.json", "w") do io
+open("data/fluxes.json", "w") do io
     JSON.print(io, Dict(string(x) => y for (x, y) in fba_sol.fluxes))
 end
-
-open("fluxes_rhea.json", "w") do io
-    JSON.print(io, Dict("RHEA:$(string(x))" => y for (x, y) in fba_sol.fluxes))
-end
-
-
-delete!(model.reactions,"EX_29969")
-
 
 
 Dict(escher_model.reactions[string(x)].name=>y for (x,y) in fba_sol.fluxes if abs(y)>1e-5 && string(x)!="biomass")
