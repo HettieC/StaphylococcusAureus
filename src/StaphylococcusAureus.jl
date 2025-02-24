@@ -9,6 +9,7 @@ using RheaReactions
 using JSONFBCModels
 
 include("utils.jl")
+include("curate.jl")
 include("reconstruct.jl")
 
 end
