@@ -11,7 +11,7 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-id_tag("lcl|AM990992.1_prot_CAQ49995.1_1555")
+id_tag("lcl|AM990992.1_prot_CAQ50558.1_2118")
 ####################################
 
 model = build_model()
@@ -32,11 +32,11 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:37563" => -0.059,   #CTP       
         "CHEBI:57692" => -0.007,    #FAD  
 
-        #"CHEBI:61404" => -0.02,    #dATP
-        #"CHEBI:57287" => -4.42e-5, #CoA
-        #"CHEBI:37568" => -0.02,    #dTTP
-        #"CHEBI:61429" => -0.099,   #dGTP
-        #"CHEBI:61481" => -0.099,   #dCTP
+        "CHEBI:61404" => -0.02,    #dATP
+        "CHEBI:57287" => -4.42e-5, #CoA
+        "CHEBI:37568" => -0.02,    #dTTP
+        "CHEBI:61429" => -0.099,   #dGTP
+        "CHEBI:61481" => -0.099,   #dCTP
         
         "CHEBI:57783" => 2e-5, #NADPH 
         "CHEBI:57945" => 2e-5, #NADH
@@ -68,7 +68,7 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:58315" => -0.119, #L-tyrosine
         "CHEBI:57912" => -1.0,   #L-tryptophan
         "CHEBI:57595" => -0.073, #L-histidine
-
+        "CHEBI:58199" => 0.1, #L-homocysteine
         "CHEBI:58048" => -0.1,  #L-asparagine
         "CHEBI:57844" => -0.084, #L-methionine
 
@@ -125,16 +125,8 @@ fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
 
 
 
-Dict(escher_model.reactions[string(x)].name=>y for (x,y) in fba_sol.fluxes if abs(y)>1e-5 && string(x)!="biomass")
+#### get reactions that produce CoA CHEBI:57287
 
-open("atp_fluxes.txt","w") do io 
-    for (x,y) in fba_sol.fluxes 
-        abs(y)<1 && continue
-        string(x)=="biomass" && continue 
-        for ec in model.reactions[string(x)].annotations["EC"]
-            for z in split(ec)
-                println(io,z)
-            end
-        end
-    end
-end
+[(r,rxn.annotations["EC"],rxn.annotations["KEGG"]) for (r,rxn) in model.reactions if fba_sol.fluxes[r]>1e-5 && haskey(rxn.stoichiometry,"CHEBI:57287") && rxn.stoichiometry["CHEBI:57287"]>0]
+
+[(r,rxn.annotations["EC"],rxn.annotations["KEGG"]) for (r,rxn) in model.reactions if fba_sol.fluxes[r]<-1e-5 && haskey(rxn.stoichiometry,"CHEBI:57287") && rxn.stoichiometry["CHEBI:57287"]<0]
