@@ -11,7 +11,7 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-id_tag("lcl|AM990992.1_prot_CAQ48875.1_435")
+id_tag("lcl|AM990992.1_prot_CAQ49063.1_623")
 ####################################
 
 model = build_model()
@@ -30,14 +30,14 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:46398" => -0.1,   #UTP
         "CHEBI:37565" => -0.059,   #GTP
         "CHEBI:37563" => -0.059,   #CTP       
-        #"CHEBI:57692" => -0.007,    #FAD  
-        "CHEBI:58453" => -0.007,    #
+        "CHEBI:57692" => -0.007,    #FAD  
+        #"CHEBI:58453" => -0.007,    #
 
-        "CHEBI:61404" => -0.02,    #dATP
-        "CHEBI:57287" => -4.42e-5, #CoA
-        "CHEBI:37568" => -0.02,    #dTTP
-        "CHEBI:61429" => -0.099,   #dGTP
-        "CHEBI:61481" => -0.099,   #dCTP
+        #"CHEBI:61404" => -0.02,    #dATP
+        #"CHEBI:57287" => -4.42e-5, #CoA
+        #"CHEBI:37568" => -0.02,    #dTTP
+        #"CHEBI:61429" => -0.099,   #dGTP
+        #"CHEBI:61481" => -0.099,   #dCTP
         
         "CHEBI:57783" => 2e-5, #NADPH 
         "CHEBI:57945" => 2e-5, #NADH
@@ -53,17 +53,17 @@ model.reactions["biomass"] = CM.Reaction(
         # "CHEBI:32682" => -0.111,  #L-arginine  
         # "CHEBI:57762" => -0.207,  #L-valine  
         # "CHEBI:60039" => -0.116,  #L-proline
-        "CHEBI:35235" => -0.019,  #L-cysteine
+        #"CHEBI:35235" => -0.019,  #L-cysteine
         #"CHEBI:57305" => -0.19,  #glycine
         #"CHEBI:33384" => -0.198, #L-serine         
         #"CHEBI:29991" => -0.261, #L-aspartate
-        "CHEBI:57972" => -0.212, #L-alanine
+        #"CHEBI:57972" => -0.212, #L-alanine
         #"CHEBI:58359" => -0.2,   #L-glutamine
         # #"CHEBI:57912" => -1.0,   #L-tryptophan
         #"CHEBI:29985" => -1.0,   #L-glutamate
         #"CHEBI:32551" => -0.235, #L-lysine
         # #"CHEBI:57844" => -0.084, #L-methionine
-        "CHEBI:58045" => -0.269, #L-isoleucine
+        #"CHEBI:58045" => -0.269, #L-isoleucine
         #"CHEBI:57595" => -0.073, #L-histidine
         #"CHEBI:57926" => -0.179, #L-threonine
         #"CHEBI:58095" => -0.137, #L-phenylalanine
