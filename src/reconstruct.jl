@@ -19,6 +19,7 @@ function build_model()
     add_sinks!(model)
     add_oxphos!(model)
     change_bounds!(model)
+    curate!(model)
 
     model
 end
