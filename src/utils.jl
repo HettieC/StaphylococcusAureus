@@ -79,6 +79,7 @@ function extend_model!(model, dfs)
             end
 
 
+
             model.reactions[string(rid)] = CM.Reaction(;
                 name=name,
                 lower_bound = lb,

@@ -72,7 +72,6 @@ model.reactions["biomass"] = CM.Reaction(
         "CHEBI:58048" => -0.1,  #L-asparagine
         "CHEBI:57844" => -0.084, #L-methionine
 
-
     ),
     objective_coefficient=1.0,
     notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
@@ -93,9 +92,11 @@ ex_fluxes = Dict(
 
 Dict(x=>y for (x,y) in fba_sol.fluxes if abs(y)>1e-5)
 
+
 open("data/fluxes.json", "w") do io
     JSON.print(io, Dict(string(x) => y for (x, y) in fba_sol.fluxes))
 end
+
 
 
 ### make sinks 
