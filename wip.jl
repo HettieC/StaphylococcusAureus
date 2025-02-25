@@ -137,3 +137,4 @@ fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
 [(r,rxn.annotations["EC"],rxn.annotations["KEGG"]) for (r,rxn) in model.reactions if fba_sol.fluxes[r]>1e-5 && haskey(rxn.stoichiometry,"CHEBI:57287") && rxn.stoichiometry["CHEBI:57287"]>0]
 
 [(r,rxn.annotations["EC"],rxn.annotations["KEGG"]) for (r,rxn) in model.reactions if fba_sol.fluxes[r]<-1e-5 && haskey(rxn.stoichiometry,"CHEBI:57287") && rxn.stoichiometry["CHEBI:57287"]<0]
+
