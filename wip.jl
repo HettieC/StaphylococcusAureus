@@ -95,11 +95,11 @@ ex_fluxes = Dict(
     for (x, y) in fba_sol.fluxes if startswith(string(x), "EX")
 )
 
-open("fluxes.json", "w") do io
+open("data/fluxes.json", "w") do io
     JSON.print(io, Dict(string(x) => y for (x, y) in fba_sol.fluxes))
 end
 
-open("fluxes_rhea.json", "w") do io
+open("data/fluxes_rhea.json", "w") do io
     JSON.print(io, Dict("RHEA:$(string(x))" => y for (x, y) in fba_sol.fluxes))
 end
 
