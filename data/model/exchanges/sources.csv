@@ -4,7 +4,6 @@ CHEBI:15379,oxygen
 CHEBI:43474,phosphoric acid
 CHEBI:15903,beta-D-glucose
 CHEBI:28938,nh4(+)
-CHEBI:28938,ammonia
 CHEBI:29919,hydrogen sulfide
 CHEBI:15378,H+
 CHEBI:35235,L-cysteine
@@ -12,8 +11,6 @@ CHEBI:32682,L-Arginine
 CHEBI:57427,L-Leucine 
 CHEBI:60039,L-Proline
 CHEBI:57762,L-valine 
-CHEBI:57844,L-methionine
-CHEBI:57912,L-tryptophan
-CHEBI:58601,alpha-D-glucose 1-phosphate
+CHEBI:57986,riboflavin
 CHEBI:57856,S-adenosyl-L-homocysteine
 CHEBI:59789,S-adenosyl-L-methionine
