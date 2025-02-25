@@ -1,15 +1,24 @@
+rhea_rxn_dir(rxn, qrt) = begin 
+    idx = first(indexin([rxn], qrt))
+    isnothing(idx) && error("Reaction not found...")
+    idx == 1 && return (-1000, 1000)
+    idx == 2 && return (0, 1000)
+    idx == 3 && return (-1000, 0)
+    idx == 4 && return (-1000, 1000)
+end
+
 function curate!(model)
 
     # modify rhea reactions to use beta-D isomer instead of D-glucose 
 
-    for (r,rxn) in model.reactions 
-        if haskey(rxn.stoichiometry,"CHEBI:4167") # D-glucose -> beta-D-glucose
+    for (r, rxn) in model.reactions
+        if haskey(rxn.stoichiometry, "CHEBI:4167") # D-glucose -> beta-D-glucose
             rxn.stoichiometry["CHEBI:15903"] = rxn.stoichiometry["CHEBI:4167"]
             delete!(rxn.stoichiometry, "CHEBI:4167")
         end
-        if haskey(rxn.stoichiometry,"CHEBI:61548") # D-glucose 6-phosphate -> β-D-glucose 6-phosphate 
+        if haskey(rxn.stoichiometry, "CHEBI:61548") # D-glucose 6-phosphate -> β-D-glucose 6-phosphate 
             rxn.stoichiometry["CHEBI:58247"] = rxn.stoichiometry["CHEBI:61548"]
-            delete!(rxn.stoichiometry,"CHEBI:61548")
+            delete!(rxn.stoichiometry, "CHEBI:61548")
         end
     end
 
@@ -19,5 +28,94 @@ function curate!(model)
     # allow bidirectional H2O 
     model.reactions["EX_15377"].lower_bound = -1000
     model.reactions["EX_15377"].upper_bound = 1000
-    model 
+
+    # change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
+    biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+    @select!(biocyc, :rheaDir, :metacyc)
+    for rid in A.reactions(model)
+        println(rid)
+        if startswith(rid,'X') 
+            println(rid)
+            continue
+        end
+        qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+        df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
+        isempty(df) && continue
+        lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+        model.reactions[rid].lower_bound = lb
+        model.reactions[rid].upper_bound = ub
+    end
+
+    #add atp maintenance reaction 
+    model.reactions["ATPM"] = CM.Reaction(
+        ;
+        name="ATP maintenance",
+        lower_bound=1.0,
+        stoichiometry=Dict(
+            "CHEBI:30616" => -1, #atp
+            "CHEBI:15377" => -1, #h2o
+            "CHEBI:43474" => 1, #phosphate
+            "CHEBI:15378" => 1, #h+
+            "CHEBI:456216" => 1, #adp
+        ),
+    )
+
+    # add a biomass reaction
+    model.reactions["biomass"] = CM.Reaction(
+        ;
+        name="Biomass based on Staph epidermis RP62A",
+        lower_bound=0.0,
+        upper_bound=1000.0,
+        stoichiometry=Dict(
+            "CHEBI:30616" => -1, #atp
+            "CHEBI:15377" => -1, #h2o
+            "CHEBI:43474" => 1, #phosphate
+            "CHEBI:15378" => 1, #h+
+            "CHEBI:456216" => 1, #adp
+            "CHEBI:46398" => -0.1,   #UTP
+            "CHEBI:37565" => -0.059,   #GTP
+            "CHEBI:37563" => -0.059,   #CTP       
+            "CHEBI:57692" => -0.007,    #FAD  
+            "CHEBI:61404" => -0.02,    #dATP
+            "CHEBI:57287" => -4.42e-5, #CoA
+            "CHEBI:37568" => -0.02,    #dTTP
+            "CHEBI:61429" => -0.099,   #dGTP
+            "CHEBI:61481" => -0.099,   #dCTP
+            "CHEBI:57783" => 2e-5, #NADPH 
+            "CHEBI:57945" => 2e-5, #NADH
+            "CHEBI:58349" => -2e-5, #NADP(+)
+            "CHEBI:57540" => -2e-5, #NAD(+)
+            "CHEBI:30807" => -1.0,    #tetradecanoate
+            "CHEBI:25646" => -1.0,    #octanoate
+            "CHEBI:7896" => -1.0,     #hexadecanoate
+            "CHEBI:18262" => -1.0,    #dodecanoate
+            "CHEBI:27689" => -1.0,    #decanoate
+            "CHEBI:57427" => -0.282,  #L-leucine
+            "CHEBI:32682" => -0.111,  #L-arginine  
+            "CHEBI:57762" => -0.207,  #L-valine  
+            "CHEBI:60039" => -0.116,  #L-proline
+            "CHEBI:35235" => -0.019,  #L-cysteine
+            "CHEBI:57305" => -0.19,  #glycine
+            "CHEBI:33384" => -0.19, #L-serine         
+            "CHEBI:29991" => -0.261, #L-aspartate
+            "CHEBI:57972" => -0.212, #L-alanine
+            "CHEBI:58359" => -1.2,   #L-glutamine
+            "CHEBI:29985" => -1.0,   #L-glutamate
+            "CHEBI:32551" => -0.235, #L-lysine
+            "CHEBI:58045" => -0.269, #L-isoleucine
+            "CHEBI:57305" => -0.1,  #glycine
+            "CHEBI:57926" => -0.179, #L-threonine
+            "CHEBI:58095" => -0.137, #L-phenylalanine
+            "CHEBI:58315" => -0.119, #L-tyrosine
+            "CHEBI:57912" => -1.0,   #L-tryptophan
+            "CHEBI:57595" => -0.073, #L-histidine
+            "CHEBI:58199" => 0.1, #L-homocysteine
+            "CHEBI:58048" => -0.1,  #L-asparagine
+            "CHEBI:57844" => -0.084, #L-methionine
+        ),
+        objective_coefficient=1.0,
+        notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
+    )
+
+    model
 end

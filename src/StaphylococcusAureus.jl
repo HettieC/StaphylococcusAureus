@@ -3,6 +3,7 @@ module StaphylococcusAureus
 using DocStringExtensions
 using CSV, DataFrames, DataFramesMeta
 using COBREXA, AbstractFBCModels
+import AbstractFBCModels as A
 import AbstractFBCModels.CanonicalModel as CM
 import COBREXA as X
 using RheaReactions
