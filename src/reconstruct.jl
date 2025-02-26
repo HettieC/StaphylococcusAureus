@@ -18,9 +18,9 @@ function build_model()
     add_sources!(model)
     add_sinks!(model)
     add_oxphos!(model)
+    model,directions = curate!(model)
     change_bounds!(model)
-    curate!(model)
 
-    model
+    return model, directions
 end
 export build_model

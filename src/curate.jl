@@ -32,6 +32,7 @@ function curate!(model)
     # change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
     biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
     @select!(biocyc, :rheaDir, :metacyc)
+    directions = String[]
     for rid in A.reactions(model)
         println(rid)
         if startswith(rid,"EX") 
@@ -43,6 +44,9 @@ function curate!(model)
         lb, ub = rhea_rxn_dir(df[1, 1], qrt)
         model.reactions[rid].lower_bound = lb
         model.reactions[rid].upper_bound = ub
+        if lb != -1000 || ub != 1000 
+            push!(directions,rid)
+        end
     end
 
     #add atp maintenance reaction 
@@ -116,5 +120,5 @@ function curate!(model)
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
     )
 
-    model
+    return model, directions
 end

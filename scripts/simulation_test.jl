@@ -6,15 +6,19 @@ using HiGHS, JSON
 using ConstraintTrees
 import ConstraintTrees as C
 
-model = build_model()
+model,directions = build_model()
+
 # make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
 model.reactions["biomass"].objective_coefficient = 0.0
 model.reactions["ATPM"].objective_coefficient = 1.0
+model.reactions["15841"].lower_bound = 0
+
 model.reactions["EX_15903"].upper_bound = 1
 sol = parsimonious_flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
+loopless_sol = loopless_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
 open("data/fluxes.json", "w") do io
     JSON.print(io, Dict(string(x) => y for (x, y) in sol.fluxes))
