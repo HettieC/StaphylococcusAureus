@@ -34,8 +34,7 @@ function curate!(model)
     @select!(biocyc, :rheaDir, :metacyc)
     for rid in A.reactions(model)
         println(rid)
-        if startswith(rid,'X') 
-            println(rid)
+        if startswith(rid,"EX") 
             continue
         end
         qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
