@@ -239,6 +239,7 @@ function change_reaction_names(model)
 
     g_model = deepcopy(model)
     for (rid, g_name) in rhea_id_gene_id
+        length(g_name)<1 && continue
         g_model.reactions[rid].name = g_name
     end
     return g_model

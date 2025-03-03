@@ -1,4 +1,4 @@
-rhea_rxn_dir(rxn, qrt) = begin 
+rhea_rxn_dir(rxn, qrt) = begin
     idx = first(indexin([rxn], qrt))
     isnothing(idx) && error("Reaction not found...")
     idx == 1 && return (-1000, 1000)
@@ -34,8 +34,7 @@ function curate!(model)
     @select!(biocyc, :rheaDir, :metacyc)
     directions = String[]
     for rid in A.reactions(model)
-        println(rid)
-        if startswith(rid,"EX") 
+        if startswith(rid, "EX")
             continue
         end
         qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
@@ -44,8 +43,8 @@ function curate!(model)
         lb, ub = rhea_rxn_dir(df[1, 1], qrt)
         model.reactions[rid].lower_bound = lb
         model.reactions[rid].upper_bound = ub
-        if lb != -1000 || ub != 1000 
-            push!(directions,rid)
+        if lb != -1000 || ub != 1000
+            push!(directions, rid)
         end
     end
 
@@ -60,6 +59,21 @@ function curate!(model)
             "CHEBI:43474" => 1, #phosphate
             "CHEBI:15378" => 1, #h+
             "CHEBI:456216" => 1, #adp
+        ),
+    )
+
+    #add atp synthase reaction 
+    model.reactions["ATPS"] = CM.Reaction(
+        ;
+        name="ATP synthase",
+        lower_bound=0.0,
+        stoichiometry=Dict(
+            "CHEBI:456216" => -1, #adp
+            "CHEBI:15378_p" => -4, #h+
+            "CHEBI:43474" => -1, #phosphate
+            "CHEBI:30616" => 1, #atp
+            "CHEBI:15377" => 1, #h2o
+            "CHEBI:15378" => 3, #h+
         ),
     )
 
@@ -120,5 +134,5 @@ function curate!(model)
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
     )
 
-    return model, directions
+    return model
 end

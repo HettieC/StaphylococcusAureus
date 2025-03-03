@@ -18,9 +18,17 @@ function build_model()
     add_sources!(model)
     add_sinks!(model)
     add_oxphos!(model)
-    model,directions = curate!(model)
+    model = curate!(model)
     change_bounds!(model)
+    add_electron_transport_chain!(model)
 
-    return model, directions
+    # remove general quinone/quinol reactions 
+    for (r,rxn) in model.reactions 
+        if haskey(rxn.stoichiometry,"CHEBI:132124") || haskey(rxn.stoichiometry,"CHEBI:24646")
+            delete!(model.reactions,r)
+        end
+    end
+
+    return model
 end
 export build_model

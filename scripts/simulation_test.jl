@@ -6,7 +6,7 @@ using HiGHS, JSON
 using ConstraintTrees
 import ConstraintTrees as C
 
-model,directions = build_model()
+model = build_model()
 
 # make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
@@ -26,6 +26,13 @@ end
 
 C.pretty(
     C.ifilter_leaves(sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+
+C.pretty(
+    C.ifilter_leaves(loopless_sol.fluxes) do ix, x
         abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
     end; 
     format_label = x -> A.reaction_name(model, string(last(x))),

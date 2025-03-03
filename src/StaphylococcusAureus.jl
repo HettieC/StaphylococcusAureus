@@ -12,5 +12,6 @@ using JSONFBCModels
 include("utils.jl")
 include("curate.jl")
 include("reconstruct.jl")
+include("specials.jl")
 
 end
