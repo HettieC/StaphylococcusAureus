@@ -89,7 +89,11 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "NAD+ + (S)-lactate = NADH + pyruvate + H+"
             ],
-        )
+        ),
+        gene_association_dnf = [
+            ["SAPIG0252"],
+            ["SAPIG2650"]
+        ]
     )
 
     #cyt aa3 
@@ -115,11 +119,11 @@ function add_electron_transport_chain!(model)
         name="Cytochrome bd oxidase",
         stoichiometry=Dict(
             "CHEBI:15379" => -1, #O2
-            "CHEBI:15378" => -1, #H+
-            "POLYMER:9539" => -1, #a menaquinol
-            "POLYMER:9537" => 1, #a menaquinone
-            "CHEBI:15377" => 1, #H2O
-            "CHEBI:15378_p" => 1, #H+ periplasm
+            "CHEBI:15378" => -4, #H+
+            "POLYMER:9539" => -2, #a menaquinol
+            "POLYMER:9537" => 2, #a menaquinone
+            "CHEBI:15377" => 2, #H2O
+            "CHEBI:15378_p" => 4, #H+ periplasm
         ),
         lower_bound = 0.0,
         annotations=Dict(
@@ -134,11 +138,11 @@ function add_electron_transport_chain!(model)
         name="Cytochrome bo3 oxidase",
         stoichiometry=Dict(
             "CHEBI:15379" => -1, #O2
-            "CHEBI:15378" => -1, #H+
-            "POLYMER:9539" => -1, #a menaquinol
-            "POLYMER:9537" => 1, #a menaquinone
-            "CHEBI:15377" => 1, #H2O
-            "CHEBI:15378_p" => 1, #H+ periplasm
+            "CHEBI:15378" => -8, #H+
+            "POLYMER:9539" => -2, #a menaquinol
+            "POLYMER:9537" => 2, #a menaquinone
+            "CHEBI:15377" => 2, #H2O
+            "CHEBI:15378_p" => 8, #H+ periplasm
         ),
         lower_bound = 0.0,
         annotations=Dict(

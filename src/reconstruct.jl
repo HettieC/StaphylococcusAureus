@@ -22,9 +22,9 @@ function build_model()
     change_bounds!(model)
     add_electron_transport_chain!(model)
 
-    # remove general quinone/quinol reactions 
+    # remove general quinone/quinol/ubiquinone/ubiquinone reactions 
     for (r,rxn) in model.reactions 
-        if haskey(rxn.stoichiometry,"CHEBI:132124") || haskey(rxn.stoichiometry,"CHEBI:24646")
+        if haskey(rxn.stoichiometry,"CHEBI:132124") || haskey(rxn.stoichiometry,"CHEBI:24646") || haskey(rxn.stoichiometry,"POLYMER:9566") || haskey(rxn.stoichiometry,"POLYMER:9565")
             delete!(model.reactions,r)
         end
     end

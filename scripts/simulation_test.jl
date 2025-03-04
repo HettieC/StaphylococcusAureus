@@ -12,13 +12,35 @@ model = build_model()
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-model.reactions["biomass"].objective_coefficient = 0.0
-model.reactions["ATPM"].objective_coefficient = 1.0
-model.reactions["15841"].lower_bound = 0
-
-model.reactions["EX_15903"].upper_bound = 1
+model.reactions["ATPM"].lower_bound = 2.0
+model.reactions["EX_15903"].upper_bound = 10
 sol = parsimonious_flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
-loopless_sol = loopless_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+
+open("data/fluxes.json","w") do io 
+    JSON.print(io,sol.fluxes)
+end
+
+
+
+for (m, met) in model.metabolites
+    haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
+    model.reactions["EX_$(split(m,':')[2])"] = CM.Reaction(; stoichiometry=Dict(m => 1), notes=Dict("reason" => ["added as sink"]), upper_bound=0.0)
+end
+
+
+sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+
+### delete unneeded sinks 
+
+for (m, met) in model.metabolites
+    if abs(fba_sol.fluxes["EX_$(split(m,':')[2])"]) < 1e-5
+        delete!(model.reactions, "EX_$(split(m,':')[2])")
+    end
+end
+
+
+sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+
 
 open("data/fluxes.json", "w") do io
     JSON.print(io, Dict(string(x) => y for (x, y) in sol.fluxes))
