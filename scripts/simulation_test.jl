@@ -12,16 +12,19 @@ model = build_model()
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-model.reactions["ATPM"].lower_bound = 2.0
-model.reactions["EX_15903"].upper_bound = 10
+model.reactions["EX_15903"].upper_bound = 1
+model.reactions["32746"].upper_bound = -0.1
 sol = parsimonious_flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
 
 open("data/fluxes.json","w") do io 
     JSON.print(io,sol.fluxes)
 end
 
+open("data/big_fluxes.json","w") do io 
+    JSON.print(io,Dict(x=>y for (x,y) in sol.fluxes if abs(y)>900))
+end
 
-
+# add sinks
 for (m, met) in model.metabolites
     haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
     model.reactions["EX_$(split(m,':')[2])"] = CM.Reaction(; stoichiometry=Dict(m => 1), notes=Dict("reason" => ["added as sink"]), upper_bound=0.0)
@@ -63,9 +66,33 @@ C.pretty(
 C.pretty(
     C.ifilter_leaves(sol.fluxes) do ix, x
         abs(x) > 1e-6 && begin
-            mets = [A.metabolite_name(model, k) for k in keys(A.reaction_stoichiometry(model, string(last(ix))))]
-            any(in.(mets, Ref(["L-2,4-diaminobutanoate"])))
-        end 
+            mets = [k for k in keys(A.reaction_stoichiometry(model, string(last(ix))))]
+            any(in.(mets, Ref(["CHEBI:30616"])))
+        end && A.reaction
     end; 
     format_label = x -> A.reaction_name(model, string(last(x))),
+)
+
+
+# atp producing reactions
+C.pretty(
+    C.ifilter_leaves(sol.fluxes) do ix, x
+        abs(x) > 1e-5 && 
+            haskey(model.reactions[string(last(ix))].stoichiometry,"CHEBI:30616") && 
+            ((model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] > 0 && x > 1e-5) || 
+            (model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] < 0 && x < -1e-5))
+    end; 
+    format_label = x -> (string(last(x)),A.reaction_name(escher_model, string(last(x)))),
+)
+
+
+
+# proton producing reactions
+C.pretty(
+    C.ifilter_leaves(sol.fluxes) do ix, x
+        abs(x) > 1 && 
+            haskey(model.reactions[string(last(ix))].stoichiometry,"CHEBI:15378") && 
+            ((model.reactions[string(last(ix))].stoichiometry["CHEBI:15378"] > 0 && x > 1) || 
+            (model.reactions[string(last(ix))].stoichiometry["CHEBI:15378"] < 0 && x < -1))
+    end; 
 )

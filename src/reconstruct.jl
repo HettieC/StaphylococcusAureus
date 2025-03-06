@@ -24,10 +24,12 @@ function build_model()
 
     # remove general quinone/quinol/ubiquinone/ubiquinone reactions 
     for (r,rxn) in model.reactions 
-        if haskey(rxn.stoichiometry,"CHEBI:132124") || haskey(rxn.stoichiometry,"CHEBI:24646") || haskey(rxn.stoichiometry,"POLYMER:9566") || haskey(rxn.stoichiometry,"POLYMER:9565")
+        if haskey(rxn.stoichiometry,"CHEBI:132124") || haskey(rxn.stoichiometry,"CHEBI:24646") || haskey(rxn.stoichiometry,"POLYMER:9566") || haskey(rxn.stoichiometry,"POLYMER:9565") || haskey(rxn.stoichiometry,"POLYMER:9563")
             delete!(model.reactions,r)
         end
     end
+
+    #
 
     return model
 end
