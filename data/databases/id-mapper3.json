@@ -1,0 +1,1253 @@
+{
+    "CHEBI:17499": {
+        "InChI": "",
+        "SMILES": "[*]",
+        "xrefs": [
+            "CHEBI:17499",
+            "chebi:13233",
+            "chebi:15018",
+            "chebi:17499",
+            "chebi:8785",
+            "deprecated:MNXM1102417",
+            "deprecated:MNXM1102418"
+        ],
+        "mnx_id": "MNXM1105763",
+        "InChIkey": "",
+        "reference": "chebi:17499",
+        "name": "AH2"
+    },
+    "CHEBI:29067": {
+        "name": "a carboxylate",
+        "mnx_id": "MNXM739611",
+        "xrefs": [
+            "CHEBI:29067",
+            "chebi:13626",
+            "chebi:13945",
+            "chebi:23026",
+            "chebi:29067",
+            "chebi:58657",
+            "deprecated:MNXM72"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:29067",
+        "InChI": "",
+        "SMILES": "[*]C(=O)[O-]"
+    },
+    "CHEBI:65264": {
+        "SMILES": "CCCCCCCCCCCC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "InChI": "",
+        "name": "dodecanoyl-pantetheine-4-phosphoryl-serine residue",
+        "reference": "chebi:65264",
+        "InChIkey": "",
+        "mnx_id": "MNXM726233",
+        "xrefs": [
+            "CHEBI:65264",
+            "CHEBI:65283",
+            "chebi:65264",
+            "chebi:65283",
+            "deprecated:MNXM104672",
+            "deprecated:MNXM5723",
+            "deprecated:MNXM89851",
+            "metacyc.compound:Dodecanoyl-ACPs",
+            "metacyc.compound:Dodecanoyl-TYPE-I-FAS-ACPs",
+            "metacycM:Dodecanoyl-ACPs",
+            "metacycM:Dodecanoyl-TYPE-I-FAS-ACPs"
+        ]
+    },
+    "CHEBI:78809": {
+        "SMILES": "CCCCCCCC(=O)NCCCC[C@H](N[*])C([*])=O",
+        "InChI": "",
+        "name": "N(6)-octanoyl-L-lysine residue",
+        "reference": "chebi:78809",
+        "InChIkey": "",
+        "mnx_id": "MNXM145774",
+        "xrefs": [
+            "CHEBI:78809",
+            "chebi:78809"
+        ]
+    },
+    "CHEBI:57560": {
+        "SMILES": "[*]C(=O)[O-]",
+        "InChI": "",
+        "name": "a long-chain fatty acid",
+        "InChIkey": "",
+        "reference": "chebi:57560",
+        "xrefs": [
+            "CHEBI:57560",
+            "chebi:13652",
+            "chebi:57560",
+            "deprecated:MNXM114063",
+            "deprecated:MNXM114489",
+            "deprecated:MNXM150358",
+            "deprecated:MNXM162412",
+            "deprecated:MNXM34928",
+            "deprecated:MNXM96037",
+            "reactome:R-ALL-1524021",
+            "reactome:R-ALL-1524085",
+            "reactome:R-ALL-1524103",
+            "reactome:R-ALL-1602366",
+            "reactomeM:R-ALL-1524021",
+            "reactomeM:R-ALL-1524085",
+            "reactomeM:R-ALL-1524103",
+            "reactomeM:R-ALL-1602366"
+        ],
+        "mnx_id": "MNXM726856"
+    },
+    "CHEBI:60110": {
+        "SMILES": "[*]C(=O)OC[C@H](COP(=O)([O-])OC[C@@H](O)COP(=O)([O-])[O-])OC([*])=O",
+        "InChI": "",
+        "xrefs": [
+            "CHEBI:37393",
+            "CHEBI:60110",
+            "SLM:000000101",
+            "chebi:11681",
+            "chebi:19930",
+            "chebi:37393",
+            "chebi:60110",
+            "deprecated:MNXM871",
+            "kegg.compound:C03892",
+            "keggC:C03892",
+            "keggC:M_C03892",
+            "reactome:R-ALL-1524059",
+            "reactomeM:R-ALL-1524059",
+            "slm:000000101"
+        ],
+        "mnx_id": "MNXM740941",
+        "reference": "chebi:60110",
+        "InChIkey": "",
+        "name": "1,2-diacyl-sn-glycero-3-phospho-(1'-sn-glycero-3'-phosphate)"
+    },
+    "CHEBI:10545": {
+        "InChI": "",
+        "SMILES": "",
+        "name": "e(-)",
+        "InChIkey": "",
+        "reference": "chebi:10545",
+        "mnx_id": "MNXM861",
+        "xrefs": [
+            "CHEBI:10545",
+            "chebi:10545",
+            "deprecated:MNXM459",
+            "deprecated:MNXM96454",
+            "deprecated:MNXM96467",
+            "kegg.compound:C05359",
+            "keggC:C05359",
+            "keggC:M_C05359",
+            "metacyc.compound:E-",
+            "metacycM:E-",
+            "reactome:R-ALL-76342",
+            "reactome:R-ALL-879326",
+            "reactome:R-ALL-917828",
+            "reactome:R-ALL-917882",
+            "reactomeM:R-ALL-76342",
+            "reactomeM:R-ALL-879326",
+            "reactomeM:R-ALL-917828",
+            "reactomeM:R-ALL-917882",
+            "sabiork.compound:7867",
+            "sabiorkM:7867",
+            "seed.compound:cpd12713",
+            "seedM:M_cpd12713",
+            "seedM:cpd12713"
+        ]
+    },
+    "CHEBI:57930": {
+        "SMILES": "[*][C@@H]1O[C@H](COP(=O)([O-])OP(=O)([O-])[O-])[C@@H](O)[C@H]1O",
+        "InChI": "",
+        "InChIkey": "",
+        "reference": "chebi:57930",
+        "xrefs": [
+            "CHEBI:16862",
+            "CHEBI:57930",
+            "chebi:13401",
+            "chebi:13662",
+            "chebi:14675",
+            "chebi:16862",
+            "chebi:25606",
+            "chebi:57930",
+            "chebi:7428",
+            "chebi:7652",
+            "deprecated:MNXM413",
+            "deprecated:MNXM79755",
+            "deprecated:MNXM96055",
+            "metacyc.compound:Purine-ribonucleosides-5-PP",
+            "metacyc.compound:Ribonucleoside-Diphosphates",
+            "metacycM:Purine-ribonucleosides-5-PP",
+            "metacycM:Ribonucleoside-Diphosphates",
+            "reactome:R-ALL-30181",
+            "reactomeM:R-ALL-30181"
+        ],
+        "mnx_id": "MNXM735700",
+        "name": "a ribonucleoside 5'-diphosphate"
+    },
+    "CHEBI:90726": {
+        "mnx_id": "MNXM728004",
+        "xrefs": [
+            "CHEBI:90726",
+            "chebi:90726",
+            "deprecated:MNXM1310"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:90726",
+        "name": "a 3-oxoacyl-CoA",
+        "SMILES": "CC(C)(COP(=O)([O-])OP(=O)([O-])OC[C@H]1O[C@@H](n2cnc3c(N)ncnc32)[C@H](O)[C@@H]1OP(=O)([O-])[O-])[C@@H](O)C(=O)NCCC(=O)NCCSC(=O)CC([*])=O",
+        "InChI": ""
+    },
+    "CHEBI:57599": {
+        "InChI": "",
+        "SMILES": "[*]C(=O)N[C@H]1[C@H](O)O[C@H](COP(=O)([O-])[O-])[C@@H](O)[C@@H]1O",
+        "xrefs": [
+            "CHEBI:15993",
+            "CHEBI:57599",
+            "chebi:12477",
+            "chebi:15993",
+            "chebi:21636",
+            "chebi:57599",
+            "chebi:7227",
+            "deprecated:MNXM507004",
+            "deprecated:MNXM5234",
+            "metacyc.compound:CPD-1062",
+            "metacycM:CPD-1062",
+            "seed.compound:cpd22739",
+            "seedM:M_cpd22739",
+            "seedM:cpd22739"
+        ],
+        "mnx_id": "MNXM737374",
+        "InChIkey": "",
+        "reference": "chebi:57599",
+        "name": "an N-acyl-D-glucosamine 6-phosphate"
+    },
+    "CHEBI:64479": {
+        "name": "O-(pantetheine-4'-phosphoryl)-L-serine residue",
+        "reference": "chebi:64479",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:64479",
+            "CHEBI:64891",
+            "chebi:64479",
+            "chebi:64891",
+            "chebi:76178",
+            "chebi:76240",
+            "deprecated:MNXM107332"
+        ],
+        "mnx_id": "MNXM128788",
+        "InChI": "",
+        "SMILES": "CC(C)(COP(=O)([O-])OC[C@H](N[*])C([*])=O)[C@@H](O)C(=O)NCCC(=O)NCCS"
+    },
+    "CHEBI:78776": {
+        "reference": "chebi:78776",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:141052",
+            "CHEBI:78776",
+            "chebi:141052",
+            "chebi:78776"
+        ],
+        "mnx_id": "MNXM162378",
+        "name": "O-(S-3-oxoacylpantetheine-4'-phosphoryl)-L-serine residue",
+        "InChI": "",
+        "SMILES": "CC(C)(COP(=O)([O-])OC[C@H](N[*])C([*])=O)[C@@H](O)C(=O)NCCC(=O)NCCSC(=O)CC([*])=O"
+    },
+    "CHEBI:138651": {
+        "name": "O-(S-fatty acylpantetheine-4'-phosphoryl)-L-serine residue",
+        "mnx_id": "MNXM1089222",
+        "xrefs": [
+            "CHEBI:138651",
+            "chebi:138651"
+        ],
+        "reference": "chebi:138651",
+        "InChIkey": "",
+        "InChI": "",
+        "SMILES": "CC(C)(COP(=O)([O-])OC[C@H](N[*])C([*])=O)[C@@H](O)C(=O)NCCC(=O)NCCSC([*])=O"
+    },
+    "CHEBI:74415": {
+        "name": "N(6)-(3-methylbut-2-en-1-yl)-adenosine 5'-phosphate residue",
+        "reference": "chebi:74415",
+        "InChIkey": "",
+        "mnx_id": "MNXM145772",
+        "xrefs": [
+            "CHEBI:74415",
+            "CHEBI:74638",
+            "chebi:74415",
+            "chebi:74638",
+            "deprecated:MNXM158230"
+        ],
+        "InChI": "",
+        "SMILES": "CC(C)=CCNc1ncnc2c1ncn2[C@@H]1O[C@H](COP([*])(=O)[O-])[C@@H](O[*])[C@H]1O"
+    },
+    "CHEBI:78468": {
+        "name": "O-(S-decanoylpantetheine-4'-phosphoryl)-L-serine residue",
+        "InChIkey": "",
+        "reference": "chebi:78468",
+        "xrefs": [
+            "CHEBI:78468",
+            "chebi:78468",
+            "deprecated:MNXM145788",
+            "deprecated:MNXM1473",
+            "deprecated:MNXM97432",
+            "metacyc.compound:Decanoyl-ACPs",
+            "metacyc.compound:Decanoyl-TYPE-I-FAS-ACPs",
+            "metacycM:Decanoyl-ACPs",
+            "metacycM:Decanoyl-TYPE-I-FAS-ACPs"
+        ],
+        "mnx_id": "MNXM728617",
+        "InChI": "",
+        "SMILES": "CCCCCCCCCC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O"
+    },
+    "CHEBI:57666": {
+        "SMILES": "[*]C(=O)N[C@H](C=O)[C@@H](O)[C@H](O)[C@H](O)COP(=O)([O-])[O-]",
+        "InChI": "",
+        "name": "an N-acyl-D-mannosamine 6-phosphate",
+        "reference": "chebi:57666",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:16173",
+            "CHEBI:57666",
+            "chebi:12480",
+            "chebi:12584",
+            "chebi:16173",
+            "chebi:21642",
+            "chebi:57666",
+            "chebi:7230",
+            "deprecated:MNXM3064"
+        ],
+        "mnx_id": "MNXM733790"
+    },
+    "CHEBI:62031": {
+        "name": "polar amino acid",
+        "mnx_id": "MNXM77169",
+        "xrefs": [
+            "CHEBI:26167",
+            "CHEBI:62031",
+            "chebi:26167",
+            "chebi:62031",
+            "chebi:8283",
+            "deprecated:MNXM21018",
+            "deprecated:MNXM77168",
+            "deprecated:MNXM96979",
+            "metacyc.compound:Polar-amino-acids",
+            "metacycM:Polar-amino-acids",
+            "seed.compound:cpd12887",
+            "seed.compound:cpd27885",
+            "seedM:M_cpd12887",
+            "seedM:M_cpd27885",
+            "seedM:cpd12887",
+            "seedM:cpd27885"
+        ],
+        "reference": "chebi:26167",
+        "InChIkey": "",
+        "SMILES": "[*]C(N)C(=O)O",
+        "InChI": ""
+    },
+    "CHEBI:17478": {
+        "SMILES": "[*]C=O",
+        "InChI": "",
+        "reference": "chebi:17478",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:17478",
+            "chebi:13432",
+            "chebi:13753",
+            "chebi:13805",
+            "chebi:13806",
+            "chebi:17478",
+            "chebi:22291",
+            "chebi:2554",
+            "chebi:8750",
+            "kegg.compound:C00071",
+            "keggC:C00071",
+            "keggC:M_C00071",
+            "metacyc.compound:Aldehydes",
+            "metacycM:Aldehydes",
+            "sabiork.compound:1410",
+            "sabiorkM:1410",
+            "seed.compound:cpd11616",
+            "seedM:M_cpd11616",
+            "seedM:cpd11616"
+        ],
+        "mnx_id": "MNXM277",
+        "name": "an aldehyde"
+    },
+    "CHEBI:58534": {
+        "name": "a 6-phospho-beta-D-galactoside",
+        "mnx_id": "MNXM96334",
+        "xrefs": [
+            "CHEBI:27887",
+            "CHEBI:58534",
+            "chebi:13617",
+            "chebi:20754",
+            "chebi:2232",
+            "chebi:27887",
+            "chebi:58534",
+            "deprecated:MNXM10390",
+            "deprecated:MNXM15000",
+            "deprecated:MNXM93031",
+            "kegg.compound:C03847",
+            "keggC:C03847",
+            "keggC:M_C03847",
+            "metacyc.compound:6-Phospho-b-D-galactosides",
+            "metacycM:6-Phospho-b-D-galactosides",
+            "seed.compound:cpd12403",
+            "seedM:M_cpd12403",
+            "seedM:cpd12403"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:58534",
+        "InChI": "",
+        "SMILES": "[*]O[C@@H]1O[C@H](COP(=O)([O-])[O-])[C@H](O)[C@H](O)[C@H]1O"
+    },
+    "CHEBI:13193": {
+        "SMILES": "[*]",
+        "InChI": "",
+        "name": "A",
+        "InChIkey": "",
+        "reference": "chebi:13193",
+        "xrefs": [
+            "CHEBI:13193",
+            "chebi:13193",
+            "deprecated:MNXM96039",
+            "kegg.compound:C16722",
+            "keggC:C16722",
+            "keggC:M_C16722",
+            "seed.compound:cpd11609",
+            "seedM:M_cpd11609",
+            "seedM:cpd11609"
+        ],
+        "mnx_id": "MNXM35"
+    },
+    "CHEBI:59918": {
+        "InChI": "",
+        "SMILES": "[*]C(=O)OP(=O)([O-])[O-]",
+        "reference": "chebi:59918",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:16826",
+            "CHEBI:59918",
+            "CHEBI:60199",
+            "chebi:13246",
+            "chebi:13725",
+            "chebi:16826",
+            "chebi:22222",
+            "chebi:2454",
+            "chebi:59918",
+            "chebi:60199",
+            "deprecated:MNXM7027",
+            "deprecated:MNXM90690",
+            "deprecated:MNXM96337",
+            "kegg.compound:C02133",
+            "keggC:C02133",
+            "keggC:M_C02133",
+            "metacyc.compound:Acyl-Phosphates",
+            "metacycM:Acyl-Phosphates",
+            "seed.compound:cpd12031",
+            "seedM:M_cpd12031",
+            "seedM:cpd12031"
+        ],
+        "mnx_id": "MNXM1999",
+        "name": "an acyl phosphate"
+    },
+    "CHEBI:78449": {
+        "name": "O-(S-malonylpantetheine-4'-phosphoryl)-L-serine residue",
+        "mnx_id": "MNXM145526",
+        "xrefs": [
+            "CHEBI:78449",
+            "chebi:78449"
+        ],
+        "reference": "chebi:78449",
+        "InChIkey": "",
+        "SMILES": "CC(C)(COP(=O)([O-])OC[C@H](N[*])C([*])=O)[C@@H](O)C(=O)NCCC(=O)NCCSC(=O)CC(=O)[O-]",
+        "InChI": ""
+    },
+    "CHEBI:55437": {
+        "InChI": "InChI=1S/C15H16O2/c1-10(2)7-8-11-9-14(16)12-5-3-4-6-13(12)15(11)17/h3-7,9,16-17H,8H2,1-2H3",
+        "SMILES": "CC(C)=CCc1cc(O)c2ccccc2c1O",
+        "mnx_id": "MNXM7000",
+        "xrefs": [
+            "CHEBI:55437",
+            "chebi:55437",
+            "chebi:84534"
+        ],
+        "InChIkey": "RCAWOWBPYYYZPZ-UHFFFAOYSA-N",
+        "reference": "chebi:55437",
+        "name": "a 2-demethylmenaquinol"
+    },
+    "CHEBI:75799": {
+        "InChI": "",
+        "SMILES": "[*]C(=O)OC[C@H](CO[C@@H]1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O)OC([*])=O",
+        "InChIkey": "",
+        "reference": "chebi:75799",
+        "xrefs": [
+            "CHEBI:75799",
+            "chebi:75799",
+            "deprecated:MNXM103135",
+            "kegg.compound:C04046",
+            "keggC:C04046",
+            "keggC:M_C04046"
+        ],
+        "mnx_id": "MNXM726129",
+        "name": "a 1,2-diacyl-3-O-(beta-D-glucopyranosyl)-sn-glycerol"
+    },
+    "CHEBI:57875": {
+        "name": "a 2-acyl-sn-glycero-3-phosphocholine",
+        "xrefs": [
+            "CHEBI:57875",
+            "SLM:000000724",
+            "chebi:57875",
+            "deprecated:MNXM733536",
+            "deprecated:MNXM733537",
+            "slm:000000724"
+        ],
+        "mnx_id": "MNXM1108087",
+        "InChIkey": "",
+        "reference": "chebi:57875",
+        "InChI": "",
+        "SMILES": "C[N+](C)(C)CCOP(=O)([O-])OC[C@@H](CO)OC([*])=O"
+    },
+    "CHEBI:83099": {
+        "mnx_id": "MNXM6998",
+        "xrefs": [
+            "CHEBI:14919",
+            "CHEBI:57280",
+            "CHEBI:83099",
+            "chebi:14919",
+            "chebi:57280",
+            "chebi:83099",
+            "deprecated:MNXM145553",
+            "deprecated:MNXM158233"
+        ],
+        "reference": "chebi:83099",
+        "InChIkey": "",
+        "name": "(R)-N(6)-lipoyl-L-lysine residue",
+        "InChI": "",
+        "SMILES": "[*]N[C@@H](CCCCNC(=O)CCCC[C@@H]1CCSS1)C([*])=O"
+    },
+    "CHEBI:57970": {
+        "InChI": "",
+        "SMILES": "[*]C(=O)OC[C@@H](O)COP(=O)([O-])[O-]",
+        "mnx_id": "MNXM728506",
+        "xrefs": [
+            "CHEBI:57970",
+            "SLM:000000333",
+            "bigg.metabolite:HC02042",
+            "biggM:HC02042",
+            "biggM:M_HC02042",
+            "chebi:57970",
+            "chebi:74916",
+            "deprecated:MNXM145527",
+            "kegg.compound:C00681",
+            "keggC:C00681",
+            "keggC:M_C00681",
+            "metacyc.compound:ACYL-SN-GLYCEROL-3P",
+            "metacycM:ACYL-SN-GLYCEROL-3P",
+            "slm:000000333"
+        ],
+        "reference": "chebi:57970",
+        "InChIkey": "",
+        "name": "a 1-acyl-sn-glycero-3-phosphate"
+    },
+    "CHEBI:28868": {
+        "SMILES": "[*]C(=O)[O-]",
+        "InChI": "",
+        "name": "a fatty acid",
+        "mnx_id": "MNXM728579",
+        "xrefs": [
+            "CHEBI:28868",
+            "SLM:000000984",
+            "chebi:13634",
+            "chebi:24022",
+            "chebi:28868",
+            "chebi:4985",
+            "deprecated:MNXM145709",
+            "deprecated:MNXM739610",
+            "reactome:R-ALL-1222455",
+            "reactome:R-ALL-166213",
+            "reactome:R-ALL-166216",
+            "reactomeM:R-ALL-1222455",
+            "reactomeM:R-ALL-166213",
+            "reactomeM:R-ALL-166216",
+            "slm:000000984"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:28868"
+    },
+    "CHEBI:17815": {
+        "SMILES": "[*]C(=O)OC[C@H](CO)OC([*])=O",
+        "InChI": "",
+        "name": "a 1,2-diacyl-sn-glycerol",
+        "InChIkey": "",
+        "reference": "chebi:17815",
+        "mnx_id": "MNXM1108364",
+        "xrefs": [
+            "CHEBI:17815",
+            "SLM:000000262",
+            "chebi:11150",
+            "chebi:13582",
+            "chebi:17815",
+            "chebi:495",
+            "deprecated:MNXM738564",
+            "deprecated:MNXM738566",
+            "reactome:R-ALL-114519",
+            "reactome:R-ALL-1500596",
+            "reactome:R-ALL-1524057",
+            "reactome:R-ALL-163414",
+            "reactome:R-ALL-5221124",
+            "reactome:R-ALL-76103",
+            "reactomeM:R-ALL-114519",
+            "reactomeM:R-ALL-1500596",
+            "reactomeM:R-ALL-1524057",
+            "reactomeM:R-ALL-163414",
+            "reactomeM:R-ALL-5221124",
+            "reactomeM:R-ALL-76103",
+            "slm:000000262"
+        ]
+    },
+    "CHEBI:78466": {
+        "name": "O-(S-3R-hydroxydecanoylpantetheine-4'-phosphoryl)-L-serine residue",
+        "mnx_id": "MNXM728729",
+        "xrefs": [
+            "CHEBI:78466",
+            "chebi:78466",
+            "deprecated:MNXM146198",
+            "deprecated:MNXM7127",
+            "metacyc.compound:Beta-hydroxydecanoyl-ACPs",
+            "metacyc.compound:Beta-hydroxydecanoyl-TYPE-I-FAS-ACPs",
+            "metacycM:Beta-hydroxydecanoyl-ACPs",
+            "metacycM:Beta-hydroxydecanoyl-TYPE-I-FAS-ACPs"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:78466",
+        "InChI": "",
+        "SMILES": "CCCCCCC[C@@H](O)CC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O"
+    },
+    "CHEBI:78463": {
+        "SMILES": "CCCCCCCC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "InChI": "",
+        "InChIkey": "",
+        "reference": "chebi:78463",
+        "mnx_id": "MNXM728539",
+        "xrefs": [
+            "CHEBI:78463",
+            "chebi:78463",
+            "deprecated:MNXM145593",
+            "deprecated:MNXM979",
+            "metacyc.compound:Octanoyl-ACPs",
+            "metacyc.compound:Octanoyl-TYPE-I-FAS-ACPs",
+            "metacycM:Octanoyl-ACPs",
+            "metacycM:Octanoyl-TYPE-I-FAS-ACPs"
+        ],
+        "name": "O-(S-octanoylpantetheine-4'-phosphoryl)-L-serine residue"
+    },
+    "CHEBI:78481": {
+        "SMILES": "CCCCCCCCCCCCC/C=C/C(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "InChI": "",
+        "name": "O-(S-2E-hexadecenoylpantetheine-4'-phosphoryl)-L-serine residue",
+        "mnx_id": "MNXM728712",
+        "xrefs": [
+            "CHEBI:78481",
+            "chebi:78481",
+            "deprecated:MNXM146193",
+            "deprecated:MNXM29072",
+            "metacyc.compound:2-Hexadecenoyl-ACPs",
+            "metacyc.compound:2-Hexadecenoyl-TYPE-I-FAS-ACPs",
+            "metacycM:2-Hexadecenoyl-ACPs",
+            "metacycM:2-Hexadecenoyl-TYPE-I-FAS-ACPs"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:78481"
+    },
+    "CHEBI:78464": {
+        "InChI": "",
+        "SMILES": "CCCCCCCC(=O)CC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "name": "O-(S-3-oxodecanoylpantetheine-4'-phosphoryl)-L-serine residue",
+        "InChIkey": "",
+        "reference": "chebi:78464",
+        "mnx_id": "MNXM728593",
+        "xrefs": [
+            "CHEBI:78464",
+            "chebi:78464",
+            "deprecated:MNXM145781",
+            "deprecated:MNXM26616",
+            "metacyc.compound:3-oxo-decanoyl-ACPs",
+            "metacyc.compound:3-oxo-decanoyl-TYPE-I-FAS-ACPs",
+            "metacycM:3-oxo-decanoyl-ACPs",
+            "metacycM:3-oxo-decanoyl-TYPE-I-FAS-ACPs"
+        ]
+    },
+    "CHEBI:17976": {
+        "SMILES": "COc1c(O)c(C)c(CC=C(C)C)c(O)c1OC",
+        "InChI": "InChI=1S/C14H20O4/c1-8(2)6-7-10-9(3)11(15)13(17-4)14(18-5)12(10)16/h6,15-16H,7H2,1-5H3",
+        "mnx_id": "MNXM732272",
+        "xrefs": [
+            "CHEBI:17976",
+            "chebi:15278",
+            "chebi:17976",
+            "chebi:27182",
+            "chebi:9851",
+            "deprecated:MNXM202",
+            "reactome:R-ALL-76633",
+            "reactomeM:R-ALL-76633"
+        ],
+        "InChIkey": "TVLSKGDBUQMDPR-UHFFFAOYSA-N",
+        "reference": "chebi:17976",
+        "name": "a ubiquinol"
+    },
+    "CHEBI:58856": {
+        "InChIkey": "",
+        "reference": "chebi:58856",
+        "mnx_id": "MNXM1107792",
+        "xrefs": [
+            "CHEBI:58856",
+            "SLM:000000814",
+            "chebi:58856",
+            "chebi:65103",
+            "deprecated:MNXM728525",
+            "deprecated:MNXM728527",
+            "reactome:R-ALL-6809811",
+            "reactomeM:R-ALL-6809811",
+            "slm:000000814"
+        ],
+        "name": "a (2E)-enoyl-CoA",
+        "InChI": "",
+        "SMILES": "CC(C)(COP(=O)([O-])OP(=O)([O-])OC[C@H]1O[C@@H](n2cnc3c(N)ncnc32)[C@H](O)[C@@H]1OP(=O)([O-])[O-])[C@@H](O)C(=O)NCCC(=O)NCCSC(=O)/C=C/[*]"
+    },
+    "CHEBI:74411": {
+        "InChI": "",
+        "SMILES": "[*]O[C@@H]1[C@@H](COP([*])(=O)O)O[C@@H](n2cnc3c(N)ncnc32)[C@@H]1O",
+        "name": "adenosine 5'-monophosphate residue",
+        "xrefs": [
+            "CHEBI:50306",
+            "CHEBI:74411",
+            "chebi:50306",
+            "chebi:74411"
+        ],
+        "mnx_id": "MNXM41962",
+        "InChIkey": "",
+        "reference": "chebi:50306"
+    },
+    "CHEBI:78473": {
+        "InChI": "",
+        "SMILES": "CCCCCCCCCCCC(=O)CC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "name": "O-(S-3-oxotetradecanoylpantetheine-4'-phosphoryl)-L-serine residue",
+        "reference": "chebi:78473",
+        "InChIkey": "",
+        "mnx_id": "MNXM728613",
+        "xrefs": [
+            "CHEBI:78473",
+            "chebi:78473",
+            "deprecated:MNXM145787",
+            "deprecated:MNXM26095",
+            "metacyc.compound:3-oxo-myristoyl-ACPs",
+            "metacyc.compound:3-oxo-myristoyl-TYPE-I-FAS-ACPs",
+            "metacycM:3-oxo-myristoyl-ACPs",
+            "metacycM:3-oxo-myristoyl-TYPE-I-FAS-ACPs"
+        ]
+    },
+    "CHEBI:64612": {
+        "SMILES": "[*]C(=O)OC[C@H](COP(=O)([O-])OCC[NH3+])OC([*])=O",
+        "InChI": "",
+        "name": "a 1,2-diacyl-sn-glycero-3-phosphoethanolamine",
+        "InChIkey": "",
+        "reference": "chebi:64612",
+        "xrefs": [
+            "CHEBI:64612",
+            "SLM:000000239",
+            "chebi:64612",
+            "deprecated:MNXM734021",
+            "deprecated:MNXM734022",
+            "slm:000000239"
+        ],
+        "mnx_id": "MNXM1108118"
+    },
+    "CHEBI:64837": {
+        "InChI": "",
+        "SMILES": "[*]N[C@@H](Cc1cncn1P(=O)([O-])[O-])C([*])=O",
+        "name": "N(pros)-phospho-L-histidine residue",
+        "InChIkey": "",
+        "reference": "chebi:64837",
+        "mnx_id": "MNXM726468",
+        "xrefs": [
+            "CHEBI:64837",
+            "CHEBI:64936",
+            "chebi:64837",
+            "chebi:64936",
+            "deprecated:MNXM106856",
+            "deprecated:MNXM168938",
+            "seed.compound:cpd29533",
+            "seedM:M_cpd29533",
+            "seedM:cpd29533"
+        ]
+    },
+    "CHEBI:78480": {
+        "SMILES": "CCCCCCCCCCCCC[C@@H](O)CC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "InChI": "",
+        "name": "O-(S-3R-hydroxyhexadecanoylpantetheine-4'-phosphoryl)-L-serine residue",
+        "InChIkey": "",
+        "reference": "chebi:78480",
+        "xrefs": [
+            "CHEBI:78480",
+            "chebi:78480",
+            "deprecated:MNXM146200",
+            "metacyc.compound:R-3-Hydroxypalmitoyl-ACPs",
+            "metacyc.compound:R-3-Hydroxypalmitoyl-TYPE-I-FAS-ACPs",
+            "metacycM:R-3-Hydroxypalmitoyl-ACPs",
+            "metacycM:R-3-Hydroxypalmitoyl-TYPE-I-FAS-ACPs",
+            "seed.compound:cpd28023",
+            "seedM:M_cpd28023",
+            "seedM:cpd28023"
+        ],
+        "mnx_id": "MNXM12847"
+    },
+    "CHEBI:30879": {
+        "InChI": "",
+        "SMILES": "[*][C@@H]1O[C@H](CO)[C@@H](O)[C@H]1O",
+        "name": "a ribonucleoside",
+        "reference": "chebi:18254",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:18254",
+            "CHEBI:26399",
+            "CHEBI:30879",
+            "chebi:13014",
+            "chebi:13015",
+            "chebi:13685",
+            "chebi:13804",
+            "chebi:18254",
+            "chebi:21085",
+            "chebi:22288",
+            "chebi:2553",
+            "chebi:26399",
+            "chebi:26560",
+            "chebi:30879",
+            "chebi:4240",
+            "chebi:8844",
+            "deprecated:MNXM163790",
+            "deprecated:MNXM2426",
+            "deprecated:MNXM79752",
+            "deprecated:MNXM79949",
+            "deprecated:MNXM94381",
+            "metacyc.compound:D-Ribosyl-Base",
+            "metacyc.compound:Purine-Ribonucleosides",
+            "metacyc.compound:Ribonucleosides",
+            "metacycM:D-Ribosyl-Base",
+            "metacycM:Purine-Ribonucleosides",
+            "metacycM:Ribonucleosides"
+        ],
+        "mnx_id": "MNXM730837"
+    },
+    "CHEBI:76264": {
+        "SMILES": "[*]C(=O)OC[C@H](CO[C@@H]1O[C@H](CO[C@@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2O)[C@@H](O)[C@H](O)[C@H]1O)OC([*])=O",
+        "InChI": "",
+        "name": "a 1,2-diacyl-3-O-(beta-D-Glc-(1->6)-beta-D-Glc)-sn-glycerol",
+        "mnx_id": "MNXM732841",
+        "xrefs": [
+            "CHEBI:76264",
+            "chebi:76264",
+            "deprecated:MNXM2367",
+            "kegg.compound:C06040",
+            "keggC:C06040",
+            "keggC:M_C06040",
+            "seed.compound:cpd12815",
+            "seedM:M_cpd12815",
+            "seedM:cpd12815"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:76264"
+    },
+    "CHEBI:83100": {
+        "SMILES": "[*]N[C@@H](CCCCNC(=O)CCCC[C@@H](S)CCS)C([*])=O",
+        "InChI": "",
+        "name": "(R)-N(6)-dihydrolipoyl-L-lysine residue",
+        "xrefs": [
+            "CHEBI:83100",
+            "chebi:83100",
+            "deprecated:MNXM145607",
+            "metacyc.compound:Dihydro-Lipoyl-Proteins",
+            "metacycM:Dihydro-Lipoyl-Proteins",
+            "seed.compound:cpd26965",
+            "seedM:M_cpd26965",
+            "seedM:cpd26965"
+        ],
+        "mnx_id": "MNXM17283",
+        "reference": "chebi:83100",
+        "InChIkey": ""
+    },
+    "CHEBI:132124": {
+        "InChI": "",
+        "SMILES": "[*]C1=C([*])C(=O)C([*])=C([*])C1=O",
+        "name": "a quinone",
+        "reference": "chebi:132124",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:132124",
+            "chebi:132124",
+            "deprecated:MNXM769"
+        ],
+        "mnx_id": "MNXM740099"
+    },
+    "CHEBI:58332": {
+        "name": "a CDP-1,2-diacyl-sn-glycerol",
+        "InChIkey": "",
+        "reference": "chebi:58332",
+        "mnx_id": "MNXM1104248",
+        "xrefs": [
+            "CHEBI:58332",
+            "SLM:000000084",
+            "chebi:58332",
+            "deprecated:MNXM732253",
+            "slm:000000084"
+        ],
+        "SMILES": "[*]C(=O)OC[C@H](COP(=O)([O-])OP(=O)([O-])OC[C@H]1O[C@@H](n2ccc(N)nc2=O)[C@H](O)[C@@H]1O)OC([*])=O",
+        "InChI": ""
+    },
+    "CHEBI:29999": {
+        "SMILES": "[*]N[C@@H](CO)C([*])=O",
+        "InChI": "",
+        "reference": "chebi:29999",
+        "InChIkey": "",
+        "mnx_id": "MNXM59538",
+        "xrefs": [
+            "CHEBI:29999",
+            "chebi:29999"
+        ],
+        "name": "L-serine residue"
+    },
+    "CHEBI:78462": {
+        "SMILES": "CCCCC/C=C/C(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "InChI": "",
+        "name": "O-(S-(2E)-octenoylpantetheine-4'-phosphoryl)-L-serine residue",
+        "reference": "chebi:78462",
+        "InChIkey": "",
+        "mnx_id": "MNXM728589",
+        "xrefs": [
+            "CHEBI:78462",
+            "chebi:78462",
+            "chebi:83573",
+            "deprecated:MNXM145778",
+            "deprecated:MNXM23766",
+            "metacyc.compound:2-Octenoyl-ACPs",
+            "metacyc.compound:2-Octenoyl-TYPE-I-FAS-ACPs",
+            "metacycM:2-Octenoyl-ACPs",
+            "metacycM:2-Octenoyl-TYPE-I-FAS-ACPs"
+        ]
+    },
+    "CHEBI:57880": {
+        "InChI": "",
+        "SMILES": "[*]C(=O)OC[C@H](COP(=O)([O-])O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@@H](O)[C@H]1O)OC([*])=O",
+        "InChIkey": "",
+        "reference": "chebi:57880",
+        "mnx_id": "MNXM1105987",
+        "xrefs": [
+            "CHEBI:57880",
+            "SLM:000000324",
+            "chebi:57880",
+            "deprecated:MNXM1104080",
+            "deprecated:MNXM730334",
+            "slm:000000324"
+        ],
+        "name": "a 1,2-diacyl-sn-glycero-3-phospho-(1D-myo-inositol)"
+    },
+    "CHEBI:78469": {
+        "InChI": "",
+        "SMILES": "CCCCCCCCCC(=O)CC(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "xrefs": [
+            "CHEBI:78469",
+            "CHEBI:83437",
+            "chebi:78469",
+            "chebi:83437",
+            "deprecated:MNXM145782",
+            "deprecated:MNXM158846",
+            "deprecated:MNXM28933",
+            "metacyc.compound:3-oxo-dodecanoyl-ACPs",
+            "metacyc.compound:3-oxo-dodecanoyl-TYPE-I-FAS-ACPs",
+            "metacycM:3-oxo-dodecanoyl-ACPs",
+            "metacycM:3-oxo-dodecanoyl-TYPE-I-FAS-ACPs"
+        ],
+        "mnx_id": "MNXM728598",
+        "InChIkey": "",
+        "reference": "chebi:78469",
+        "name": "O-(S-3-oxododecanoylpantetheine-4'-phosphoryl)-L-serine residue"
+    },
+    "CHEBI:29969": {
+        "InChIkey": "",
+        "reference": "chebi:29967",
+        "mnx_id": "MNXM59465",
+        "xrefs": [
+            "CHEBI:29967",
+            "CHEBI:29969",
+            "chebi:29967",
+            "chebi:29969",
+            "deprecated:MNXM59462"
+        ],
+        "name": "L-lysine residue",
+        "SMILES": "[*]N[C@@H](CCCCN)C([*])=O",
+        "InChI": ""
+    },
+    "CHEBI:78467": {
+        "InChI": "",
+        "SMILES": "CCCCCCC/C=C/C(=O)SCCNC(=O)CCNC(=O)[C@H](O)C(C)(C)COP(=O)([O-])OC[C@H](N[*])C([*])=O",
+        "reference": "chebi:78467",
+        "InChIkey": "",
+        "mnx_id": "MNXM6456",
+        "xrefs": [
+            "CHEBI:78467",
+            "chebi:78467",
+            "deprecated:MNXM145779",
+            "metacyc.compound:Trans-D2-decenoyl-ACPs",
+            "metacyc.compound:Trans-D2-decenoyl-TYPE-I-FAS-ACPs",
+            "metacycM:Trans-D2-decenoyl-ACPs",
+            "metacycM:Trans-D2-decenoyl-TYPE-I-FAS-ACPs",
+            "seed.compound:cpd28273",
+            "seedM:M_cpd28273",
+            "seedM:cpd28273"
+        ],
+        "name": "O-(S-2E-decenoylpantetheine-4'-phosphoryl)-L-serine residue"
+    },
+    "CHEBI:83111": {
+        "name": "(R)-N(6)-(S(8)-acetyldihydrolipoyl)-L-lysine residue",
+        "reference": "chebi:83111",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:78815",
+            "CHEBI:83111",
+            "chebi:78815",
+            "chebi:83111",
+            "deprecated:MNXM158223"
+        ],
+        "mnx_id": "MNXM146028",
+        "SMILES": "CC(=O)SCC[C@H](S)CCCCC(=O)NCCCC[C@H](N[*])C([*])=O",
+        "InChI": ""
+    },
+    "CHEBI:15734": {
+        "InChI": "",
+        "SMILES": "[*]CO",
+        "name": "a primary alcohol",
+        "reference": "chebi:15734",
+        "InChIkey": "",
+        "mnx_id": "MNXM730353",
+        "xrefs": [
+            "CHEBI:15734",
+            "chebi:13676",
+            "chebi:14887",
+            "chebi:15734",
+            "chebi:26262",
+            "chebi:57489",
+            "chebi:8406",
+            "deprecated:MNXM162463",
+            "deprecated:MNXM42616",
+            "deprecated:MNXM512005",
+            "deprecated:MNXM832"
+        ]
+    },
+    "CHEBI:61557": {
+        "name": "a ribonucleoside 5'-triphosphate",
+        "xrefs": [
+            "CHEBI:17326",
+            "CHEBI:58104",
+            "CHEBI:61557",
+            "chebi:13411",
+            "chebi:14677",
+            "chebi:17326",
+            "chebi:25610",
+            "chebi:58104",
+            "chebi:61557",
+            "chebi:7442",
+            "chebi:7655",
+            "deprecated:MNXM147299",
+            "deprecated:MNXM79758",
+            "deprecated:MNXM96380",
+            "metacyc.compound:Purine-ribonucleosides-5-PPP",
+            "metacyc.compound:Ribonucleoside-Triphosphates",
+            "metacycM:Purine-ribonucleosides-5-PPP",
+            "metacycM:Ribonucleoside-Triphosphates"
+        ],
+        "mnx_id": "MNXM729013",
+        "reference": "chebi:61557",
+        "InChIkey": "",
+        "InChI": "",
+        "SMILES": "[*][C@@H]1O[C@H](COP(=O)([O-])OP(=O)([O-])OP(=O)([O-])[O-])[C@@H](O)[C@H]1O"
+    },
+    "CHEBI:83139": {
+        "SMILES": "CC(C)(COP(=O)([O-])OP(=O)([O-])OC[C@H]1O[C@@H](n2cnc3c(N)ncnc32)[C@H](O)[C@@H]1OP(=O)([O-])[O-])[C@@H](O)C(=O)NCCC(=O)NCCSC([*])=O",
+        "InChI": "",
+        "reference": "chebi:83139",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:33184",
+            "CHEBI:83139",
+            "chebi:13649",
+            "chebi:14530",
+            "chebi:25073",
+            "chebi:33184",
+            "chebi:6523",
+            "chebi:83139",
+            "deprecated:MNXM60326",
+            "kegg.compound:C02843",
+            "keggC:C02843",
+            "keggC:M_C02843"
+        ],
+        "mnx_id": "MNXM146118",
+        "name": "a long-chain fatty acyl-CoA"
+    },
+    "CHEBI:83143": {
+        "InChI": "",
+        "SMILES": "[*]N[C@@H](CCCCNC(=O)CCCC[C@@H](S)CCSCN)C([*])=O",
+        "name": "N(6)-[(R)-S(8)-aminomethyldihydrolipoyl]-L-lysine residue",
+        "InChIkey": "",
+        "reference": "chebi:83103",
+        "xrefs": [
+            "CHEBI:83103",
+            "CHEBI:83143",
+            "chebi:83103",
+            "chebi:83143",
+            "deprecated:MNXM158226"
+        ],
+        "mnx_id": "MNXM146029"
+    },
+    "CHEBI:18151": {
+        "mnx_id": "MNXM736183",
+        "xrefs": [
+            "CHEBI:18151",
+            "chebi:14581",
+            "chebi:15028",
+            "chebi:18151",
+            "chebi:18158",
+            "chebi:26525",
+            "chebi:60024",
+            "chebi:6748",
+            "chebi:8783",
+            "deprecated:MNXM442",
+            "deprecated:MNXM531745"
+        ],
+        "InChIkey": "NDCOZNXXVWWVAO-UHFFFAOYSA-N",
+        "reference": "chebi:18151",
+        "name": "a menaquinol",
+        "SMILES": "CC(C)=CCc1c(C)c(O)c2ccccc2c1O",
+        "InChI": "InChI=1S/C16H18O2/c1-10(2)8-9-12-11(3)15(17)13-6-4-5-7-14(13)16(12)18/h4-8,17-18H,9H2,1-3H3"
+    },
+    "CHEBI:24646": {
+        "SMILES": "[*]c1c([*])c(O)c([*])c([*])c1O",
+        "InChI": "",
+        "name": "a quinol",
+        "mnx_id": "MNXM56807",
+        "xrefs": [
+            "CHEBI:24646",
+            "chebi:134188",
+            "chebi:24646"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:24646"
+    },
+    "CHEBI:57318": {
+        "name": "a (3S)-3-hydroxyacyl-CoA",
+        "xrefs": [
+            "CHEBI:136757",
+            "CHEBI:136760",
+            "CHEBI:137639",
+            "CHEBI:137650",
+            "CHEBI:15455",
+            "CHEBI:57318",
+            "SLM:000000725",
+            "chebi:10887",
+            "chebi:11046",
+            "chebi:136757",
+            "chebi:136760",
+            "chebi:137639",
+            "chebi:137650",
+            "chebi:15455",
+            "chebi:18566",
+            "chebi:208",
+            "chebi:57318",
+            "deprecated:MNXM148846",
+            "deprecated:MNXM149456",
+            "deprecated:MNXM172267",
+            "deprecated:MNXM1875",
+            "deprecated:MNXM527703",
+            "kegg.compound:C00640",
+            "keggC:C00640",
+            "keggC:M_C00640",
+            "seed.compound:cpd11718",
+            "seedM:M_cpd11718",
+            "seedM:cpd11718",
+            "slm:000000725"
+        ],
+        "mnx_id": "MNXM729189",
+        "reference": "chebi:57318",
+        "InChIkey": "",
+        "SMILES": "CC(C)(COP(=O)([O-])OP(=O)([O-])OC[C@H]1O[C@@H](n2cnc3c(N)ncnc32)[C@H](O)[C@@H]1OP(=O)([O-])[O-])[C@@H](O)C(=O)NCCC(=O)NCCSC(=O)C[C@H]([*])O",
+        "InChI": ""
+    },
+    "CHEBI:145394": {
+        "mnx_id": "MNXM59293",
+        "xrefs": [
+            "CHEBI:145394",
+            "CHEBI:60291",
+            "chebi:145394",
+            "chebi:60291"
+        ],
+        "InChIkey": "",
+        "reference": "chebi:145394",
+        "name": "a 1,2-diacyl-sn-glycero-3-phosphoglycerol",
+        "InChI": "",
+        "SMILES": "[*]C(=O)OC[C@H](COP(=O)([O-])OCC(O)CO)OC([*])=O"
+    },
+    "CHEBI:83142": {
+        "reference": "chebi:83142",
+        "InChIkey": "",
+        "xrefs": [
+            "CHEBI:83142",
+            "chebi:83142"
+        ],
+        "mnx_id": "MNXM146027",
+        "name": "(R)-N(6)-(S(8)-2-methylpropanoyldihydrolipoyl)-L-lysine residue",
+        "InChI": "",
+        "SMILES": "CC(C)C(=O)SCC[C@H](S)CCCCC(=O)NCCCC[C@H](N[*])C([*])=O"
+    },
+    "CHEBI:29979": {
+        "xrefs": [
+            "CHEBI:29979",
+            "CHEBI:29982",
+            "chebi:29979",
+            "chebi:29982",
+            "deprecated:MNXM127161"
+        ],
+        "mnx_id": "MNXM59427",
+        "InChIkey": "",
+        "reference": "chebi:29979",
+        "name": "L-histidine residue",
+        "SMILES": "[*]N[C@@H](Cc1c[nH]cn1)C([*])=O",
+        "InChI": ""
+    },
+    "CHEBI:16389": {
+        "name": "a ubiquinone",
+        "reference": "chebi:16389",
+        "InChIkey": "SOECUQMRSRVZQQ-UHFFFAOYSA-N",
+        "xrefs": [
+            "CHEBI:16389",
+            "chebi:15279",
+            "chebi:16389",
+            "chebi:27186",
+            "chebi:9852",
+            "deprecated:MNXM176",
+            "deprecated:MNXM90278",
+            "kegg.compound:C00399",
+            "keggC:C00399",
+            "keggC:M_C00399"
+        ],
+        "mnx_id": "MNXM731777",
+        "InChI": "InChI=1S/C14H18O4/c1-8(2)6-7-10-9(3)11(15)13(17-4)14(18-5)12(10)16/h6H,7H2,1-5H3",
+        "SMILES": "COC1=C(OC)C(=O)C(CC=C(C)C)=C(C)C1=O"
+    },
+    "CHEBI:65111": {
+        "name": "a 2,3-saturated acyl-CoA",
+        "mnx_id": "MNXM726999",
+        "xrefs": [
+            "CHEBI:65111",
+            "chebi:65111",
+            "deprecated:MNXM114648",
+            "deprecated:MNXM97194"
+        ],
+        "reference": "chebi:65111",
+        "InChIkey": "",
+        "InChI": "",
+        "SMILES": "CC(C)(COP(=O)([O-])OP(=O)([O-])OC[C@H]1O[C@@H](n2cnc3c(N)ncnc32)[C@H](O)[C@@H]1OP(=O)([O-])[O-])[C@@H](O)C(=O)NCCC(=O)NCCSC(=O)CC[*]"
+    }
+}
