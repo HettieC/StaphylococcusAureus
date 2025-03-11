@@ -51,7 +51,6 @@ function extend_model!(model, dfs)
 
         else # first time seeing this reaction
             rxn = get_reaction(rid)
-
             coeff_mets = get_reaction_metabolites(rid)
             stoichiometry = Dict(
                 string(v.accession) => s

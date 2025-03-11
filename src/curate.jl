@@ -130,11 +130,10 @@ function curate!(model)
             "CHEBI:58315" => -0.119, #L-tyrosine
             "CHEBI:57912" => -1.0,   #L-tryptophan
             "CHEBI:57595" => -0.073, #L-histidine
-            "CHEBI:58199" => 0.1, #L-homocysteine
+            "CHEBI:58199" => -0.1, #L-homocysteine
             "CHEBI:58048" => -0.1,  #L-asparagine
-            #"CHEBI:57844" => -0.084, #L-methionine
+            "CHEBI:57844" => -0.084, #L-methionine
 
-            "CHEBI:58199" => -0.1
         ),
         objective_coefficient=1.0,
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
