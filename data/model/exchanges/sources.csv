@@ -1,4 +1,4 @@
-CHEBI_ID,Name
+CHEBI,Name
 CHEBI:15377,h2o 
 CHEBI:15379,oxygen
 CHEBI:43474,phosphoric acid
@@ -6,7 +6,5 @@ CHEBI:15903,beta-D-glucose
 CHEBI:28938,nh4(+)
 CHEBI:35235,L-cysteine
 CHEBI:32682,L-Arginine
-CHEBI:57427,L-Leucine 
-CHEBI:60039,L-Proline
-CHEBI:57762,L-valine 
 CHEBI:57986,riboflavin
+CHEBI:47013,D-ribose

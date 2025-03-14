@@ -254,13 +254,13 @@ function add_sources!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sources.csv"))
 
     for row in eachrow(df)
-        chebi = split(row.CHEBI_ID,':')[2]
+        chebi = split(row.CHEBI,':')[2]
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
             lower_bound = 0.0,
             upper_bound = 1000.0,
-            stoichiometry = Dict(row.CHEBI_ID => 1),
+            stoichiometry = Dict(row.CHEBI => 1),
         )
     end
     model
@@ -275,13 +275,13 @@ function add_sinks!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sinks.csv"))
 
     for row in eachrow(df)
-        chebi = split(row.CHEBI_ID,':')[2]
+        chebi = split(row.CHEBI,':')[2]
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
             lower_bound = -1000.0,
             upper_bound = 0.0,
-            stoichiometry = Dict(row.CHEBI_ID => 1),
+            stoichiometry = Dict(row.CHEBI => 1),
         )
     end
     model

@@ -13,14 +13,14 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-model.reactions["EX_15903"].upper_bound = 1
+model.reactions["EX_15903"].upper_bound = 1 #glucose
 model.reactions["32746"].upper_bound = 1000
 sol = parsimonious_flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
 open("data/fluxes.json","w") do io 
     JSON.print(io,sol.fluxes)
 end
 
-open("data/big_fluxes.json","w") do io 
+2open("data/big_fluxes.json","w") do io 
     JSON.print(io,Dict(x=>y for (x,y) in sol.fluxes if abs(y)>100))
 end
 
