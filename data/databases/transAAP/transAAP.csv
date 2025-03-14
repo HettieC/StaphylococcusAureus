@@ -1,0 +1,354 @@
+﻿ORF;GenomeID;Family;Subfamily;YY;Substrate_function;TC_num
+SAPIG1720;ss10893;AAE;;222;aspartate:alanine antiporter;2.A.81
+SAPIG0124;ss10893;ABC;membrane;234;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG0125;ss10893;ABC;membrane;235;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG0126;ss10893;ABC;binding;236;iron-hydroxamate;3.A.1
+SAPIG0154;ss10893;ABC;membrane;238;phosphonate;3.A.1
+SAPIG0155;ss10893;ABC;membrane;239;phosphonate;3.A.1
+SAPIG0156;ss10893;ABC;binding;240;phosphonate;3.A.1
+SAPIG0157;ss10893;ABC;binding;241;phosphonates;3.A.1
+SAPIG0186;ss10893;ABC;binding;242;nitrate;3.A.1
+SAPIG0187;ss10893;ABC;binding;243;glycine betaine;3.A.1
+SAPIG0188;ss10893;ABC;membrane;244;nitrate/sulfonate/taurine;3.A.1
+SAPIG0215;ss10893;ABC;binding;245;D-methionine;3.A.1
+SAPIG0216;ss10893;ABC;membrane;246;dipeptide/oligopeptide;3.A.1
+SAPIG0217;ss10893;ABC;membrane;247;dipeptide/oligopeptide;3.A.1
+SAPIG0218;ss10893;ABC;binding protein;248;dipeptide/oligopeptide;3.A.1
+SAPIG0223;ss10893;ABC;binding;249;polyamine;3.A.1
+SAPIG0224;ss10893;ABC;binding protein;250;sugar (maltose);3.A.1
+SAPIG0225;ss10893;ABC;membrane;251;sugar;3.A.1
+SAPIG0226;ss10893;ABC;membrane;252;sugar (maltose);3.A.1
+SAPIG0234;ss10893;ABC;binding;253;2-aminoethylphosphonate;3.A.1
+SAPIG0248;ss10893;ABC;binding protein;255;dipeptide/oligopeptide;3.A.1
+SAPIG0292;ss10893;ABC;binding;258;daunorubicin;3.A.1
+SAPIG0321;ss10893;ABC;membrane;260;lipoprotein releasing;3.A.1
+SAPIG0322;ss10893;ABC;binding;261;lipoprotein;3.A.1
+SAPIG0431;ss10893;ABC;binding;262;daunorubicin;3.A.1
+SAPIG0467;ss10893;ABC;binding;263;glycine betaine;3.A.1
+SAPIG0527;ss10893;ABC;binding;265;D-methionine;3.A.1
+SAPIG0528;ss10893;ABC;membrane;266;D-methionine;3.A.1
+SAPIG0529;ss10893;ABC;binding;267;methionine;3.A.1
+SAPIG0690;ss10893;ABC;binding;268;iron-hydroxamate;3.A.1
+SAPIG0691;ss10893;ABC;membrane;269;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG0710;ss10893;ABC;binding;270;zinc;3.A.1
+SAPIG0711;ss10893;ABC;membrane;271;manganese/zinc ion;3.A.1
+SAPIG0712;ss10893;ABC;binding;272;daunorubicin;3.A.1
+SAPIG0716;ss10893;ABC;binding;273;daunorubicin;3.A.1
+SAPIG0717;ss10893;ABC;membrane;274;polysaccharide export;3.A.1
+SAPIG0722;ss10893;ABC;membrane;275;multidrug;3.A.1
+SAPIG0725;ss10893;ABC;binding;276;phosphonate;3.A.1
+SAPIG0726;ss10893;ABC;membrane;277;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG0727;ss10893;ABC;membrane;278;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG0739;ss10893;ABC;binding;279;lipoprotein;3.A.1
+SAPIG0740;ss10893;ABC;membrane;280;unknown substrate;3.A.1
+SAPIG0762;ss10893;ABC;binding;281;lipid A;3.A.1
+SAPIG0763;ss10893;ABC;binding;282;lipid A;3.A.1
+SAPIG0797;ss10893;ABC;binding;283;lipoprotein;3.A.1
+SAPIG0799;ss10893;ABC;binding;284;glycine betaine;3.A.1
+SAPIG0800;ss10893;ABC;binding;285;glycine betaine;3.A.1
+SAPIG0810;ss10893;ABC;membrane;286;iron compound;3.A.1
+SAPIG0811;ss10893;ABC;membrane;287;iron compound;3.A.1
+SAPIG0812;ss10893;ABC;binding;288;phosphonate;3.A.1
+SAPIG0813;ss10893;ABC;binding;289;iron-hydroxamate;3.A.1
+SAPIG0892;ss10893;ABC;binding;292;D-methionine;3.A.1
+SAPIG0893;ss10893;ABC;membrane;293;D-methionine;3.A.1
+SAPIG0894;ss10893;ABC;binding;294;methionine;3.A.1
+SAPIG0897;ss10893;ABC;ABC;295;unknown substrate;3.A.1
+SAPIG0898;ss10893;ABC;membrane;296;unknown substrate;3.A.1
+SAPIG0901;ss10893;ABC;membrane;297;unknown substrate;3.A.1
+SAPIG0982;ss10893;ABC;membrane;298;dipeptide/oligopeptide;3.A.1
+SAPIG0983;ss10893;ABC;membrane;299;dipeptide/oligopeptide;3.A.1
+SAPIG0984;ss10893;ABC;binding;300;glycine betaine;3.A.1
+SAPIG0985;ss10893;ABC;binding;301;glycine betaine;3.A.1
+SAPIG0986;ss10893;ABC;binding protein;302;oligopeptide;3.A.1
+SAPIG0987;ss10893;ABC;membrane;303;dipeptide/oligopeptide;3.A.1
+SAPIG0988;ss10893;ABC;membrane;304;dipeptide/oligopeptide;3.A.1
+SAPIG0989;ss10893;ABC;binding;305;glycine betaine;3.A.1
+SAPIG0990;ss10893;ABC;binding;306;glycine betaine;3.A.1
+SAPIG0991;ss10893;ABC;binding protein;307;oligopeptide;3.A.1
+SAPIG1031;ss10893;ABC;binding;309;lipoprotein;3.A.1
+SAPIG1035;ss10893;ABC;binding;310;iron-hydroxamate;3.A.1
+SAPIG1073;ss10893;ABC;membrane;311;cobalt ion;3.A.1
+SAPIG1074;ss10893;ABC;binding;312;cobalt;3.A.1
+SAPIG1075;ss10893;ABC;membrane;313;unknown substrate;3.A.1
+SAPIG1096;ss10893;ABC;binding;314;polyamine;3.A.1
+SAPIG1097;ss10893;ABC;membrane;315;spermidine/putrescine;3.A.1
+SAPIG1098;ss10893;ABC;membrane;316;spermidine/putrescine;3.A.1
+SAPIG1099;ss10893;ABC;binding protein;317;spermidine/putrescine;3.A.1
+SAPIG1128;ss10893;ABC;binding protein;318;unknown substrate;3.A.1
+SAPIG1129;ss10893;ABC;binding;319;heme;3.A.1
+SAPIG1130;ss10893;ABC;membrane;320;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG1297;ss10893;ABC;membrane;324;unknown substrate;3.A.1
+SAPIG1379;ss10893;ABC;ABC;325;oligopeptide;3.A.1
+SAPIG1380;ss10893;ABC;binding;326;phosphonate;3.A.1
+SAPIG1381;ss10893;ABC;membrane;327;dipeptide/oligopeptide;3.A.1
+SAPIG1382;ss10893;ABC;membrane;328;dipeptide/oligopeptide;3.A.1
+SAPIG1387;ss10893;ABC;binding;329;phosphate;3.A.1
+SAPIG1388;ss10893;ABC;membrane;330;phosphate;3.A.1
+SAPIG1389;ss10893;ABC;membrane;331;phosphate;3.A.1
+SAPIG1393;ss10893;ABC;binding;333;daunorubicin;3.A.1
+SAPIG1620;ss10893;ABC;membrane;335;manganese/zinc ion;3.A.1
+SAPIG1621;ss10893;ABC;binding;336;phosphonate;3.A.1
+SAPIG1726;ss10893;ABC;membrane;337;heme export;3.A.1
+SAPIG1901;ss10893;ABC;membrane;340;multidrug/exoprotein (EcsBA homolog);3.A.1
+SAPIG1902;ss10893;ABC;binding;341;daunorubicin;3.A.1
+SAPIG1923;ss10893;ABC;binding;342;phosphate;3.A.1
+SAPIG1924;ss10893;ABC;membrane;343;amino aicd (glutamine/glutamate/aspartate);3.A.1
+SAPIG1959;ss10893;ABC;binding;344;lipid A;3.A.1
+SAPIG1963;ss10893;ABC;membrane;345;polysaccharide export;3.A.1
+SAPIG1964;ss10893;ABC;binding;346;daunorubicin;3.A.1
+SAPIG2052;ss10893;ABC;binding;347;daunorubicin;3.A.1
+SAPIG2054;ss10893;ABC;binding;348;daunorubicin;3.A.1
+SAPIG2085;ss10893;ABC;binding;350;heme;3.A.1
+SAPIG2193;ss10893;ABC;binding;352;phosphonate;3.A.1
+SAPIG2235;ss10893;ABC;membrane;354;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG2236;ss10893;ABC;membrane;355;cobalamin/Fe3+-siderophores;3.A.1
+SAPIG2237;ss10893;ABC;binding;356;iron-hydroxamate;3.A.1
+SAPIG2273;ss10893;ABC;membrane;357;cobalt ion;3.A.1
+SAPIG2274;ss10893;ABC;binding;358;cobalt;3.A.1
+SAPIG2275;ss10893;ABC;binding;359;sulfate;3.A.1
+SAPIG2328;ss10893;ABC;binding;360;molybdate;3.A.1
+SAPIG2329;ss10893;ABC;membrane;361;molybdate;3.A.1
+SAPIG2330;ss10893;ABC;binding;362;mobybdenate;3.A.1
+SAPIG2335;ss10893;ABC;binding;363;iron-hydroxamate;3.A.1
+SAPIG2393;ss10893;ABC;membrane;364;sodium ion efflux;3.A.1
+SAPIG2394;ss10893;ABC;binding;365;daunorubicin;3.A.1
+SAPIG2412;ss10893;ABC;binding;366;lipoprotein;3.A.1
+SAPIG2413;ss10893;ABC;membrane;367;lipoprotein releasing;3.A.1
+SAPIG2459;ss10893;ABC;binding;369;zinc;3.A.1
+SAPIG2463;ss10893;ABC;binding;370;phosphate;3.A.1
+SAPIG2464;ss10893;ABC;membrane;371;amino aicd (glutamine/glutamate/aspartate);3.A.1
+SAPIG2465;ss10893;ABC;binding protein;372;amino acid (glutamine/glutamate/aspartate);3.A.1
+SAPIG2481;ss10893;ABC;binding;373;lipid A;3.A.1
+SAPIG2482;ss10893;ABC;binding;374;lipid A;3.A.1
+SAPIG2497;ss10893;ABC;membrane;375;glycine betaine/L-proline/carnitine/choline;3.A.1
+SAPIG2498;ss10893;ABC;binding;376;glycine betaine;3.A.1
+SAPIG2499;ss10893;ABC;membrane;377;glycine betaine/L-proline/carnitine/choline;3.A.1
+SAPIG2500;ss10893;ABC;binding;378;glycine betaine;3.A.1
+SAPIG2506;ss10893;ABC;membrane;379;unknown substrate;3.A.1
+SAPIG2507;ss10893;ABC;binding;380;glycine betaine;3.A.1
+SAPIG2513;ss10893;ABC;binding;381;sulfate;3.A.1
+SAPIG2514;ss10893;ABC;binding;382;glycine betaine;3.A.1
+SAPIG2515;ss10893;ABC;membrane;383;dipeptide/oligopeptide;3.A.1
+SAPIG2516;ss10893;ABC;membrane;384;dipeptide/oligopeptide;3.A.1
+SAPIG2517;ss10893;ABC;binding;385;nickel;3.A.1
+SAPIG2566;ss10893;ABC;binding;386;daunorubicin;3.A.1
+SAPIG2567;ss10893;ABC;membrane;387;multidrug;3.A.1
+SAPIG2671;ss10893;ABC;membrane;388;lipoprotein releasing;3.A.1
+SAPIG2672;ss10893;ABC;binding;389;lipoprotein;3.A.1
+SAPIG2747;ss10893;ABC;binding;393;lipoprotein;3.A.1
+SAPIG2748;ss10893;ABC;membrane;394;unknown substrate;3.A.1
+SAPIG2523;ss10893;AbgT;;205;aminobenzoyl-glutamate;2.A.68
+SAPIG2310;ss10893;AEC;;206;unknown substrate;2.A.69
+SAPIG1008;ss10893;AGCS;;106;sodium ion:alanine symporter;2.A.25
+SAPIG1358;ss10893;AGCS;;107;sodium ion:alanine symporter;2.A.25
+SAPIG1007;ss10893;AI-2E;;227;Autoinducer-2 export;2.A.86
+SAPIG1360;ss10893;AI-2E;;228;Autoinducer-2 export;2.A.86
+SAPIG1831;ss10893;Amt;;4;ammonium;1.A.11
+SAPIG2080;ss10893;Amt;;5;ammonium;1.A.11
+SAPIG2081;ss10893;Amt;;6;ammonium;1.A.11
+SAPIG0658;ss10893;APC;;113;amino acid;2.A.3
+SAPIG1100;ss10893;APC;;114;amino acid;2.A.3
+SAPIG1335;ss10893;APC;;115;amino acid;2.A.3
+SAPIG1436;ss10893;APC;;116;large neutral amino acid;2.A.3
+SAPIG1736;ss10893;APC;;117;amino acid;2.A.3
+SAPIG1750;ss10893;APC;;118;amino acid;2.A.3
+SAPIG2367;ss10893;APC;;119;GABA;2.A.3
+SAPIG2490;ss10893;APC;;120;amino acid;2.A.3
+SAPIG2492;ss10893;APC;;121;amino acid;2.A.3
+SAPIG2503;ss10893;APC;;122;amino acid;2.A.3
+SAPIG2651;ss10893;APC;;123;amino acid;2.A.3
+SAPIG2683;ss10893;APC;;124;arginine:ornithine antiporter;2.A.3
+SAPIG1579;ss10893;ArAE;;223;fusaric acid efflux;2.A.85
+SAPIG1958;ss10893;ArAE;;224;fusaric acid efflux;2.A.85
+SAPIG1982;ss10893;ArAE;;225;fusaric acid efflux;2.A.85
+SAPIG2561;ss10893;ArAE;;226;fusaric acid efflux;2.A.85
+SAPIG1824;ss10893;ArsB;;459;arsenite (ArsB);2.A.45
+SAPIG2372;ss10893;BASS;;112;sodium ion/;2.A.28
+SAPIG1350;ss10893;BCCT;;75;glycine betaine/carnitine/choline;2.A.15
+SAPIG2245;ss10893;BCCT;;76;glycine betaine/carnitine/choline;2.A.15
+SAPIG2662;ss10893;BCCT;;77;glycine betaine/carnitine/choline;2.A.15
+SAPIG2333;ss10893;BUT;;230;biotin uptake;2.A.88
+SAPIG1853;ss10893;CaCA;;86;sodium ion:calcium ion antiporter;2.A.19
+SAPIG0183;ss10893;CDF;;141;cation efflux;2.A.4
+SAPIG2188;ss10893;CDF;;142;cation efflux;2.A.4
+SAPIG2468;ss10893;CDF;;143;cation efflux;2.A.4
+SAPIG2665;ss10893;CitMHS;;72;proton:citrate symporter;2.A.11
+SAPIG0326;ss10893;CNT;;147;sodium ion:nucleoside symporter;2.A.41
+SAPIG0596;ss10893;CNT;;148;sodium ion:nucleoside symporter;2.A.41
+SAPIG0723;ss10893;CNT;;149;sodium ion:nucleoside symporter;2.A.41
+SAPIG0709;ss10893;CPA1;;130;sodium ion:proton antiporter;2.A.36
+SAPIG2491;ss10893;CPA1;;131;sodium ion:proton antiporter;2.A.36
+SAPIG1005;ss10893;CPA2;;132;potassium/sodium ion:proton antiporter;2.A.37
+SAPIG0518;ss10893;CPA3;MnhA;502;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0702;ss10893;CPA3;MnhA;504;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0703;ss10893;CPA3;MnhB;185;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0704;ss10893;CPA3;MnhC;186;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0705;ss10893;CPA3;MnhD;506;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0706;ss10893;CPA3;MnhE;188;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0707;ss10893;CPA3;MnhF;189;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0708;ss10893;CPA3;MnhG;190;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0929;ss10893;CPA3;MnhG;191;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0930;ss10893;CPA3;MnhF;192;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0931;ss10893;CPA3;MnhE;193;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0932;ss10893;CPA3;MnhD;509;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0933;ss10893;CPA3;MnhC;195;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0934;ss10893;CPA3;MnhB;196;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0935;ss10893;CPA3;MnhA;511;multicomponent sodium ion:proton antiporter;2.A.63
+SAPIG0461;ss10893;DAACS;;104;proton/sodium ion:glutamate/aspartate symporter;2.A.23
+SAPIG2437;ss10893;DAACS;;105;proton/sodium ion:glutamate/aspartate symporter;2.A.23
+SAPIG0768;ss10893;DASS;;153;sodium ion:dicarboxylate/sulfate;2.A.47
+SAPIG2011;ss10893;DASS;;155;sodium ion:dicarboxylate/sulfate;2.A.47
+SAPIG2741;ss10893;DASS;;156;sodium ion:dicarboxylate/sulfate;2.A.47
+SAPIG1165;ss10893;DcuC;;708;C4-dicarboxylate;2.A.61
+SAPIG0285;ss10893;DMT;GRP;207;glucose uptake (GRP subfamily);2.A.7
+SAPIG0698;ss10893;DMT;;208;drug/metabolite;2.A.7
+SAPIG0806;ss10893;DMT;RarD;209;chloramphenicol (RarD homolog);2.A.7
+SAPIG2309;ss10893;DMT;GRP;211;glucose uptake (GRP subfamily);2.A.7
+SAPIG2392;ss10893;DMT;;212;drug/metabolite;2.A.7
+SAPIG2584;ss10893;DMT;;213;calcium ion;2.A.7
+SAPIG2742;ss10893;DMT;;214;drug/metabolite;2.A.7
+SAPIG1653;ss10893;DNA-T;;403;unknown substrate;3.A.11
+SAPIG1655;ss10893;DNA-T;;404;unknown substrate;3.A.11
+SAPIG2397;ss10893;ESS;;111;sodium ion:glutamate symporter;2.A.27
+SAPIG2144;ss10893;F-ATPase;;431;protons;3.A.2
+SAPIG2145;ss10893;F-ATPase;;432;protons;3.A.2
+SAPIG2146;ss10893;F-ATPase;;433;protons;3.A.2
+SAPIG2147;ss10893;F-ATPase;;434;protons;3.A.2
+SAPIG2148;ss10893;F-ATPase;;435;protons;3.A.2
+SAPIG2149;ss10893;F-ATPase;;436;protons;3.A.2
+SAPIG2150;ss10893;F-ATPase;;437;protons;3.A.2
+SAPIG2151;ss10893;F-ATPase;;438;protons;3.A.2
+SAPIG2152;ss10893;F-ATPase;;439;protons;3.A.2
+SAPIG1243;ss10893;FeoB;;672;ferrous ion;9.A.8
+SAPIG2600;ss10893;FeoB;;680;ferrous ion;9.A.8
+SAPIG2633;ss10893;FeoB;;681;ferrous ion;9.A.8
+SAPIG0318;ss10893;FNT;;150;formate/nitrite;2.A.44
+SAPIG2456;ss10893;FNT;;151;formate/nitrite;2.A.44
+SAPIG2555;ss10893;GntP;;221;gluconate;2.A.8
+SAPIG1080;ss10893;GPTS;HPr;628;unknown substrate;4.A
+SAPIG1081;ss10893;GPTS;EnzymeI;627;unknown substrate;4.A
+SAPIG0916;ss10893;GUP;;158;glycerol:proton symporter;2.A.50
+SAPIG0779;ss10893;HCC;;650;hemolysin C (HlyC) homolog;9.A.40
+SAPIG0903;ss10893;HCC;;651;heavy metal ion;9.A.40
+SAPIG0425;ss10893;ILT;;632;iron ion;9.A.10
+SAPIG0426;ss10893;ILT;;633;iron ion;9.A.10
+SAPIG0073;ss10893;IVSP;;466;unknown substrate;3.A.7
+SAPIG0948;ss10893;IVSP;;475;unknown substrate;3.A.7
+SAPIG1852;ss10893;IVSP;;482;unknown substrate;3.A.7
+SAPIG2034;ss10893;IVSP;;483;unknown substrate;3.A.7
+SAPIG0121;ss10893;LctP;;73;L-lactate;2.A.14
+SAPIG2419;ss10893;LctP;;74;L-lactate;2.A.14
+SAPIG0010;ss10893;LIV-E;AzlC;217;branched-chain amino acid efflux (AzlC);2.A.78
+SAPIG0203;ss10893;LIVCS;;108;branched-chain amino acid;2.A.26
+SAPIG0319;ss10893;LIVCS;;109;branched-chain amino acid;2.A.26
+SAPIG1409;ss10893;LIVCS;;110;branched-chain amino acid;2.A.26
+SAPIG0880;ss10893;LysE;;215;lysine efflux;2.A.75
+SAPIG0098;ss10893;MFS;;30;multidrug efflux (EmrB/QacA subfamily);2.A.1
+SAPIG0105;ss10893;MFS;;31;multidrug efflux;2.A.1
+SAPIG0117;ss10893;MFS;;32;glycerol-3-phosphate;2.A.1
+SAPIG0130;ss10893;MFS;;33;nitrate/nitrite;2.A.1
+SAPIG0131;ss10893;MFS;;34;multidrug efflux;2.A.1
+SAPIG0151;ss10893;MFS;;35;multidrug efflux;2.A.1
+SAPIG0192;ss10893;MFS;;36;multidrug efflux;2.A.1
+SAPIG0231;ss10893;MFS;;37;multidrug efflux;2.A.1
+SAPIG0289;ss10893;MFS;;39;glycerol-3-phosphate;2.A.1
+SAPIG0417;ss10893;MFS;;40;glycerol-3-phosphate;2.A.1
+SAPIG0648;ss10893;MFS;;41;multidrug efflux;2.A.1
+SAPIG0751;ss10893;MFS;;42;multidrug efflux;2.A.1
+SAPIG0772;ss10893;MFS;;43;multidrug efflux;2.A.1
+SAPIG1011;ss10893;MFS;;46;tetracycline efflux;2.A.1
+SAPIG1361;ss10893;MFS;;47;multidrug efflux;2.A.1
+SAPIG1435;ss10893;MFS;;48;multidrug efflux;2.A.1
+SAPIG1812;ss10893;MFS;;50;multidrug efflux;2.A.1
+SAPIG2227;ss10893;MFS;;52;multidrug efflux (EmrB/QacA subfamily);2.A.1
+SAPIG2229;ss10893;MFS;;53;multidrug efflux;2.A.1
+SAPIG2240;ss10893;MFS;;54;tetracycline efflux;2.A.1
+SAPIG2317;ss10893;MFS;;56;multidrug efflux;2.A.1
+SAPIG2404;ss10893;MFS;;57;multidrug efflux (EmrB/QacA subfamily);2.A.1
+SAPIG2408;ss10893;MFS;;59;multidrug efflux;2.A.1
+SAPIG2441;ss10893;MFS;;60;nitrate;2.A.1
+SAPIG2466;ss10893;MFS;;61;multidrug efflux (EmrB/QacA subfamily);2.A.1
+SAPIG2486;ss10893;MFS;;62;multidrug efflux;2.A.1
+SAPIG2496;ss10893;MFS;;63;multidrug efflux;2.A.1
+SAPIG2505;ss10893;MFS;;64;multidrug efflux;2.A.1
+SAPIG2512;ss10893;MFS;;65;multidrug efflux;2.A.1
+SAPIG2562;ss10893;MFS;;66;D-galactonate;2.A.1
+SAPIG2564;ss10893;MFS;;67;multidrug efflux;2.A.1
+SAPIG1004;ss10893;MgtE;;635;magnesium ion;9.A.19
+SAPIG1301;ss10893;MIP;;14;glycerol uptake;1.A.8
+SAPIG2399;ss10893;MIT;;10;magnesium/cobalt ion;1.A.35
+SAPIG2431;ss10893;MIT;;11;magnesium/cobalt ion;1.A.35
+SAPIG0146;ss10893;MOP;PST;199;polysaccharide export;2.A.66
+SAPIG0415;ss10893;MOP;MATE;200;multidrug efflux;2.A.66
+SAPIG0570;ss10893;MOP;PST;201;polysaccharide export;2.A.66
+SAPIG1807;ss10893;MOP;PST;203;polysaccharide export;2.A.66
+SAPIG2387;ss10893;MOP;MATE;204;multidrug efflux;2.A.66
+SAPIG1349;ss10893;MscL;;7;large-conductance mechanosensitive ion channel;1.A.22
+SAPIG0441;ss10893;MscS;;8;small-conductance mechanosensitive ion channel;1.A.23
+SAPIG1608;ss10893;MTB;;416;unknown substrate;3.A.15
+SAPIG0466;ss10893;NCS2;;144;xanthine/uracil;2.A.40
+SAPIG1196;ss10893;NCS2;;145;xanthine/uracil;2.A.40
+SAPIG2306;ss10893;NCS2;;55;xanthine/uracil;2.A.40
+SAPIG0926;ss10893;NhaC;;125;sodium ion:proton antiporter;2.A.35
+SAPIG2351;ss10893;NhaC;;126;sodium ion:proton antiporter;2.A.35
+SAPIG2377;ss10893;NhaC;;127;sodium ion:proton antiporter;2.A.35
+SAPIG2744;ss10893;NiCoT;;159;nickel ion;2.A.52
+SAPIG1102;ss10893;Nramp;;163;manganese/iron ion;2.A.55
+SAPIG1668;ss10893;Nramp;;164;manganese/iron ion;2.A.55
+SAPIG0524;ss10893;NSS;;102;sodium ion:solute symporter;2.A.22
+SAPIG2133;ss10893;Oxa1;;231;60 KD inner membrane protein OxaA homolog;2.A.9
+SAPIG0059;ss10893;P-ATPase;;447;zinc/cadmium/cobalt ion;3.A.3
+SAPIG0065;ss10893;P-ATPase;;448;copper ion;3.A.3
+SAPIG0630;ss10893;P-ATPase;;449;copper ion;3.A.3
+SAPIG2116;ss10893;P-ATPase;;452;potassium ion;3.A.3
+SAPIG2117;ss10893;P-ATPase;;453;potassium ion;3.A.3
+SAPIG2118;ss10893;P-ATPase;;454;potassium ion;3.A.3
+SAPIG2608;ss10893;P-ATPase;;456;zinc/cadmium/cobalt ion;3.A.3
+SAPIG0742;ss10893;PiT;;90;phosphate;2.A.20
+SAPIG0118;ss10893;PNaS;;169;sodium ion:phosphate symporter;2.A.58
+SAPIG0804;ss10893;POT;;83;proton:dipeptide/tripeptide symporter;2.A.17
+SAPIG1484;ss10893;RFT;;229;riboflavin uptake;2.A.87
+SAPIG2313;ss10893;RND;HAE1;175;multidrug/solvent efflux (HAE1 subfamily);2.A.6
+SAPIG2602;ss10893;RND;HAE2;177;multidrug/solvent efflux (MmpL homolog/HAE2 subfamily);2.A.6
+SAPIG0207;ss10893;SSPTS;EnzymeIIABC;561;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG0210;ss10893;SSPTS;EnzymeIIABC;562;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG0254;ss10893;SSPTS;EnzymeIIABC;563;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG0257;ss10893;SSPTS;EnzymeIIA;571;fructose;4.A
+SAPIG0258;ss10893;SSPTS;EnzymeIIB;588;galactitol;4.A
+SAPIG0259;ss10893;SSPTS;EnzymeIIC;589;galactitol;4.A
+SAPIG0279;ss10893;SSPTS;EnzymeIIABC;564;glucose;4.A
+SAPIG0323;ss10893;SSPTS;EnzymeIIC;537;fructose;4.A
+SAPIG0410;ss10893;SSPTS;EnzymeIIC;594;ascorbate;4.A
+SAPIG0411;ss10893;SSPTS;EnzymeIIB;539;galactitol;4.A
+SAPIG0412;ss10893;SSPTS;EnzymeIIA;572;fructose;4.A
+SAPIG0540;ss10893;SSPTS;EnzymeIIABC;565;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG0777;ss10893;SSPTS;EnzymeIIABC;573;fructose;4.A
+SAPIG1423;ss10893;SSPTS;EnzymeIIABC;566;glucose;4.A
+SAPIG1778;ss10893;SSPTS;EnzymeIIABC;567;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG2210;ss10893;SSPTS;EnzymeIIBC;576;mannitol;4.A
+SAPIG2213;ss10893;SSPTS;EnzymeIIA;577;mannitol/fructose;4.A
+SAPIG2250;ss10893;SSPTS;EnzymeIIABC;584;cellobiose;4.A
+SAPIG2251;ss10893;SSPTS;EnzymeIIA;585;cellobiose;4.A
+SAPIG2374;ss10893;SSPTS;EnzymeIIABC;568;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG2432;ss10893;SSPTS;EnzymeIIABC;569;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG2583;ss10893;SSPTS;EnzymeIIBC;557;fructose;4.A
+SAPIG2588;ss10893;SSPTS;EnzymeIIABC;570;glucose/maltose/N-acetylglucosamine;4.A
+SAPIG2691;ss10893;SSPTS;EnzymeIIABC;579;fructose;4.A
+SAPIG0021;ss10893;SSS;;91;sodium ion:proline symporter;2.A.21
+SAPIG0327;ss10893;SSS;;92;sodium ion:proline symporter;2.A.21
+SAPIG1416;ss10893;SSS;;95;sodium ion:proline symporter;2.A.21
+SAPIG1557;ss10893;SSS;;96;sodium ion:proline symporter;2.A.21
+SAPIG1746;ss10893;SSS;;97;sodium ion:proline symporter;2.A.21
+SAPIG1996;ss10893;SSS;;98;sodium ion:proline symporter;2.A.21
+SAPIG2120;ss10893;SSS;;99;sodium ion:proline symporter;2.A.21
+SAPIG0427;ss10893;Tat;;198;protein export;2.A.64
+SAPIG1167;ss10893;TDT;;79;tellurite;2.A.16
+SAPIG1017;ss10893;TerC;;642;tellurium ion efflux;9.A.30
+SAPIG0660;ss10893;ThrE;;219;unknown substrate;2.A.79
+SAPIG0821;ss10893;ThrE;;220;unknown substrate;2.A.79
+SAPIG2751;ss10893;TRAP-T;;168;C4-dicarboxylate;2.A.56
+SAPIG1019;ss10893;Trk;;136;potassium ion uptake;2.A.38
+SAPIG2063;ss10893;Trk;;139;potassium ion uptake;2.A.38
+SAPIG2337;ss10893;UT;;9;urea;1.A.28
+SAPIG1188;ss10893;YggT;;649;unknown substrate;9.A.4

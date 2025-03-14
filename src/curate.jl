@@ -114,7 +114,7 @@ function curate!(model)
             "CHEBI:57427" => -0.282,  #L-leucine
             "CHEBI:32682" => -0.111,  #L-arginine  
             "CHEBI:57762" => -0.207,  #L-valine  
-            "CHEBI:60039" => -0.116,  #L-proline
+            #"CHEBI:60039" => -0.116,  #L-proline
             "CHEBI:35235" => -0.019,  #L-cysteine
             "CHEBI:57305" => -0.19,  #glycine
             "CHEBI:33384" => -0.19, #L-serine         
