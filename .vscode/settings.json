@@ -1,5 +1,6 @@
 {
     "githubPullRequests.ignoredPullRequestBranches": [
         "main"
-    ]
+    ],
+    "julia.environmentPath": "/home/nastasia/projects/StaphylococcusAureus-1"
 }
