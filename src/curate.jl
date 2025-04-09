@@ -10,6 +10,9 @@ end
 function curate!(model)
 
     # modify rhea reactions to use beta-D isomer instead of D-glucose 
+    # modify rhea reactions to use general sucrose 6(F)-phosphate instead of 6G
+        # modify rhea reactions to use beta-D isomer instead of D-fructose 
+
 
     for (r, rxn) in model.reactions
         if haskey(rxn.stoichiometry, "CHEBI:4167") # D-glucose -> beta-D-glucose
@@ -20,10 +23,25 @@ function curate!(model)
             rxn.stoichiometry["CHEBI:58247"] = rxn.stoichiometry["CHEBI:61548"]
             delete!(rxn.stoichiometry, "CHEBI:61548")
         end
+        if haskey(rxn.stoichiometry, "CHEBI:91002") # sucrose 6(G)-phosphate -> sucrose 6(F)-phosphate 
+            rxn.stoichiometry["CHEBI:57723"] = rxn.stoichiometry["CHEBI:91002"]
+            delete!(rxn.stoichiometry, "CHEBI:91002")
+        end
+        if haskey(rxn.stoichiometry, "CHEBI:37721") # D-fructose -> β-D-fructose
+            rxn.stoichiometry["CHEBI:28645"] = rxn.stoichiometry["CHEBI:37721"]
+            delete!(rxn.stoichiometry, "CHEBI:37721")
+        end
+        if haskey(rxn.stoichiometry, "CHEBI:61527") # D-fructose -> β-D-fructose
+            rxn.stoichiometry["CHEBI:57634"] = rxn.stoichiometry["CHEBI:61527"]
+            delete!(rxn.stoichiometry, "CHEBI:61527")
+        end
     end
 
     delete!(model.metabolites, "CHEBI:4167") # D-glucose
     delete!(model.metabolites, "CHEBI:61548") # D-glucose 6-phosphate
+    delete!(model.metabolites, "CHEBI:91002") # sucrose 6(G)-phosphate
+
+    
 
     # allow bidirectional H2O 
     model.reactions["EX_15377"].lower_bound = -1000
@@ -95,15 +113,15 @@ function curate!(model)
             "CHEBI:37563" => -0.059,   #CTP 
             "CHEBI:57692" => -0.007,    #FAD  
             "CHEBI:61404" => -0.02,    #dATP
-            "CHEBI:57287" => -4.42e-5, #CoA
+            "CHEBI:57287" => -4.42e-4, #CoA
             "CHEBI:37568" => -0.02,    #dTTP
             "CHEBI:61429" => -0.099,   #dGTP
             "CHEBI:61481" => -0.099,   #dCTP
 
-            "CHEBI:57783" => 2e-5, #NADPH 
-            "CHEBI:57945" => 2e-5, #NADH
-            "CHEBI:58349" => -2e-5, #NADP(+)
-            "CHEBI:57540" => -2e-5, #NAD(+)
+            "CHEBI:57783" => 2e-4, #NADPH 
+            "CHEBI:57945" => 2e-4, #NADH
+            "CHEBI:58349" => -2e-4, #NADP(+)
+            "CHEBI:57540" => -2e-4, #NAD(+)
 
             "CHEBI:30807" => -0.1,    #tetradecanoate
             "CHEBI:25646" => -0.1,    #octanoate
