@@ -1,5 +1,6 @@
 using COBREXA
 using DataFrames, CSV
+using CairoMakie
 
 turnup_df = DataFrame(CSV.File("data/model/isozymes/turnup_output.csv"))
 
@@ -44,77 +45,188 @@ for (id, rxn) in model.reactions
     end
 end
 
-molar_masses = Dict{String,Float64}() # g/mol
-begin
-    molar_masses["61404"] = 487.1499 # dATP
-    molar_masses["61429"] = 503.1493 # dGTP
-    molar_masses["61481"] = 463.1252 # dCTP
-    molar_masses["37568"] = 478.1365 # dTTP
+function get_gene_product_molar_mass(gids)
+    AA_mass = Dict(
+        'A' => 89,
+        'R' => 174,
+        'N' => 132,
+        'D' => 133,
+        'B' => 133,
+        'C' => 121,
+        'Q' => 146,
+        'E' => 147,
+        'Z' => 147,
+        'G' => 75,
+        'H' => 155,
+        'I' => 131,
+        'L' => 131,
+        'K' => 146,
+        'M' => 149,
+        'F' => 165,
+        'P' => 115,
+        'S' => 105,
+        'T' => 119,
+        'W' => 204,
+        'Y' => 181,
+        'V' => 117,
+    )
+    seqs = Dict{String,String}()
+    open("data/sequence.txt","r") do io
+        prev = ""
+        for ln in eachline(io)
+            if startswith(ln,'>')
+                seqs[ln[2:end]] = ""
+                prev = ln[2:end]
+            else 
+                seqs[prev] = seqs[prev]*ln 
+            end
+        end
+    end
 
-    molar_masses["30616"] = 503.14946 # ATP
-    molar_masses["37565"] = 519.14886 # GTP
-    molar_masses["37563"] = 479.12468 # CTP
-    molar_masses["46398"] = 480.1094 # UTP
+    gene_product_molar_mass = Dict{String,Float64}()
+    for gid in gids 
+        gene_product_molar_mass[gid] = sum([AA_mass[aa] for aa in seqs[gid]]) / 1000 # convert to milligrams
+    end
 
-    molar_masses["32551"] = 147.19558 # # lysine
-    molar_masses["58045"] = 131.1729 # isoleucine
-    molar_masses["57427"] = 131.1729 # leucine
-    molar_masses["57844"] = 149.2124 # methionine
-    molar_masses["58095"] = 165.1891 # phenylalanine
-    molar_masses["57926"] = 119.1197  # threonine
-    molar_masses["57912"] = 204.2262 # tryptophan
-    molar_masses["57762"] = 117.1469 # valine
-    molar_masses["32682"] = 175.20906 # arginine
-    molar_masses["57595"] = 155.1552 # histidine
-    molar_masses["57972"] = 89.0935 # alanine
-    molar_masses["58048"] = 132.1184 # asparagine
-    molar_masses["29991"] = 132.09478 # aspartate
-    molar_masses["35235"] = 121.159 # cysteine
-    molar_masses["29985"] = 147.1299 # glutamate
-    molar_masses["58359"] = 146.1451 # glutamine
-    molar_masses["57305"] = 75.0669 # glycine
-    molar_masses["60039"] = 115.131 # proline
-    molar_masses["33384"] = 105.093 # serine
-    molar_masses["58315"] = 181.1894 # tyrosine
-
-    molar_masses["glycogen"] = 162.1406 # C6H10O5
-
-    molar_masses["30807"] = 227.364 # tetradecanoic acid
-    molar_masses["7896"] = 255.4161 # hexadecanoic acid
-    molar_masses["25629"] = 283.47 # octadecanoic acid
-
-    molar_masses["peptidoglycan"] = 1916.20990
-
-    molar_masses["kdo_lps"] = 2232.67080
-
-    # soluble pool
-    molar_masses["60530"] = 836.838 # Fe(II)-heme o
-    molar_masses["57692"] = 782.5259 # FAD
-    molar_masses["57705"] = 605.3378 # UDP-N-acetyl-alpha-D-glucosamine
-    molar_masses["57540"] = 662.4172 # NAD(+)
-    molar_masses["58885"] = 564.2859 # UDP-alpha-D-glucose
-    molar_masses["57287"] = 763.502 # CoA
-    molar_masses["57925"] = 306.31 # glutathione
-    molar_masses["57945"] = 663.4251 # NADH
-    molar_masses["58223"] = 401.1374 # UDP
-    molar_masses["29985"] = 146.12136 # L-glutamate
-    molar_masses["32966"] = 336.08392 # beta-D-fructose 1,6-bisphosphate
-    molar_masses["30616"] = 503.14946 # ATP
-    molar_masses["57783"] = 741.3891 # NADPH
-    molar_masses["57986"] = 375.356 # riboflavin
-    molar_masses["597326"] = 245.126 # pyridoxal 5'-phosphate
-    molar_masses["62501"] = 439.3816 # folate
-    molar_masses["58297"] = 610.615 # glutathione disulfide
-    molar_masses["58210"] = 453.325 # FMN
-    molar_masses["58349"] = 740.3812 # NADP(+)
+    println(110*length(seqs["SAPIG1968"]))
+    return gene_product_molar_mass     
+    
 end
 
-total_enzyme_capacity = 50.0 # mg of enzyme/gDW
+gene_product_molar_masses = get_gene_product_molar_mass(A.genes(model))
 
-ec_solution = enzyme_constrained_flux_balance_analysis(
+total_capacity = 550.0 # kDa
+
+ec_sol = enzyme_constrained_flux_balance_analysis(
     model;
     reaction_isozymes,
-    gene_product_molar_masses = molar_masses,
-    capacity = total_enzyme_capacity,
+    gene_product_molar_masses = gene_product_molar_masses,
+    capacity = total_capacity,
     optimizer = HiGHS.Optimizer,
 )
+ec_sol.gene_product_amounts
+# The total amount of required gene product mass
+ec_sol.gene_product_capacity
+
+open("data/ec_fluxes.json","w") do io 
+    JSON.print(io,ec_sol.fluxes)
+end
+
+# simulate overflow metabolism 
+all_gids = A.genes(model)
+
+
+
+
+membrane_capacity = 0.20 * total_capacity
+
+function prepare_ec_ecoli(
+    model;
+    reaction_isozymes,
+    gene_product_molar_masses,
+    all_gids,
+    total_capacity,
+    # membrane_gids,
+    # membrane_capacity,
+)
+    ct = enzyme_constrained_flux_balance_constraints(
+        model;
+        reaction_isozymes,
+        gene_product_molar_masses,
+        capacity = [
+            ("total", all_gids, total_capacity),
+            #("membrane", membrane_gids, membrane_capacity),
+        ],
+    )
+
+    # apply more quirks (make a few bounds more realistic)
+    ct.fluxes[:EX_15903].bound = C.Between(-1000, 1000)
+    ct.fluxes_forward[:EX_15903].bound = C.Between(0, 1000)
+    ct.fluxes_reverse[:EX_15903].bound = C.Between(0, 1000)
+    # ct.fluxes[:EX_5dglcn_e].bound = C.EqualTo(0.0)
+    # ct.fluxes[:EX_for_e].bound = C.EqualTo(0.0)
+    # ct.fluxes[:EX_pyr_e].bound = C.EqualTo(0.0)
+    # ct.fluxes[:EX_lac__D_e].bound = C.EqualTo(0.0)
+
+    # inject the overexpressed proteins into the system
+    # ct +=
+    #     :gene_product_amounts^C.variables(; keys = [:lacY, :lacZ], bounds = C.EqualTo(0.0))
+    # ct.gene_product_capacity.total.value +=
+    #     ct.gene_product_amounts.lacY.value * lacY_mm +
+    #     ct.gene_product_amounts.lacZ.value * lacZ_mm
+    # ct.gene_product_capacity.membrane.value += ct.gene_product_amounts.lacY.value * lacY_mm
+
+    # add the "total amount of gene stuff" objective that we want to minimize
+    ct *=
+        :l1_min_proteins_objective^C.Constraint(
+            sum(
+                C.value(v) * gene_product_molar_masses[string(k)] for
+                (k, v) in ct.gene_product_amounts
+            ),
+            nothing,
+        )
+
+    return ct
+end
+
+function run_ecfba_monoculture(ct, length; lacZ_frac = 0.0, lacY_frac = 0.0)
+    # make a copy for local modifications
+    ct = C.ConstraintTree(
+        ct...,
+        :objective => deepcopy(ct.objective),
+        :gene_product_amounts => deepcopy(ct.gene_product_amounts),
+    )
+
+    # ct.gene_product_amounts[:lacY].bound = C.EqualTo(total_capacity * lacY_frac / lacY_mm)
+    # ct.gene_product_amounts[:lacZ].bound = C.EqualTo(total_capacity * lacZ_frac / lacZ_mm)
+
+    res = screen(range(0.1, 0.24, length)) do mu
+        #@info "ecfba run" mu lacY_frac lacZ_frac
+
+        ct.objective.bound = C.EqualTo(mu)
+
+        sol = optimized_values(
+            ct;
+            objective = ct.l1_min_proteins_objective.value,
+            optimizer = HiGHS.Optimizer,
+            settings = [silence],
+            sense = Minimal,
+        )
+
+        isnothing(sol) && return nothing
+
+        return (;
+            mu,
+            total_mass = sol.gene_product_capacity.total,
+            # membrane_mass = sol.gene_product_capacity.membrane,
+            ac_flux = sol.fluxes.EX_30089,
+            glc_flux = sol.fluxes.EX_15903,
+            o2_flux = sol.fluxes.EX_15379,
+            ATP_flux = sol.fluxes.ATPS,
+        )
+    end
+    return Tables.columntable(filter(!isnothing, res))
+end
+
+
+ct = prepare_ec_ecoli(
+    model;
+    reaction_isozymes,
+    gene_product_molar_masses,
+    all_gids,
+    total_capacity,
+    # membrane_gids,
+    # membrane_capacity,
+)
+
+refsim = run_ecfba_monoculture(ct, 20)
+
+wt = scatter(
+    refsim.mu,
+    abs.(refsim.o2_flux);
+    axis = (xlabel = "Growth rate [1/h]", ylabel = "Acetate flux [mmol/gDW/h]", xlabelsize=20, ylabelsize = 20),
+)
+
+open("data/refsim_fluxes.json","w") do io 
+    JSON.print(io,ec_sol.fluxes)
+end

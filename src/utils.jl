@@ -295,6 +295,7 @@ function add_oxphos!(model)
     for row in eachrow(unique(df))
         rid = parse(Int64, split(row.RHEA_ID, ':')[2])
         haskey(model.reactions, string(rid)) && continue
+        grr = String.(df.Protein[:])
 
         rxn = get_reaction(rid)
 

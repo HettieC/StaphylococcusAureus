@@ -86,7 +86,7 @@ C.pretty(
             ((model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] > 0 && x > 1e-5) || 
             (model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] < 0 && x < -1e-5))
     end; 
-    format_label = x -> (string(last(x)),A.reaction_name(escher_model, string(last(x)))),
+    format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
 )
 
 
