@@ -61,6 +61,13 @@ C.pretty(
 )
 
 C.pretty(
+    C.ifilter_leaves(sol.fluxes) do ix, x
+        abs(x) > 1e-6 && isnothing(tryparse(Int,string(last(ix))))    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+
+C.pretty(
     C.ifilter_leaves(loopless_sol.fluxes) do ix, x
         abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
     end; 

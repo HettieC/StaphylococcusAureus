@@ -221,6 +221,7 @@ function change_reaction_names(model)
 
     rhea_id_gene_id = Dict{String,String}()
     for (r, rxn) in model.reactions
+        println(r)
         startswith(r,"EX") && continue
         g_name = ""
         if !isnothing(rxn.annotations) && haskey(rxn.annotations, "EC")
@@ -229,6 +230,7 @@ function change_reaction_names(model)
             end
         end
         if !isnothing(rxn.gene_association_dnf)
+            rxn.gene_association_dnf == [["g1"]] && continue
             for g in unique([eggnog_dict[tag_id[g]] for g in vcat(rxn.gene_association_dnf...)])
                 g_name *= "$g, "
             end
@@ -260,8 +262,10 @@ function add_sources!(model)
             name = "$(row.Name) exchange",
             lower_bound = 0.0,
             upper_bound = 1000.0,
-            stoichiometry = Dict(row.CHEBI => 1),
+            stoichiometry = Dict(row.CHEBI*"_e" => 1),
         )
+        model.metabolites[row.CHEBI*"_e"] = deepcopy(model.metabolites[row.CHEBI])
+        model.metabolites[row.CHEBI*"_e"].compartment = "external"
     end
     model
 end
@@ -281,8 +285,10 @@ function add_sinks!(model)
             name = "$(row.Name) exchange",
             lower_bound = -1000.0,
             upper_bound = 0.0,
-            stoichiometry = Dict(row.CHEBI => 1),
+            stoichiometry = Dict(row.CHEBI*"_e" => 1),
         )
+        model.metabolites[row.CHEBI*"_e"] = deepcopy(model.metabolites[row.CHEBI])
+        model.metabolites[row.CHEBI*"_e"].compartment = "external"
     end
     model
 end
