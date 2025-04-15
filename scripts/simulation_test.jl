@@ -14,14 +14,20 @@ escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
 model.reactions["EX_15903"].upper_bound = 10 #glucose
-sol = parsimonious_flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
 sol = flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
+
+#######
+### need some arginine symport from periplasm!
+
+#######
+
+sol = parsimonious_flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
 
 open("data/fluxes.json","w") do io 
     JSON.print(io,sol.fluxes)
 end
 
-open("data/big_fluxes.json","w") do io 
+32open("data/big_fluxes.json","w") do io 
     JSON.print(io,Dict(x=>y for (x,y) in sol.fluxes if abs(y)>50))
 end
 
@@ -56,6 +62,13 @@ end
 C.pretty(
     C.ifilter_leaves(sol.fluxes) do ix, x
         abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+
+C.pretty(
+    C.ifilter_leaves(sol.fluxes) do ix, x
+        abs(x) > 1e-6 && isnothing(tryparse(Int,string(last(ix))))    
     end; 
     format_label = x -> A.reaction_name(model, string(last(x))),
 )

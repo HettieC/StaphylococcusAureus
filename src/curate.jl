@@ -41,7 +41,8 @@ function curate!(model)
     delete!(model.metabolites, "CHEBI:61548") # D-glucose 6-phosphate
     delete!(model.metabolites, "CHEBI:91002") # sucrose 6(G)-phosphate
 
-    
+    # add generic transport gene
+    model.genes["g1"] = CM.Gene(name="g1")
 
     # allow bidirectional H2O 
     model.reactions["EX_15377"].lower_bound = -1000
@@ -52,9 +53,7 @@ function curate!(model)
     @select!(biocyc, :rheaDir, :metacyc)
     directions = String[]
     for rid in A.reactions(model)
-        if startswith(rid, "EX")
-            continue
-        end
+        isnothing(tryparse(Int,rid)) && continue
         qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
         df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
         isempty(df) && continue
@@ -128,6 +127,7 @@ function curate!(model)
             "CHEBI:7896" => -0.1,     #hexadecanoate
             "CHEBI:18262" => -0.1,    #dodecanoate
             "CHEBI:27689" => -0.1,    #decanoate
+            "CHEBI:25629" => -0.1,    #octadecanoate
 
             "CHEBI:57427" => -0.282,  #L-leucine
             "CHEBI:32682" => -0.111,  #L-arginine  
@@ -156,6 +156,9 @@ function curate!(model)
         objective_coefficient=1.0,
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
     )
+
+    # add missing transporters 
+    add_permease!(model, "CHEBI:32682", ["g1"], nothing)
 
     return model
 end

@@ -229,6 +229,7 @@ function change_reaction_names(model)
             end
         end
         if !isnothing(rxn.gene_association_dnf)
+            rxn.gene_association_dnf == [["g1"]] && continue
             for g in unique([eggnog_dict[tag_id[g]] for g in vcat(rxn.gene_association_dnf...)])
                 g_name *= "$g, "
             end
@@ -252,16 +253,24 @@ Add source reactions to the model.
 """
 function add_sources!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sources.csv"))
-
+    i = 0 
     for row in eachrow(df)
-        chebi = split(row.CHEBI,':')[2]
+        i += 1
+        mid = row.CHEBI
+        chebi = split(mid,":")[2]
+        if i ∈ [1,2,3,4,5,6,7,8,9]  
+            mid *= "_e"
+        end
+        println(mid)
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
             lower_bound = 0.0,
             upper_bound = 1000.0,
-            stoichiometry = Dict(row.CHEBI => 1),
+            stoichiometry = Dict(mid => 1),
         )
+        model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
+        model.metabolites[mid].compartment = "external"
     end
     model
 end
@@ -283,6 +292,8 @@ function add_sinks!(model)
             upper_bound = 0.0,
             stoichiometry = Dict(row.CHEBI => 1),
         )
+        model.metabolites[row.CHEBI] = deepcopy(model.metabolites[row.CHEBI])
+        model.metabolites[row.CHEBI].compartment = "external"
     end
     model
 end
