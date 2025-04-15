@@ -54,7 +54,6 @@ function curate!(model)
     directions = String[]
     for rid in A.reactions(model)
         isnothing(tryparse(Int,rid)) && continue
-        println(rid)
         qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
         df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
         isempty(df) && continue
@@ -128,6 +127,7 @@ function curate!(model)
             "CHEBI:7896" => -0.1,     #hexadecanoate
             "CHEBI:18262" => -0.1,    #dodecanoate
             "CHEBI:27689" => -0.1,    #decanoate
+            "CHEBI:25629" => -0.1,    #octadecanoate
 
             "CHEBI:57427" => -0.282,  #L-leucine
             "CHEBI:32682" => -0.111,  #L-arginine  
@@ -156,6 +156,9 @@ function curate!(model)
         objective_coefficient=1.0,
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
     )
+
+    # add missing transporters 
+    add_permease!(model, "CHEBI:32682", ["g1"], nothing)
 
     return model
 end

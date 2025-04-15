@@ -17,7 +17,6 @@ function add_periplasm_transporters!(model)
 
     # bidirectional by default
     for mid in all_exchange_metabolites
-
         nm = A.metabolite_name(model, mid)
 
         model.metabolites[mid*"_p"] = deepcopy(model.metabolites[mid])
@@ -28,7 +27,7 @@ function add_periplasm_transporters!(model)
             name="Diffusion $nm",
             stoichiometry=Dict(mid * "_e" => -1, mid * "_p" => 1),
             lower_bound=-1000.0,
-            upper_bound=0,
+            upper_bound=1000,
             annotations=Dict("SBO" => ["SBO_0000284"]),
         )
         if !haskey(model.metabolites,mid * "_p")
@@ -57,6 +56,8 @@ function add_membrane_transporters!(model)
     for g in groupby(abcs, [:CHEBI, :Subunit])
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
+        mid != "CHEBI:15379" && continue
+
         if mid in A.metabolites(model)
             push!(ms, mid)
             iso = String.(g.Protein)
@@ -79,6 +80,8 @@ function add_membrane_transporters!(model)
     for g in groupby(pts, [:CHEBI, :Subunit])
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
+        mid != "CHEBI:15379" && continue
+
         if mid in A.metabolites(model)
             push!(ms, mid)
             iso = string.(g.Protein)

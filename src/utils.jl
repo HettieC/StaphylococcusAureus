@@ -221,7 +221,6 @@ function change_reaction_names(model)
 
     rhea_id_gene_id = Dict{String,String}()
     for (r, rxn) in model.reactions
-        println(r)
         startswith(r,"EX") && continue
         g_name = ""
         if !isnothing(rxn.annotations) && haskey(rxn.annotations, "EC")
@@ -254,18 +253,24 @@ Add source reactions to the model.
 """
 function add_sources!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sources.csv"))
-
+    i = 0 
     for row in eachrow(df)
-        chebi = split(row.CHEBI,':')[2]
+        i += 1
+        mid = row.CHEBI
+        chebi = split(mid,":")[2]
+        if i ∈ [1,2,3,4,5,6,7,8,9]  
+            mid *= "_e"
+        end
+        println(mid)
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
             lower_bound = 0.0,
             upper_bound = 1000.0,
-            stoichiometry = Dict(row.CHEBI*"_e" => 1),
+            stoichiometry = Dict(mid => 1),
         )
-        model.metabolites[row.CHEBI*"_e"] = deepcopy(model.metabolites[row.CHEBI])
-        model.metabolites[row.CHEBI*"_e"].compartment = "external"
+        model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
+        model.metabolites[mid].compartment = "external"
     end
     model
 end
@@ -285,10 +290,10 @@ function add_sinks!(model)
             name = "$(row.Name) exchange",
             lower_bound = -1000.0,
             upper_bound = 0.0,
-            stoichiometry = Dict(row.CHEBI*"_e" => 1),
+            stoichiometry = Dict(row.CHEBI => 1),
         )
-        model.metabolites[row.CHEBI*"_e"] = deepcopy(model.metabolites[row.CHEBI])
-        model.metabolites[row.CHEBI*"_e"].compartment = "external"
+        model.metabolites[row.CHEBI] = deepcopy(model.metabolites[row.CHEBI])
+        model.metabolites[row.CHEBI].compartment = "external"
     end
     model
 end
