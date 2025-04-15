@@ -1,6 +1,7 @@
 using COBREXA
 using DataFrames, CSV
 using CairoMakie
+using Statistics
 
 turnup_df = DataFrame(CSV.File("data/model/isozymes/turnup_output.csv"))
 
@@ -13,6 +14,7 @@ turnup_df = DataFrames.rename!(turnup_df,
     "kcat [s^(-1)]" => "kcat",
 )
 kcat_df = insertcols(rxn_seq_subs_prods, 5, :kcat => turnup_df.kcat)
+# kcat mean at 22.82
 kcat_dict = Dict{String,Dict{String,Float64}}()
 for row in eachrow(kcat_df)
     if !ismissing(row.kcat)
@@ -24,6 +26,8 @@ for row in eachrow(kcat_df)
         end
     end
 end
+avg_kcat = mean(vcat([collect(values(y)) for (x,y) in kcat_dict]...))
+
 isozymes_stoich_df = DataFrame(CSV.File("data/model/isozymes/reaction_isozymes.csv")) 
 select!(isozymes_stoich_df,:RHEA_ID, :Protein, :Stoichiometry, :Isozyme)
 isozyme_stoich = Dict(Pair.(isozymes_stoich_df.Protein, isozymes_stoich_df.Stoichiometry))
@@ -43,6 +47,20 @@ for (id, rxn) in model.reactions
             kcat_reverse = maximum([kcat_dict["$(id)_r"][g] for g in grr]),
         )
     end
+end
+
+
+# add oxphos fake isozymes 
+oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3"]
+for rid in oxphos_reactions
+    grrs = A.reaction_gene_association_dnf(model, rid)
+    println(grrs)
+    reaction_isozymes[rid] = Dict("isoyzme_1" => Isozyme(
+        gene_product_stoichiometry = Dict("g1" => 1), # assume subunit stoichiometry of 1 for all isozymes
+        kcat_forward = avg_kcat,
+        kcat_reverse = avg_kcat,
+        )
+    )
 end
 
 function get_gene_product_molar_mass(gids)
@@ -97,28 +115,30 @@ gene_product_molar_masses = get_gene_product_molar_mass(A.genes(model))
 
 total_capacity = 550.0 # kDa
 
-ec_sol = enzyme_constrained_flux_balance_analysis(
-    model;
-    reaction_isozymes,
-    gene_product_molar_masses = gene_product_molar_masses,
-    capacity = total_capacity,
-    optimizer = HiGHS.Optimizer,
-)
-ec_sol.gene_product_amounts
-# The total amount of required gene product mass
-ec_sol.gene_product_capacity
 
-open("data/ec_fluxes.json","w") do io 
-    JSON.print(io,ec_sol.fluxes)
-end
+# ec_sol = enzyme_constrained_flux_balance_analysis(
+#     model;
+#     reaction_isozymes,
+#     gene_product_molar_masses = gene_product_molar_masses,
+#     capacity = total_capacity,
+#     optimizer = HiGHS.Optimizer,
+# )
+# ec_sol.gene_product_amounts
+# # The total amount of required gene product mass
+# ec_sol.gene_product_capacity
+
+# open("data/ec_fluxes.json","w") do io 
+#     JSON.print(io,ec_sol.fluxes)
+# end
 
 # simulate overflow metabolism 
 all_gids = A.genes(model)
+membrane_gids = ["g1"]
 
+membrane_capacity = 0.01 * total_capacity
 
-
-
-membrane_capacity = 0.20 * total_capacity
+avg_product_mm = mean(vcat([collect(values(y)) for (x,y) in gene_product_molar_masses]...))
+merge!(gene_product_molar_masses, Dict(Pair.(membrane_gids,avg_product_mm)))
 
 function prepare_ec_ecoli(
     model;
@@ -126,8 +146,8 @@ function prepare_ec_ecoli(
     gene_product_molar_masses,
     all_gids,
     total_capacity,
-    # membrane_gids,
-    # membrane_capacity,
+    membrane_gids,
+    membrane_capacity,
 )
     ct = enzyme_constrained_flux_balance_constraints(
         model;
@@ -135,7 +155,7 @@ function prepare_ec_ecoli(
         gene_product_molar_masses,
         capacity = [
             ("total", all_gids, total_capacity),
-            #("membrane", membrane_gids, membrane_capacity),
+            ("membrane", membrane_gids, membrane_capacity),
         ],
     )
 
@@ -180,7 +200,7 @@ function run_ecfba_monoculture(ct, length; lacZ_frac = 0.0, lacY_frac = 0.0)
     # ct.gene_product_amounts[:lacY].bound = C.EqualTo(total_capacity * lacY_frac / lacY_mm)
     # ct.gene_product_amounts[:lacZ].bound = C.EqualTo(total_capacity * lacZ_frac / lacZ_mm)
 
-    res = screen(range(0.1, 0.24, length)) do mu
+    res = screen(range(0.1, 1.0, length)) do mu
         #@info "ecfba run" mu lacY_frac lacZ_frac
 
         ct.objective.bound = C.EqualTo(mu)
@@ -198,7 +218,7 @@ function run_ecfba_monoculture(ct, length; lacZ_frac = 0.0, lacY_frac = 0.0)
         return (;
             mu,
             total_mass = sol.gene_product_capacity.total,
-            # membrane_mass = sol.gene_product_capacity.membrane,
+            membrane_mass = sol.gene_product_capacity.membrane,
             ac_flux = sol.fluxes.EX_30089,
             glc_flux = sol.fluxes.EX_15903,
             o2_flux = sol.fluxes.EX_15379,
@@ -215,8 +235,8 @@ ct = prepare_ec_ecoli(
     gene_product_molar_masses,
     all_gids,
     total_capacity,
-    # membrane_gids,
-    # membrane_capacity,
+    membrane_gids,
+    membrane_capacity,
 )
 
 refsim = run_ecfba_monoculture(ct, 20)
@@ -227,6 +247,6 @@ wt = scatter(
     axis = (xlabel = "Growth rate [1/h]", ylabel = "Acetate flux [mmol/gDW/h]", xlabelsize=20, ylabelsize = 20),
 )
 
-open("data/refsim_fluxes.json","w") do io 
+    open("data/refsim_fluxes.json","w") do io 
     JSON.print(io,ec_sol.fluxes)
 end

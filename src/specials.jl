@@ -21,7 +21,10 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "NADH + menaquinone + H+ = NAD+ + menaquinol"
             ]
-        )
+        ),
+        gene_association_dnf = [
+            ["g1"]
+        ]
     )
 
     model.reactions["Sdh"] = CM.Reaction(;
@@ -39,7 +42,10 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "NADH + succinate + H+ = NAD+ + fumarate + H+(p)"
             ]
-        )
+        ),
+        gene_association_dnf = [
+            ["g1"]
+        ]
     )
 
     model.reactions["Mqo"] = CM.Reaction(;
@@ -55,7 +61,10 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "NADH + malate = NAD+ + oxaloacetate"
             ]
-        )
+        ),
+        gene_association_dnf = [
+            ["g1"]
+        ]
     )
 
     #Lqo 
@@ -72,7 +81,10 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "a menaquinone + (S)-lactate = a menaquinol + pyruvate"
             ],
-        )
+        ),
+        gene_association_dnf = [
+            ["g1"]
+        ]
     )
 
     model.reactions["Ldh"] = CM.Reaction(;
@@ -111,7 +123,10 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "O2 + Fe(2+) + H+ = H2O + Fe(3+)"
             ]
-        )
+        ),
+        gene_association_dnf = [
+            ["g1"]
+        ]
     )
 
     #cyt bd
@@ -130,7 +145,10 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "O2 + H+(c) + menaquinol = H2O + menaquinone + H+(p)"
             ]
-        )
+        ),
+        gene_association_dnf = [
+            ["g1"]
+        ]
     )
 
     #cyt bo3
@@ -149,7 +167,10 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "O2 + H+(c) + menaquinol = H2O + menaquinone + H+(p)"
             ]
-        )
+        ),
+        gene_association_dnf = [
+            ["g1"]
+        ]
     )
 
     model
