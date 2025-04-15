@@ -42,7 +42,7 @@ for (id, rxn) in model.reactions
         d = get!(reaction_isozymes, id, Dict{String,Isozyme}())
         #println(id,"  ",[isozyme_stoich[g] for g in grr])
         d["isozyme_"*string(i)] = Isozyme( # each isozyme gets a unique name
-            gene_product_stoichiometry = Dict(g => isozyme_stoich[g] for g in grr), # assume subunit stoichiometry of 1 for all isozymes
+            gene_product_stoichiometry = Dict(g => isozyme_stoich[g] for g in grr), 
             kcat_forward = maximum([kcat_dict["$(id)_f"][g] for g in grr]),
             kcat_reverse = maximum([kcat_dict["$(id)_r"][g] for g in grr]),
         )
@@ -107,11 +107,12 @@ function get_gene_product_molar_mass(gids)
     end
 
     println(110*length(seqs["SAPIG1968"]))
-    return gene_product_molar_mass     
-    
+    return gene_product_molar_mass
 end
 
-gene_product_molar_masses = get_gene_product_molar_mass(A.genes(model))
+gene_product_molar_masses = get_gene_product_molar_mass([g for g in A.genes(model) if g!="g1"])
+gene_product_molar_masses["g1"] = mean(collect(values(gene_product_molar_masses)))
+
 
 total_capacity = 550.0 # kDa
 
@@ -137,8 +138,6 @@ membrane_gids = ["g1"]
 
 membrane_capacity = 0.01 * total_capacity
 
-avg_product_mm = mean(vcat([collect(values(y)) for (x,y) in gene_product_molar_masses]...))
-merge!(gene_product_molar_masses, Dict(Pair.(membrane_gids,avg_product_mm)))
 
 function prepare_ec_ecoli(
     model;
@@ -200,7 +199,7 @@ function run_ecfba_monoculture(ct, length; lacZ_frac = 0.0, lacY_frac = 0.0)
     # ct.gene_product_amounts[:lacY].bound = C.EqualTo(total_capacity * lacY_frac / lacY_mm)
     # ct.gene_product_amounts[:lacZ].bound = C.EqualTo(total_capacity * lacZ_frac / lacZ_mm)
 
-    res = screen(range(0.1, 1.0, length)) do mu
+    res = screen(range(0.1, 1.2, length)) do mu
         #@info "ecfba run" mu lacY_frac lacZ_frac
 
         ct.objective.bound = C.EqualTo(mu)
@@ -223,6 +222,7 @@ function run_ecfba_monoculture(ct, length; lacZ_frac = 0.0, lacY_frac = 0.0)
             glc_flux = sol.fluxes.EX_15903,
             o2_flux = sol.fluxes.EX_15379,
             ATP_flux = sol.fluxes.ATPS,
+            flux_sol = sol.fluxes,
         )
     end
     return Tables.columntable(filter(!isnothing, res))
@@ -239,14 +239,21 @@ ct = prepare_ec_ecoli(
     membrane_capacity,
 )
 
-refsim = run_ecfba_monoculture(ct, 20)
+refsim = run_ecfba_monoculture(ct, 10)
 
 wt = scatter(
     refsim.mu,
-    abs.(refsim.o2_flux);
-    axis = (xlabel = "Growth rate [1/h]", ylabel = "Acetate flux [mmol/gDW/h]", xlabelsize=20, ylabelsize = 20),
+    abs.(refsim.ac_flux);
+    axis = (xlabel = "Growth rate [1/h]", 
+            ylabel = "Acetate flux [mmol/gDW/h]", 
+            xlabelsize=20, 
+            ylabelsize = 20, 
+            xticklabelsize = 20,
+            yticklabelsize = 20),
 )
 
-    open("data/refsim_fluxes.json","w") do io 
-    JSON.print(io,ec_sol.fluxes)
+open("data/refsim_fluxes_growth_0.775.json","w") do io 
+    JSON.print(io,refsim.flux_sol[3])
 end
+
+save("wt_ac.png",wt)
