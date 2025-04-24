@@ -27,11 +27,11 @@ open("data/fluxes.json","w") do io
     JSON.print(io,sol.fluxes)
 end
 
-32open("data/big_fluxes.json","w") do io 
+open("data/big_fluxes.json","w") do io 
     JSON.print(io,Dict(x=>y for (x,y) in sol.fluxes if abs(y)>50))
 end
 
-Dict((x,model.reactions[String(x)].name)=>y for (x,y) in sol.fluxes if abs(y)>900)
+Dict((x,model.reactions[String(x)].name)=>y for (x,y) in sol.fluxes if abs(y)>15)
 
 
 # add sinks
@@ -80,17 +80,6 @@ C.pretty(
     format_label = x -> A.reaction_name(model, string(last(x))),
 )
 
-C.pretty(
-    C.ifilter_leaves(sol.fluxes) do ix, x
-        abs(x) > 1e-6 && begin
-            mets = [k for k in keys(A.reaction_stoichiometry(model, string(last(ix))))]
-            any(in.(mets, Ref(["CHEBI:30616"])))
-        end && A.reaction
-    end; 
-    format_label = x -> A.reaction_name(model, string(last(x))),
-)
-
-
 # atp producing reactions
 C.pretty(
     C.ifilter_leaves(sol.fluxes) do ix, x
@@ -99,7 +88,7 @@ C.pretty(
             ((model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] > 0 && x > 1e-5) || 
             (model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] < 0 && x < -1e-5))
     end; 
-    format_label = x -> (string(last(x)),A.reaction_name(escher_model, string(last(x)))),
+    format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
 )
 
 
