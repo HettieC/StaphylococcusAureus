@@ -27,3 +27,11 @@ temp.jl
 
 data/model.json
 escher_model.json
+
+data/fluxes.json
+data/big_fluxes.json
+data/ec_fluxes.json
+
+*.png
+
+*refsim*
