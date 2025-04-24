@@ -13,7 +13,7 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-model.reactions["EX_15903"].upper_bound = 10 #glucose
+model.reactions["EX_15903"].upper_bound = 1 #glucose
 sol = flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
 
 #######
@@ -99,7 +99,7 @@ C.pretty(
             ((model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] > 0 && x > 1e-5) || 
             (model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] < 0 && x < -1e-5))
     end; 
-    format_label = x -> (string(last(x)),A.reaction_name(escher_model, string(last(x)))),
+    format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
 )
 
 
