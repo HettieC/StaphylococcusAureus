@@ -411,3 +411,87 @@ function get_gene_product_molar_mass(gids)
 end
 
 export get_gene_product_molar_mass
+
+function get_reaction_isozymes(model)
+    turnup_df = DataFrame(XLSX.readtable("data/turnup/output1.xlsx","Sheet1"))
+    turnup_df = vcat(turnup_df,DataFrame(XLSX.readtable("data/turnup/output2.xlsx","Sheet1")))
+    turnup_df = vcat(turnup_df,DataFrame(XLSX.readtable("data/turnup/output3.xlsx","Sheet1")))
+    turnup_df = vcat(turnup_df,DataFrame(XLSX.readtable("data/turnup/output4.xlsx","Sheet1")))
+
+    rxn_seq_subs_prods = DataFrame(CSV.File("data/model/isozymes/reaction_sequence_subs_prods.csv"))
+
+    turnup_df = DataFrames.rename!(turnup_df,
+        "kcat [s^(-1)]" => "kcat",
+    )
+    kcat_df = insertcols(rxn_seq_subs_prods, 5, :kcat => turnup_df.kcat)
+    # kcat mean at 22.82
+    kcat_dict = Dict{String,Dict{String,Float64}}()
+    for row in eachrow(kcat_df)
+        if !ismissing(row.kcat)
+            if !haskey(kcat_dict, row.reaction_id)
+                # put into 1/h instead of 1/s by multiplying by 3600
+                kcat_dict[row.reaction_id] = Dict(row.locus_tag => row.kcat * 3.6)
+            else
+                kcat_dict[row.reaction_id][row.locus_tag] = row.kcat * 3.6
+            end
+        end
+    end
+
+    isozymes_stoich_df = DataFrame(CSV.File("data/model/isozymes/reaction_isozymes.csv")) 
+    select!(isozymes_stoich_df,:RHEA_ID, :Protein, :Stoichiometry, :Isozyme)
+    isozyme_stoich = Dict(Pair.(isozymes_stoich_df.Protein, isozymes_stoich_df.Stoichiometry))
+
+    reaction_isozymes = Dict{String,Dict{String,Isozyme}}() # a mapping from reaction IDs to isozyme IDs to isozyme structs.
+    for (id, rxn) in model.reactions
+        grrs = rxn.gene_association_dnf
+        isnothing(grrs) && continue # skip if no grr available
+        haskey(kcat_dict, "$(id)_f") || continue # skip if no kcat data available
+        haskey(kcat_dict, "$(id)_r") || continue
+        for (i, grr) in enumerate(grrs)
+            d = get!(reaction_isozymes, id, Dict{String,Isozyme}())
+            #println(id,"  ",[isozyme_stoich[g] for g in grr])
+            d["isozyme_"*string(i)] = Isozyme( # each isozyme gets a unique name
+                gene_product_stoichiometry = Dict(g => isozyme_stoich[g] for g in grr), 
+                kcat_forward = maximum([kcat_dict["$(id)_f"][g] for g in grr]) * 3.6,
+                kcat_reverse = maximum([kcat_dict["$(id)_r"][g] for g in grr]) * 3.6,
+            )
+        end
+    end
+
+    return reaction_isozymes
+end 
+export get_reaction_isozymes
+
+function add_fake_isozymes!(reaction_isozymes)
+    # use a fake gene g1 for all metabolic reactions with not grr
+
+    avg_kcat = mean(vcat([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y]...))
+
+    i = 0
+    for (r,rxn) in model.reactions 
+        haskey(reaction_isozymes,r) && continue 
+        isnothing(tryparse(Int64,r)) && continue
+        println(r)
+        i += 1
+    end
+
+    oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3"]
+    for rid in oxphos_reactions
+        reaction_isozymes[rid] = Dict("isoyzme_1" => Isozyme(
+            gene_product_stoichiometry = Dict("g1" => 1), # assume subunit stoichiometry of 1 for all isozymes
+            kcat_forward = avg_kcat,
+            kcat_reverse = avg_kcat,
+            )
+        )
+    end
+    return reaction_isozymes
+end
+
+function find_ec_info(ec_number::String)
+    df = DataFrame(CSV.File("data/databases/uniprot/s_aureus.csv"))
+    a = @subset df @byrow begin
+        !ismissing(:e_c_number) && contains(:e_c_number, ec_number)
+    end
+    return a
+end
+export find_ec_info

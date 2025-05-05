@@ -8,6 +8,7 @@ import AbstractFBCModels.CanonicalModel as CM
 import COBREXA as X
 using RheaReactions
 using JSONFBCModels
+using XLSX
 
 include("utils.jl")
 include("curate.jl")
