@@ -32,6 +32,8 @@ data/fluxes.json
 data/big_fluxes.json
 data/ec_fluxes.json
 
+data/databases
+
 *.png
 
 *refsim*
