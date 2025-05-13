@@ -12,6 +12,11 @@ model = build_model()
 
 reaction_isozymes = get_reaction_isozymes()
 
+df = DataFrame(CSV.File("data/model/transporters.csv"))
+
+
+
+
 
 avg_kcat = mean(vcat([b.kcat_forward for (x, y) in reaction_isozymes for (a, b) in y]...))
 

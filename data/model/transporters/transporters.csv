@@ -1,4 +1,4 @@
-Type,Metabolite,CHEBI,Protein,Stoichiometry,Subunit
+Type,Metabolite,CHEBI,Protein,Stoichiometry,Isozyme
 ABC,phosphate,CHEBI:43474,SAPIG1387,1,
 ABC,phosphate,CHEBI:43474,SAPIG1388,1,
 ABC,phosphate,CHEBI:43474,SAPIG1389,1,

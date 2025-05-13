@@ -45,7 +45,7 @@ end
 function add_membrane_transporters!(model)
 
     df = DataFrame(
-        CSV.File(joinpath(pkgdir(@__MODULE__), "data", "model", "transporters.csv")),
+        CSV.File(joinpath(pkgdir(@__MODULE__), "data", "model", "transporters", "transporters.csv")),
     )
 
     gs = String[]
@@ -53,16 +53,15 @@ function add_membrane_transporters!(model)
 
     # abc transporters
     abcs = @subset(df, :Type .== "ABC")
-    for g in groupby(abcs, [:CHEBI, :Subunit])
+    for g in groupby(abcs, [:CHEBI, :Isozyme])
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
-        mid != "CHEBI:15379" && continue
 
-        if mid in A.metabolites(model)
+        if string(mid) in A.metabolites(model)
             push!(ms, mid)
             iso = string.(filter(x -> !ismissing(x),g.Protein))
             append!(gs, iso)
-            if all(x -> ismissing(x), g.Subunit)
+            if all(x -> ismissing(x), g.Isozyme)
                 for gid in iso
                     add_abc!(model, mid, [gid], 1)
                 end
@@ -77,10 +76,9 @@ function add_membrane_transporters!(model)
 
     # PTS transporters
     pts = @subset(df, :Type .== "PTS")
-    for g in groupby(pts, [:CHEBI, :Subunit])
+    for g in groupby(pts, [:CHEBI, :Isozyme])
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
-        mid != "CHEBI:15379" && continue
 
         if mid in A.metabolites(model)
             push!(ms, mid)
@@ -95,7 +93,7 @@ function add_membrane_transporters!(model)
 
     # symport
     symport = @subset(df, :Type .== "Symport")
-    for g in groupby(symport, [:CHEBI, :Subunit])
+    for g in groupby(symport, [:CHEBI, :Isozyme])
         all(x -> ismissing(x), g.Protein) && continue
         mid1, mid2 = sort(split(first(g.CHEBI), "/")) # to make rid unique
         if mid1 in A.metabolites(model) && mid2 in A.metabolites(model)
@@ -112,7 +110,7 @@ function add_membrane_transporters!(model)
 
     # antiport
     antiport = @subset(df, :Type .== "Antiport")
-    for g in groupby(antiport, [:CHEBI, :Subunit])
+    for g in groupby(antiport, [:CHEBI, :Isozyme])
         all(x -> ismissing(x), g.Protein) && continue
         mid1, mid2 = sort(split(first(g.CHEBI), "/")) # to make rid unique
         if mid1 in A.metabolites(model) && mid2 in A.metabolites(model)
@@ -129,7 +127,7 @@ function add_membrane_transporters!(model)
 
     # permease (the default as well)
     permease = @subset(df, :Type .== "Permease")
-    for g in groupby(permease, [:CHEBI, :Subunit])
+    for g in groupby(permease, [:CHEBI, :Isozyme])
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
         if mid in A.metabolites(model)
@@ -170,6 +168,7 @@ function add_membrane_transporters!(model)
     end
     # no need to add metabolites, because they should all already be in the model
     @assert all(in.(ms, Ref(A.metabolites(model))))
+    return model
 end
 
 function add_abc!(model, mid, iso, ss)

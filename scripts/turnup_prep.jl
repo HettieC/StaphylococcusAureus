@@ -91,15 +91,7 @@ CSV.write("data/turnup/sequence_subs_prods.csv", df; delim = ',')
 XLSX.writetable("data/turnup/turnup_input1.xlsx",df[1:499,:])
 XLSX.writetable("data/turnup/turnup_input2.xlsx",df[500:999,:])
 XLSX.writetable("data/turnup/turnup_input3.xlsx",df[1000:1499,:])
-XLSX.writetable("data/turnup/turnup_input4.xlsx",df[1500:end,:])
+XLSX.writetable("data/turnup/turnup_input4.xlsx",df[1500:1999,:])
+XLSX.writetable("data/turnup/turnup_input5.xlsx",df[2000:end,:])
 
-unique(turnup_df)
-unique(rxn_seq_subs_prods)
-DataFrames.rename!(turnup_df,
-        [
-            "substrates" => "Substrates",
-            "enzyme" => "Enzyme",
-            "products" => "Products"
-        ]
-    )
-innerjoin(rxn_seq_subs_prods,turnup_df, on = [:Enzyme,:Substrates,:Products])
+

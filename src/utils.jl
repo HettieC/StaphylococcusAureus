@@ -90,9 +90,6 @@ function extend_model!(model, dfs)
                     "KEGG" => unique(df.KEGG_ID)
                 ),
             )
-            if rid == 40530  
-                println(model.reactions[string(rid)])
-            end
         end
     end
 
@@ -263,7 +260,6 @@ function add_sources!(model)
         if i ∈ [1,2,3,4,5,6,7,8,9]  
             mid *= "_e"
         end
-        println(mid)
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
@@ -438,6 +434,7 @@ function get_reaction_isozymes()
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output2.xlsx", "Sheet1")))
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output3.xlsx", "Sheet1")))
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output4.xlsx", "Sheet1")))
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output5.xlsx", "Sheet1")))
     
     rxn_seq_subs_prods = DataFrame(CSV.File("data/model/isozymes/reaction_sequence_subs_prods.csv"))
     
@@ -445,7 +442,6 @@ function get_reaction_isozymes()
         "kcat [s^(-1)]" => "kcat",
     )
     kcat_df = insertcols(rxn_seq_subs_prods, 5, :kcat => turnup_df.kcat)
-    # kcat mean at 22.82
     kcat_dict = Dict{String,Dict{String,Float64}}()
     for row in eachrow(kcat_df)
         if !ismissing(row.kcat)
