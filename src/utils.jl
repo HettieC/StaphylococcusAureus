@@ -90,7 +90,9 @@ function extend_model!(model, dfs)
                     "KEGG" => unique(df.KEGG_ID)
                 ),
             )
-
+            if rid == 40530  
+                println(model.reactions[string(rid)])
+            end
         end
     end
 
@@ -114,7 +116,7 @@ function extend_model!(model, dfs)
         model.genes[g] = CM.Gene(; name=g)
     end
 
-    model
+    return model
 
 end
 
@@ -412,14 +414,33 @@ end
 
 export get_gene_product_molar_mass
 
-function get_reaction_isozymes(model)
-    turnup_df = DataFrame(XLSX.readtable("data/turnup/output1.xlsx","Sheet1"))
-    turnup_df = vcat(turnup_df,DataFrame(XLSX.readtable("data/turnup/output2.xlsx","Sheet1")))
-    turnup_df = vcat(turnup_df,DataFrame(XLSX.readtable("data/turnup/output3.xlsx","Sheet1")))
-    turnup_df = vcat(turnup_df,DataFrame(XLSX.readtable("data/turnup/output4.xlsx","Sheet1")))
+function add_isozymes!(reaction_isozymes,kcat_dict,dfs)
+    for df in dfs
+        rid = split(first(df.RHEA_ID),':')[2]
+        !haskey(kcat_dict, "$(rid)_f") && continue # skip if no kcat data available
 
+        grr = String.(df.Protein[:])
+        stoich = Int.(df.Stoichiometry[:])
+        
+        d = get!(reaction_isozymes, rid, Dict{String,Isozyme}())
+        i = length(reaction_isozymes[rid])
+        d["isozyme_"*string(i+1)] = Isozyme( # each isozyme gets a unique name
+            gene_product_stoichiometry=Dict(grr .=> stoich),
+            kcat_forward=maximum([kcat_dict["$(rid)_f"][g] for g in grr]) * 3.6,
+            kcat_reverse=maximum([kcat_dict["$(rid)_r"][g] for g in grr]) * 3.6,
+        )
+    end
+    return reaction_isozymes
+end
+
+function get_reaction_isozymes()
+    turnup_df = DataFrame(XLSX.readtable("data/turnup/output1.xlsx", "Sheet1"))
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output2.xlsx", "Sheet1")))
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output3.xlsx", "Sheet1")))
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output4.xlsx", "Sheet1")))
+    
     rxn_seq_subs_prods = DataFrame(CSV.File("data/model/isozymes/reaction_sequence_subs_prods.csv"))
-
+    
     turnup_df = DataFrames.rename!(turnup_df,
         "kcat [s^(-1)]" => "kcat",
     )
@@ -428,38 +449,32 @@ function get_reaction_isozymes(model)
     kcat_dict = Dict{String,Dict{String,Float64}}()
     for row in eachrow(kcat_df)
         if !ismissing(row.kcat)
-            if !haskey(kcat_dict, row.reaction_id)
+            if !haskey(kcat_dict, row.rxn)
                 # put into 1/h instead of 1/s by multiplying by 3600
-                kcat_dict[row.reaction_id] = Dict(row.locus_tag => row.kcat * 3.6)
+                kcat_dict[row.rxn] = Dict(row.locus_tag => row.kcat * 3.6)
             else
-                kcat_dict[row.reaction_id][row.locus_tag] = row.kcat * 3.6
+                kcat_dict[row.rxn][row.locus_tag] = row.kcat * 3.6
             end
         end
     end
-
-    isozymes_stoich_df = DataFrame(CSV.File("data/model/isozymes/reaction_isozymes.csv")) 
-    select!(isozymes_stoich_df,:RHEA_ID, :Protein, :Stoichiometry, :Isozyme)
-    isozyme_stoich = Dict(Pair.(isozymes_stoich_df.Protein, isozymes_stoich_df.Stoichiometry))
-
+    
+    df = DataFrame(CSV.File("data/model/metabolic_reactions.csv"))
+    
+    heteros = @rsubset(df, !iszero(:Isozyme))
+    @select!(heteros, :RHEA_ID, :Protein, :Stoichiometry, :Isozyme)
+    
+    homos = @rsubset(df, iszero(:Isozyme))
+    @select!(homos, :RHEA_ID, :Protein, :Stoichiometry)
+    
+    ghomos = groupby(homos, [:RHEA_ID, :Protein])
+    gheteros = groupby(heteros, [:RHEA_ID, :Isozyme])
+    
     reaction_isozymes = Dict{String,Dict{String,Isozyme}}() # a mapping from reaction IDs to isozyme IDs to isozyme structs.
-    for (id, rxn) in model.reactions
-        grrs = rxn.gene_association_dnf
-        isnothing(grrs) && continue # skip if no grr available
-        haskey(kcat_dict, "$(id)_f") || continue # skip if no kcat data available
-        haskey(kcat_dict, "$(id)_r") || continue
-        for (i, grr) in enumerate(grrs)
-            d = get!(reaction_isozymes, id, Dict{String,Isozyme}())
-            #println(id,"  ",[isozyme_stoich[g] for g in grr])
-            d["isozyme_"*string(i)] = Isozyme( # each isozyme gets a unique name
-                gene_product_stoichiometry = Dict(g => isozyme_stoich[g] for g in grr), 
-                kcat_forward = maximum([kcat_dict["$(id)_f"][g] for g in grr]) * 3.6,
-                kcat_reverse = maximum([kcat_dict["$(id)_r"][g] for g in grr]) * 3.6,
-            )
-        end
-    end
-
+    add_isozymes!(reaction_isozymes,kcat_dict,ghomos)
+    add_isozymes!(reaction_isozymes,kcat_dict,gheteros)
+    
     return reaction_isozymes
-end 
+end
 export get_reaction_isozymes
 
 function add_fake_isozymes!(reaction_isozymes)

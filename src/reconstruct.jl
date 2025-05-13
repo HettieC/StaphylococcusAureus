@@ -2,10 +2,10 @@ function build_model()
 
     df = DataFrame(CSV.File("data/model/metabolic_reactions.csv"))
 
-    heteros = @rsubset(df, !iszero(:Subunit))
-    gheteros = groupby(heteros, [:RHEA_ID, :Subunit])
+    heteros = @rsubset(df, !iszero(:Isozyme))
+    gheteros = groupby(heteros, [:RHEA_ID, :Isozyme])
 
-    homos = @rsubset(df, iszero(:Subunit))
+    homos = @rsubset(df, iszero(:Isozyme))
     ghomos = groupby(homos, [:RHEA_ID, :Protein])
 
     # Build model
