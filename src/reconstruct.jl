@@ -17,8 +17,9 @@ function build_model()
     gapfill!(model)
     add_sources!(model)
     add_sinks!(model)
+    reaction_isozymes, kcat_dict = get_reaction_isozymes()
     add_periplasm_transporters!(model)
-    add_membrane_transporters!(model)
+    add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
     add_oxphos!(model)
 
     model = curate!(model)
@@ -34,6 +35,6 @@ function build_model()
 
     #
 
-    return model
+    return model, reaction_isozymes
 end
 export build_model

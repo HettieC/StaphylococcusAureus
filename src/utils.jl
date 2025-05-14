@@ -469,7 +469,7 @@ function get_reaction_isozymes()
     add_isozymes!(reaction_isozymes,kcat_dict,ghomos)
     add_isozymes!(reaction_isozymes,kcat_dict,gheteros)
     
-    return reaction_isozymes
+    return reaction_isozymes, kcat_dict
 end
 export get_reaction_isozymes
 
@@ -478,12 +478,17 @@ function add_fake_isozymes!(reaction_isozymes)
 
     avg_kcat = mean(vcat([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y]...))
 
-    i = 0
     for (r,rxn) in model.reactions 
         haskey(reaction_isozymes,r) && continue 
-        isnothing(tryparse(Int64,r)) && continue
-        println(r)
-        i += 1
+        if rxn.gene_association_dnf == [["g1"]]
+            reaction_isozymes[r]["isozyme_1"] = Isozyme(
+                gene_product_stoichiometry = Dict("g1" => 1),
+                kcat_forward = avg_kcat,
+                kcat_reverse = avg_kcat
+            )
+        else
+            println(r)
+        end
     end
 
     oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3"]

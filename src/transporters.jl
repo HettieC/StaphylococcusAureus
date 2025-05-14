@@ -42,7 +42,7 @@ function add_periplasm_transporters!(model)
 
 end
 
-function add_membrane_transporters!(model)
+function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
 
     df = DataFrame(
         CSV.File(joinpath(pkgdir(@__MODULE__), "data", "model", "transporters", "transporters.csv")),
@@ -53,9 +53,15 @@ function add_membrane_transporters!(model)
 
     # abc transporters
     abcs = @subset(df, :Type .== "ABC")
-    for g in groupby(abcs, [:CHEBI, :Isozyme])
+    for g in groupby(abcs, [:CHEBI, :Isozyme]) # group the mets and isozymes
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
+        i = 0 
+        if haskey(reaction_isozymes, "ABC_$mid") 
+            i = length(reaction_isozymes["ABC_$mid"])
+        else 
+            reaction_isozymes["ABC_$mid"] = Dict{String,Isozyme}()
+        end
 
         if string(mid) in A.metabolites(model)
             push!(ms, mid)
@@ -64,10 +70,24 @@ function add_membrane_transporters!(model)
             if all(x -> ismissing(x), g.Isozyme)
                 for gid in iso
                     add_abc!(model, mid, [gid], 1)
+                    g.Protein == ["g1"] && continue
+                    reaction_isozymes["ABC_$mid"]["isozyme_"*string(i+1)] = Isozyme(
+                        gene_product_stoichiometry = Dict(gid => 1),
+                        kcat_forward = kcat_dict["ABC_$(mid)_f"][gid] * 3.6,
+                        kcat_reverse = kcat_dict["ABC_$(mid)_r"][gid] * 3.6,
+                    )
+                    i += 1
                 end
             else
                 ss = parse.(Float64, string.(g.Stoichiometry))
                 add_abc!(model, mid, iso, ss)
+                g.Protein == ["g1"] && continue
+                reaction_isozymes["ABC_$mid"]["isozyme_"*string(i+1)] = Isozyme(
+                    gene_product_stoichiometry = Dict(iso .=> ss),
+                    kcat_forward = maximum([kcat_dict["ABC_$(mid)_f"][g] for g in iso]) * 3.6,
+                    kcat_reverse = maximum([kcat_dict["ABC_$(mid)_r"][g] for g in iso]) * 3.6,
+                )
+                i += 1
             end
         else
             @warn "$mid not in model (ABC)"
@@ -80,12 +100,40 @@ function add_membrane_transporters!(model)
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
 
-        if mid in A.metabolites(model)
+        i = 0 
+        if haskey(reaction_isozymes, "PTS_$mid") 
+            i = length(reaction_isozymes["PTS_$mid"])
+        else 
+            reaction_isozymes["PTS_$mid"] = Dict{String,Isozyme}()
+        end
+
+        if string(mid) in A.metabolites(model)
             push!(ms, mid)
             iso = string.(filter(x -> !ismissing(x),g.Protein))
             append!(gs, iso)
-            ss = parse.(Float64, string.(g.Stoichiometry))
-            add_pts!(model, mid, iso, ss)
+
+
+            if all(x -> ismissing(x), g.Isozyme) # monomers
+                for gid in iso
+                    add_pts!(model, mid, [gid], 1)
+                    g.Protein == ["g1"] && continue
+                    reaction_isozymes["PTS_$mid"]["isozyme_"*string(i+1)] = Isozyme(
+                        gene_product_stoichiometry = Dict(gid => 1),
+                        kcat_forward = kcat_dict["PTS_$(mid)_f"][gid] * 3.6,
+                        kcat_reverse = kcat_dict["PTS_$(mid)_r"][gid] * 3.6,
+                    )
+                    i += 1
+                end
+            else
+                ss = parse.(Float64, string.(g.Stoichiometry))
+                add_pts!(model, mid, iso, ss)
+                reaction_isozymes["PTS_$mid"]["isozyme_"*string(i+1)] = Isozyme(
+                    gene_product_stoichiometry = Dict(iso .=> ss),
+                    kcat_forward = maximum([kcat_dict["PTS_$(mid)_f"][g] for g in iso]) * 3.6,
+                    kcat_reverse = maximum([kcat_dict["PTS_$(mid)_r"][g] for g in iso]) * 3.6,
+                )
+                i += 1
+            end
         else
             @warn "$mid not in model (PTS)"
         end
@@ -97,12 +145,38 @@ function add_membrane_transporters!(model)
         all(x -> ismissing(x), g.Protein) && continue
         mid1, mid2 = sort(split(first(g.CHEBI), "/")) # to make rid unique
         if mid1 in A.metabolites(model) && mid2 in A.metabolites(model)
+            rid = "SYM_$(mid1)_$mid2"
             push!(ms, mid1)
             push!(ms, mid2)
             iso = string.(filter(x -> !ismissing(x),g.Protein))
             append!(gs, iso)
             ss = parse.(Float64, string.(g.Stoichiometry))
-            add_symport!(model, mid1, mid2, iso, ss)
+
+            i = 0 
+            if haskey(reaction_isozymes, rid) 
+                i = length(reaction_isozymes[rid])
+            else 
+                reaction_isozymes[rid] = Dict{String,Isozyme}()
+            end
+            if ismissing(g.Isozyme)
+                for gid in iso
+                    add_symport!(model, mid1, mid2, [gid], ss)
+                    reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
+                        gene_product_stoichiometry = Dict(gid => 1),
+                        kcat_forward = kcat_dict["$(rid)_f"][gid] * 3.6,
+                        kcat_reverse = kcat_dict["$(rid)_r"][gid] * 3.6,
+                    )
+                    i += 1
+                end
+            else 
+                add_symport!(model, mid1, mid2, iso, ss)
+                reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
+                    gene_product_stoichiometry = Dict(iso .=> ss),
+                    kcat_forward = maximum([kcat_dict["$(rid)_f"][g] for g in iso]) * 3.6,
+                    kcat_reverse = maximum([kcat_dict["$(rid)_r"][g] for g in iso]) * 3.6,
+                )
+                i += 1
+            end
         else
             @warn "$mid1 or $mid2 not in model (symport)"
         end
@@ -114,12 +188,40 @@ function add_membrane_transporters!(model)
         all(x -> ismissing(x), g.Protein) && continue
         mid1, mid2 = sort(split(first(g.CHEBI), "/")) # to make rid unique
         if mid1 in A.metabolites(model) && mid2 in A.metabolites(model)
+            rid = "ANTI_$(mid1)_$mid2"
             push!(ms, mid1)
             push!(ms, mid2)
             iso = string.(filter(x -> !ismissing(x),g.Protein))
             append!(gs, iso)
             ss = parse.(Float64, string.(g.Stoichiometry))
-            add_antiport!(model, mid1, mid2, iso, ss)
+
+            i = 0 
+            if haskey(reaction_isozymes, rid) 
+                i = length(reaction_isozymes[rid])
+            else 
+                reaction_isozymes[rid] = Dict{String,Isozyme}()
+            end
+
+            if ismissing(g.Isozyme)
+                for gid in iso 
+                    add_antiport!(model, mid1, mid2, [gid], 1)
+                    reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
+                        gene_product_stoichiometry = Dict(gid => 1),
+                        kcat_forward = kcat_dict["$(rid)_f"][gid] * 3.6,
+                        kcat_reverse = kcat_dict["$(rid)_r"][gid] * 3.6,
+                    )
+                    i += 1
+                end 
+            else 
+                add_antiport!(model, mid1, mid2, iso, ss)
+                reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
+                    gene_product_stoichiometry = Dict(iso .=> ss),
+                    kcat_forward = maximum([kcat_dict["$(rid)_f"][g] for g in iso]) * 3.6,
+                    kcat_reverse = maximum([kcat_dict["$(rid)_r"][g] for g in iso]) * 3.6,
+                )
+                i += 1
+            end
+
         else
             @warn "$mid1 or $mid2 not in model (antiport)"
         end
@@ -131,11 +233,39 @@ function add_membrane_transporters!(model)
         all(x -> ismissing(x), g.Protein) && continue
         mid = first(g.CHEBI)
         if mid in A.metabolites(model)
+            rid = "PERM_$mid"
             push!(ms, mid)
             iso = string.(filter(x -> !ismissing(x),g.Protein))
             append!(gs, iso)
             ss = parse.(Float64, string.(g.Stoichiometry))
-            add_permease!(model, mid, iso, ss)
+
+            i = 0 
+            if haskey(reaction_isozymes, rid) 
+                i = length(reaction_isozymes[rid])
+            else 
+                reaction_isozymes[rid] = Dict{String,Isozyme}()
+            end
+            
+            if ismissing(g.Isozyme)
+                for gid in iso 
+                    add_permease!(model, mid, [gid], ss)
+                    reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
+                        gene_product_stoichiometry = Dict(gid => 1),
+                        kcat_forward = kcat_dict["$(rid)_f"][gid] * 3.6,
+                        kcat_reverse = kcat_dict["$(rid)_r"][gid] * 3.6,
+                    )
+                    i += 1
+                end 
+            else
+                add_permease!(model, mid, iso, ss)
+                reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
+                    gene_product_stoichiometry = Dict(iso .=> ss),
+                    kcat_forward = maximum([kcat_dict["$(rid)_f"][g] for g in iso]) * 3.6,
+                    kcat_reverse = maximum([kcat_dict["$(rid)_r"][g] for g in iso]) * 3.6,
+                )
+                i += 1
+            end
+
         else
             @warn "$mid not in model (permease)"
         end
@@ -173,9 +303,7 @@ end
 
 function add_abc!(model, mid, iso, ss)
     rid = "ABC_$mid"
-    # isoz =
-    #     isnothing(iso) ? nothing :
-    #     X.Isozyme(; gene_product_stoichiometry = Dict(iso .=> ss))
+    
     if haskey(model.reactions, rid)
         isnothing(iso) || push!(model.reactions[rid].gene_association_dnf, iso)
     else
@@ -214,11 +342,9 @@ function add_pts!(model, mid, iso, ss)
     )
 
     rid = "PTS_$mid"
-    # isoz =
-    #     isnothing(iso) ? nothing :
-    #     X.Isozyme(; gene_product_stoichiometry = Dict(iso .=> ss))
+    
     if haskey(model.reactions, rid)
-        isnothing(isoz) || push!(model.reactions[rid].gene_association_dnf, iso)
+        push!(model.reactions[rid].gene_association_dnf, iso)
     else
         model.reactions[rid] = CM.Reaction(;
             name="Transport $(A.metabolite_name(model, String(mid))) PTS",
@@ -243,11 +369,9 @@ end
 
 function add_symport!(model, mid1, mid2, iso, ss)
     rid = "SYM_$(mid1)_$mid2"
-    # isoz =
-    #     isnothing(iso) ? nothing :
-    #     X.Isozyme(; gene_product_stoichiometry = Dict(iso .=> ss))
+    
     if haskey(model.reactions, rid)
-        isnothing(isoz) || push!(model.reactions[rid].gene_association_dnf, iso)
+        push!(model.reactions[rid].gene_association_dnf, iso)
     else
         model.reactions[rid] = CM.Reaction(;
             name="Symport $(A.metabolite_name(model, String(mid1)))::$(A.metabolite_name(model, String(mid2)))",
@@ -276,9 +400,7 @@ end
 
 function add_antiport!(model, mid1, mid2, iso, ss)
     rid = "ANTI_$(mid1)_$mid2"
-    # isoz =
-    #     isnothing(iso) ? nothing :
-    #     X.Isozyme(; gene_product_stoichiometry = Dict(iso .=> ss))
+   
     if haskey(model.reactions, rid)
         isnothing(iso) || push!(model.reactions[rid].gene_association_dnf, iso)
     else
@@ -309,9 +431,7 @@ end
 
 function add_permease!(model, mid, iso, ss)
     rid = "PERM_$mid"
-    # isoz =
-    #     isnothing(iso) ? nothing :
-    #     X.Isozyme(; gene_product_stoichiometry = Dict(iso .=> ss))
+    
     if haskey(model.reactions, rid)
         isnothing(isoz) || push!(model.reactions[rid].gene_association_dnf, iso)
     else

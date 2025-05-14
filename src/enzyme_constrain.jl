@@ -8,15 +8,7 @@ using Statistics
 using HiGHS, XLSX, DataFramesMeta
 
 
-model = build_model()
-
-reaction_isozymes = get_reaction_isozymes()
-
-df = DataFrame(CSV.File("data/model/transporters.csv"))
-
-
-
-
+model, reaction_isozymes = build_model()
 
 avg_kcat = mean(vcat([b.kcat_forward for (x, y) in reaction_isozymes for (a, b) in y]...))
 
