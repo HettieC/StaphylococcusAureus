@@ -25,7 +25,7 @@ open("data/big_fluxes.json","w") do io
     JSON.print(io,Dict(x=>y for (x,y) in sol.fluxes if abs(y)>50))
 end
 
-Dict((x,model.reactions[String(x)].name)=>y for (x,y) in sol.fluxes if abs(y)>150)
+Dict((x,model.reactions[String(x)].name)=>y for (x,y) in sol.fluxes if abs(y)>5)
 
 
 # add sinks
