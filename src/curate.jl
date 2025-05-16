@@ -48,22 +48,22 @@ function curate!(model)
     model.reactions["EX_15377"].lower_bound = -1000
     model.reactions["EX_15377"].upper_bound = 1000
 
-    # change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
-    biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
-    @select!(biocyc, :rheaDir, :metacyc)
-    directions = String[]
-    for rid in A.reactions(model)
-        isnothing(tryparse(Int,rid)) && continue
-        qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
-        df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
-        isempty(df) && continue
-        lb, ub = rhea_rxn_dir(df[1, 1], qrt)
-        model.reactions[rid].lower_bound = lb
-        model.reactions[rid].upper_bound = ub
-        if lb != -1000 || ub != 1000
-            push!(directions, rid)
-        end
-    end
+    # # change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
+    # biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+    # @select!(biocyc, :rheaDir, :metacyc)
+    # directions = String[]
+    # for rid in A.reactions(model)
+    #     isnothing(tryparse(Int,rid)) && continue
+    #     qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+    #     df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
+    #     isempty(df) && continue
+    #     lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+    #     model.reactions[rid].lower_bound = lb
+    #     model.reactions[rid].upper_bound = ub
+    #     if lb != -1000 || ub != 1000
+    #         push!(directions, rid)
+    #     end
+    # end
 
     #add atp maintenance reaction 
     model.reactions["ATPM"] = CM.Reaction(
@@ -109,13 +109,13 @@ function curate!(model)
 
             "CHEBI:46398" => -0.1,   #UTP
             "CHEBI:37565" => -0.059,   #GTP
-            "CHEBI:37563" => -0.059,   #CTP 
-            "CHEBI:57692" => -0.007,    #FAD  
+             "CHEBI:37563" => -0.059,   #CTP 
+             "CHEBI:57692" => -0.007,    #FAD  
             "CHEBI:61404" => -0.02,    #dATP
             "CHEBI:57287" => -4.42e-4, #CoA
-            "CHEBI:37568" => -0.02,    #dTTP
-            "CHEBI:61429" => -0.099,   #dGTP
-            "CHEBI:61481" => -0.099,   #dCTP
+             "CHEBI:37568" => -0.02,    #dTTP
+             "CHEBI:61429" => -0.099,   #dGTP
+             "CHEBI:61481" => -0.099,   #dCTP
 
             "CHEBI:57783" => 2e-4, #NADPH 
             "CHEBI:57945" => 2e-4, #NADH

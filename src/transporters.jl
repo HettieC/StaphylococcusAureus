@@ -172,8 +172,8 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 add_symport!(model, mid1, mid2, iso, ss)
                 reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
                     gene_product_stoichiometry = Dict(iso .=> ss),
-                    kcat_forward = maximum([kcat_dict["$(rid)_f"][g] for g in iso]) * 3.6,
-                    kcat_reverse = maximum([kcat_dict["$(rid)_r"][g] for g in iso]) * 3.6,
+                    kcat_forward = haskey(kcat_dict,"$(rid)_f") ? maximum([kcat_dict["$(rid)_f"][g] for g in iso]) * 3.6 : 100,
+                    kcat_reverse = haskey(kcat_dict,"$(rid)_r") ? maximum([kcat_dict["$(rid)_r"][g] for g in iso]) * 3.6 : 100, 
                 )
                 i += 1
             end

@@ -6,20 +6,14 @@ using HiGHS, JSON
 using ConstraintTrees
 import ConstraintTrees as C
 
-model = build_model()
+model, reaction_isozymes = build_model()
 
-save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 # make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
 model.reactions["EX_15903"].upper_bound = 10 #glucose
-sol = flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
-
-#######
-### need some arginine symport from periplasm!
-
-#######
+model.reactions["EX_47013"].upper_bound = 0 #ribose
 
 sol = parsimonious_flux_balance_analysis(model, optimizer=HiGHS.Optimizer)
 
@@ -36,12 +30,12 @@ Dict((x,model.reactions[String(x)].name)=>y for (x,y) in sol.fluxes if abs(y)>15
 
 # add sinks
 for (m, met) in model.metabolites
-    haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
+    #haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
     model.reactions["EX_$(split(m,':')[2])"] = CM.Reaction(; stoichiometry=Dict(m => 1), notes=Dict("reason" => ["added as sink"]), upper_bound=0.0)
 end
 
 
-sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+sol = flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
 
 ### delete unneeded sinks 
 
@@ -53,6 +47,33 @@ end
 
 
 sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+
+
+
+# add sources
+for (m, met) in model.metabolites
+    haskey(model.reactions, "EX_$(split(m,':')[2])") && continue
+    model.reactions["EX_$(split(m,':')[2])"] = CM.Reaction(; stoichiometry=Dict(m => 1), notes=Dict("reason" => ["added as sink"]))
+end
+
+
+sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+
+### delete unneeded sources 
+
+for (m, met) in model.metabolites
+    if abs(fba_sol.fluxes["EX_$(split(m,':')[2])"]) < 1e-5
+        delete!(model.reactions, "EX_$(split(m,':')[2])")
+    end
+end
+
+
+sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)
+
+
+
+
+
 
 
 open("data/fluxes.json", "w") do io
