@@ -7,7 +7,6 @@ using CairoMakie
 using Statistics
 using HiGHS, XLSX, DataFramesMeta
 
-
 model, reaction_isozymes = build_model()
 
 avg_kcat = mean(vcat([b.kcat_forward for (x, y) in reaction_isozymes for (a, b) in y]...))
