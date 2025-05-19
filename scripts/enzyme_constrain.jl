@@ -27,14 +27,25 @@ end
 gene_product_molar_masses = get_gene_product_molar_mass([g for g in A.genes(model) if g != "g1"])
 gene_product_molar_masses["g1"] = mean(collect(values(gene_product_molar_masses)))
 
-total_capacity = 500.0 #mg/gDW
+cytosol_gids = String[] 
+for (r,isos) in reaction_isozymes 
+    if !isnothing(tryparse(Int,r))
+        append!(cytosol_gids,[g for (x,y) in isos for (g,s) in y.gene_product_stoichiometry])
+    end
+end
+membrane_gids = [g for g in A.genes(model) if g ∉ cytosol_gids]
 
+
+capacity = [
+    ("cytosol", unique(cytosol_gids), 400.0),
+    ("membrane", membrane_gids, 50.0)
+]
 
 ec_sol = enzyme_constrained_flux_balance_analysis(
     model;
     reaction_isozymes,
     gene_product_molar_masses=gene_product_molar_masses,
-    capacity=total_capacity,
+    capacity,
     optimizer=HiGHS.Optimizer,
 )
 
