@@ -23,7 +23,7 @@ function add_electron_transport_chain!(model)
             ]
         ),
         gene_association_dnf = [
-            ["g1"]
+            ["SAPIG0228","SAPIG0518"]
         ]
     )
 
@@ -44,7 +44,7 @@ function add_electron_transport_chain!(model)
             ]
         ),
         gene_association_dnf = [
-            ["g1"]
+            ["SAPIG1143"]
         ]
     )
 
@@ -63,7 +63,7 @@ function add_electron_transport_chain!(model)
             ]
         ),
         gene_association_dnf = [
-            ["g1"]
+            ["SAPIG2418","SAPIG2655"]
         ]
     )
 
@@ -103,8 +103,7 @@ function add_electron_transport_chain!(model)
             ],
         ),
         gene_association_dnf = [
-            ["SAPIG0252"],
-            ["SAPIG2650"]
+            ["SAPIG0252","SAPIG2650"]
         ]
     )
 
@@ -125,7 +124,7 @@ function add_electron_transport_chain!(model)
             ]
         ),
         gene_association_dnf = [
-            ["g1"]
+            ["SAPIG1055","SAPIG1056","SAPIG1057","SAPIG1058"]
         ]
     )
 
@@ -147,7 +146,7 @@ function add_electron_transport_chain!(model)
             ]
         ),
         gene_association_dnf = [
-            ["g1"]
+            ["SAPIG1083","SAPIG1084"]
         ]
     )
 

@@ -101,11 +101,11 @@ function curate!(model)
         lower_bound=0.0,
         upper_bound=1000.0,
         stoichiometry=Dict(
-            "CHEBI:30616" => -20, #atp
-            "CHEBI:15377" => -20, #h2o
-            "CHEBI:43474" => 20, #phosphate
-            "CHEBI:15378" => 20, #h+
-            "CHEBI:456216" => 20, #adp
+            "CHEBI:30616" => -50, #atp
+            "CHEBI:15377" => -50, #h2o
+            "CHEBI:43474" => 50, #phosphate
+            "CHEBI:15378" => 50, #h+
+            "CHEBI:456216" => 50, #adp
 
             "CHEBI:46398" => -0.1,   #UTP
             "CHEBI:37565" => -0.059,   #GTP
@@ -132,7 +132,7 @@ function curate!(model)
             "CHEBI:57427" => -0.282,  #L-leucine
             "CHEBI:32682" => -0.111,  #L-arginine  
             "CHEBI:57762" => -0.207,  #L-valine  
-            #"CHEBI:60039" => -0.116,  #L-proline
+            "CHEBI:60039" => -0.116,  #L-proline
             "CHEBI:35235" => -0.019,  #L-cysteine
             "CHEBI:57305" => -0.19,  #glycine
             "CHEBI:33384" => -0.19, #L-serine         
