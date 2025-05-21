@@ -96,7 +96,6 @@ function add_electron_transport_chain!(model)
             "CHEBI:15361" => 1, #pyruvate
             "CHEBI:15378" => 1, #H+
         ),
-        lower_bound = 0.0,
         annotations=Dict(
             "CM.Reaction" => [
                 "NAD+ + (S)-lactate = NADH + pyruvate + H+"

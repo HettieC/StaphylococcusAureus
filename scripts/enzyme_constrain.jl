@@ -15,6 +15,7 @@ import DifferentiableMetabolism as D
 model, reaction_isozymes = build_model()
 model.reactions["ATPM"].lower_bound = 8.0
 
+ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
 # add oxphos fake isozymes 
 oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3","Ldh"]
