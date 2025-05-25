@@ -252,14 +252,10 @@ Add source reactions to the model.
 """
 function add_sources!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sources.csv"))
-    i = 0 
     for row in eachrow(df)
-        i += 1
         mid = row.CHEBI
         chebi = split(mid,":")[2]
-        if i ∈ [1,2,3,4,5,6,7,8,9]  
-            mid *= "_e"
-        end
+        mid *= "_e"
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
@@ -282,16 +278,18 @@ function add_sinks!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sinks.csv"))
 
     for row in eachrow(df)
+        mid = row.CHEBI
         chebi = split(row.CHEBI,':')[2]
+        mid *= "_e"
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
             lower_bound = -1000.0,
             upper_bound = 0.0,
-            stoichiometry = Dict(row.CHEBI => 1),
+            stoichiometry = Dict(mid => 1),
         )
-        model.metabolites[row.CHEBI] = deepcopy(model.metabolites[row.CHEBI])
-        model.metabolites[row.CHEBI].compartment = "external"
+        model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
+        model.metabolites[mid].compartment = "external"
     end
     model
 end
@@ -364,28 +362,26 @@ end
 
 function get_gene_product_molar_mass(gids)
     AA_mass = Dict(
-        'A' => 89,
-        'R' => 174,
-        'N' => 132,
-        'D' => 133,
-        'B' => 133,
-        'C' => 121,
-        'Q' => 146,
-        'E' => 147,
-        'Z' => 147,
-        'G' => 75,
-        'H' => 155,
-        'I' => 131,
-        'L' => 131,
-        'K' => 146,
-        'M' => 149,
-        'F' => 165,
-        'P' => 115,
-        'S' => 105,
-        'T' => 119,
-        'W' => 204,
-        'Y' => 181,
-        'V' => 117,
+        'A' => 71.0788,
+        'R' => 156.1875,
+        'N' => 114.1038,
+        'D' => 115.0886,
+        'C' => 103.1388,
+        'Q' => 128.1307,
+        'E' => 129.1155,
+        'G' => 57.0519,
+        'H' => 137.1411,
+        'I' => 113.1594,
+        'L' => 113.1594,
+        'K' => 128.1741,
+        'M' => 131.1926,
+        'F' => 147.1766,
+        'P' => 97.1167,
+        'S' => 87.0782,
+        'T' => 101.1051,
+        'W' => 186.2132,
+        'Y' => 163.1760,
+        'V' => 99.1326,
     )
     seqs = Dict{String,String}()
     open("data/sequence.txt","r") do io
@@ -402,7 +398,7 @@ function get_gene_product_molar_mass(gids)
 
     gene_product_molar_mass = Dict{String,Float64}()
     for gid in gids 
-        gene_product_molar_mass[gid] = sum([AA_mass[aa] for aa in seqs[gid]]) / 1000 # convert to milligrams
+        gene_product_molar_mass[gid] = sum([AA_mass[aa] for aa in seqs[gid]]) / 1000 # convert to kDa
     end
 
     return gene_product_molar_mass

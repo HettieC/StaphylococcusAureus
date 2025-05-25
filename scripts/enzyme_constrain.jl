@@ -9,13 +9,18 @@ using Statistics
 using HiGHS, XLSX, DataFramesMeta
 using ElementaryFluxModes, JSON
 import DifferentiableMetabolism as D
+using JSONFBCModels
 
 # add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
 
 model, reaction_isozymes = build_model()
+# make model with gene ids as reaction names
+escher_model = change_reaction_names(model)
+save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
+
 model.reactions["ATPM"].lower_bound = 8.0
 
-ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+ec_sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
 # add oxphos fake isozymes 
 oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3","Ldh"]
@@ -41,6 +46,14 @@ end
 membrane_gids = [g for g in A.genes(model) if g ∉ cytosol_gids]
 
 df1 = DataFrame(CSV.File("data/databases/uniprot/s_aureus.csv"))
+
+open("accessions.txt","w") do io
+    for x in df1.uniprot_accesion
+        println(io,x)
+    end
+end
+unique(df1.uniprot_accesion) 
+
 df2 = DataFrame(CSV.File("data/databases/uniprot/idmapping_2025_05_19.csv"))
 rename!(df2,:Entry => :uniprot_accesion)
 
@@ -59,7 +72,7 @@ append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(mod
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
-    ("membrane", membrane_gids, 150.0)
+    ("membrane", membrane_gids, 40.0)
 ]
 
 # model.reactions["EX_30089"].objective_coefficient = 0
@@ -77,6 +90,15 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
 open("data/fluxes.json","w") do io 
     JSON.print(io,ec_sol.fluxes)
 end
+
+
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+
 
 # prune the model 
 flux_zero_tol = 1e-6 # these bounds make a real difference!
