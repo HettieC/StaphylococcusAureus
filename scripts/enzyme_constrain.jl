@@ -33,6 +33,18 @@ for rid in oxphos_reactions
     )
     )
 end
+# change kcats of glycolysis to heinemann kcats 
+ecoli_df = DataFrame(CSV.File("data/ecoli_kcats.csv"))
+ecoli_kcats = Dict(Pair.(ecoli_df.RHEA_ID,ecoli_df.kcat))
+for (rid,kcat) in ecoli_kcats
+    for (id,iso) in reaction_isozymes[string(rid)] 
+        reaction_isozymes[string(rid)][id] = Isozyme(;
+            gene_product_stoichiometry = iso.gene_product_stoichiometry,
+            kcat_forward = kcat,
+            kcat_reverse = kcat
+        )
+    end
+end
 
 gene_product_molar_masses = get_gene_product_molar_mass([g for g in A.genes(model) if g != "g1"])
 gene_product_molar_masses["g1"] = mean(collect(values(gene_product_molar_masses)))
@@ -46,14 +58,6 @@ end
 membrane_gids = [g for g in A.genes(model) if g ∉ cytosol_gids]
 
 df1 = DataFrame(CSV.File("data/databases/uniprot/s_aureus.csv"))
-
-open("accessions.txt","w") do io
-    for x in df1.uniprot_accesion
-        println(io,x)
-    end
-end
-unique(df1.uniprot_accesion) 
-
 df2 = DataFrame(CSV.File("data/databases/uniprot/idmapping_2025_05_19.csv"))
 rename!(df2,:Entry => :uniprot_accesion)
 
@@ -68,11 +72,11 @@ for ln in eachrow(df)
         subcellular_location[ln.gene] = rstrip.(first.(split.(subs," {")),'.')
     end
 end
-append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(model) && any(z -> occursin("membrane",lowercase(z)),y) && "Cytoplasm" ∉ y])
+append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(model) && any(z -> occursin("membrane",lowercase(z)),y) ])
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
-    ("membrane", membrane_gids, 40.0)
+    ("membrane", membrane_gids, 50.0)
 ]
 
 # model.reactions["EX_30089"].objective_coefficient = 0
@@ -89,6 +93,53 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
 
 open("data/fluxes.json","w") do io 
     JSON.print(io,ec_sol.fluxes)
+end
+
+
+ac_flux = Float64[]
+biomass = Float64[]
+for vol in 1:10:200
+    capacity = [
+        ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+        ("membrane", membrane_gids, vol)
+    ]
+    ec_sol = enzyme_constrained_flux_balance_analysis(
+        model;
+        reaction_isozymes,
+        gene_product_molar_masses,
+        capacity,
+        optimizer=HiGHS.Optimizer,
+    )
+    push!(ac_flux,ec_sol.fluxes["EX_30089"])
+    push!(biomass,ec_sol.fluxes["biomass"])
+end
+
+
+using CairoMakie
+fig = Figure(;size = (700,500))
+ax = Axis(
+    fig[1,1],
+    xlabel = "Membrane bound, mg/gDW",
+    ylabel = "Flux"
+)
+lines!(
+    ax,
+    1:10:200,
+    abs.(ac_flux),
+    label = "Acetate exchange"
+)
+lines!(
+    ax,
+    1:10:200,
+    abs.(biomass),
+    label = "Growth rate"
+)
+fig[1,2] = Legend(fig,ax)
+fig
+
+
+open("data/gapfill.json","w") do io 
+    JSON.print(io,Dict(r => haskey(rxn.notes,"reason") && "gapfilling" ∈ rxn.notes["reason"] ? 1 : 0 for (r,rxn) in model.reactions))
 end
 
 
