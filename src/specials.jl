@@ -51,15 +51,15 @@ function add_electron_transport_chain!(model)
     model.reactions["Mqo"] = CM.Reaction(;
         name="Malate:quinone oxidoreductase",
         stoichiometry=Dict(
-            "CHEBI:57945" => -1, #NADH 
+            "POLYMER:9537" => -1, #a menaquinone 
             "CHEBI:15589" => -1, #malate,
-            "CHEBI:57540" => 1, #NAD+ 
+            "POLYMER:9539" => 1, #a menaquinol 
             "CHEBI:16452" => 1, #oxaloacetate 
         ),
         lower_bound = 0.0,
         annotations=Dict(
             "CM.Reaction" => [
-                "NADH + malate = NAD+ + oxaloacetate"
+                "a menaquinone + malate = a menaquinol + oxaloacetate"
             ]
         ),
         gene_association_dnf = [

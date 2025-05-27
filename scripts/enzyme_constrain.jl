@@ -14,13 +14,35 @@ using JSONFBCModels
 # add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
 
 model, reaction_isozymes = build_model()
+model.reactions["biomass"].stoichiometry = Dict(
+            "CHEBI:30616" => -50, #atp
+            "CHEBI:15377" => -50, #h2o
+            "CHEBI:43474" => 50, #phosphate
+            "CHEBI:15378" => 50, #h+
+            "CHEBI:456216" => 50, #adp
+        )
+ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+ec_sol.fluxes["EX_30089"] #acetate 
 # make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
+open("data/fluxes.json","w") do io 
+    JSON.print(io,ec_sol.fluxes)
+end
+
+
+
+28250,0,1000,loop
+19625,0,1000,loop
+31258,0,1000,loop
+31162,0,1000,loop
+10155,0,1000,loop
+
+
+
 model.reactions["ATPM"].lower_bound = 8.0
 
-ec_sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
 # add oxphos fake isozymes 
 oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3","Ldh"]

@@ -11,8 +11,7 @@ function curate!(model)
 
     # modify rhea reactions to use beta-D isomer instead of D-glucose 
     # modify rhea reactions to use general sucrose 6(F)-phosphate instead of 6G
-        # modify rhea reactions to use beta-D isomer instead of D-fructose 
-
+    # modify rhea reactions to use beta-D isomer instead of D-fructose 
 
     for (r, rxn) in model.reactions
         if haskey(rxn.stoichiometry, "CHEBI:4167") # D-glucose -> beta-D-glucose
