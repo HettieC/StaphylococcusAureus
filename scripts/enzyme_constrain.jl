@@ -14,14 +14,20 @@ using JSONFBCModels
 # add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
 
 model, reaction_isozymes = build_model()
-model.reactions["biomass"].stoichiometry = Dict(
-            "CHEBI:30616" => -50, #atp
-            "CHEBI:15377" => -50, #h2o
-            "CHEBI:43474" => 50, #phosphate
-            "CHEBI:15378" => 50, #h+
-            "CHEBI:456216" => 50, #adp
-        )
-ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+df = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
+model.reactions["EX_15903"].upper_bound = 10.0
+rxns = []
+for ln in eachrow(df) 
+    !haskey(model.reactions,string(ln.RHEA_ID)) && continue
+    model.reactions[string(ln.RHEA_ID)].lower_bound = ln.LOWER_BOUND + 0.0 
+    model.reactions[string(ln.RHEA_ID)].upper_bound = ln.UPPER_BOUND + 0.0
+    ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+    if isnothing(ec_sol) || abs(ec_sol.objective) < 1e-5 
+        push!(rxns,ln.RHEA_ID)
+        model.reactions[string(ln.RHEA_ID)].lower_bound = -1000 
+        model.reactions[string(ln.RHEA_ID)].upper_bound = 1000
+    end
+end
 ec_sol.fluxes["EX_30089"] #acetate 
 # make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
@@ -30,7 +36,12 @@ save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model
 open("data/fluxes.json","w") do io 
     JSON.print(io,ec_sol.fluxes)
 end
-
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
 
 
 28250,0,1000,loop

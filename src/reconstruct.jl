@@ -23,7 +23,7 @@ function build_model()
     add_oxphos!(model)
 
     model = curate!(model)
-    change_bounds!(model)
+    #change_bounds!(model)
     add_electron_transport_chain!(model)
 
     # remove general quinone/quinol/ubiquinone/ubiquinone reactions 

@@ -47,7 +47,7 @@ function curate!(model)
     model.reactions["EX_15377"].lower_bound = -1000
     model.reactions["EX_15377"].upper_bound = 1000
 
-    # # change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
+    #change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
     # biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
     # @select!(biocyc, :rheaDir, :metacyc)
     # directions = String[]
@@ -76,6 +76,11 @@ function curate!(model)
             "CHEBI:15378" => 1, #h+
             "CHEBI:456216" => 1, #adp
         ),
+        annotations = Dict(
+            "CM.Reaction" => [
+                "ATP + H2O = ADP + phosphate + H+"
+            ]
+        )
     )
 
     #add atp synthase reaction 
@@ -91,6 +96,11 @@ function curate!(model)
             "CHEBI:15377" => 1, #h2o
             "CHEBI:15378" => 3, #h+
         ),
+        annotations = Dict(
+            "CM.Reaction" => [
+                "ADP + phosphate + 4 H+ (periplasm) = ATP + H2O + 3 H+"
+            ]
+        )
     )
 
     # add a biomass reaction
