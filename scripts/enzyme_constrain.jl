@@ -15,19 +15,21 @@ using JSONFBCModels
 
 model, reaction_isozymes = build_model()
 df = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
-model.reactions["EX_15903"].upper_bound = 10.0
+model.reactions["EX_15903"].upper_bound = 10 #glucose
+model.reactions["EX_47013"].upper_bound = 0 #ribose
 rxns = []
 for ln in eachrow(df) 
     !haskey(model.reactions,string(ln.RHEA_ID)) && continue
     model.reactions[string(ln.RHEA_ID)].lower_bound = ln.LOWER_BOUND + 0.0 
     model.reactions[string(ln.RHEA_ID)].upper_bound = ln.UPPER_BOUND + 0.0
     ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
-    if isnothing(ec_sol) || abs(ec_sol.objective) < 1e-5 
+    if isnothing(ec_sol) || abs(ec_sol.objective) < 1e-5 || -10000 < ec_sol.fluxes["EX_30089"] < -1e-5
         push!(rxns,ln.RHEA_ID)
         model.reactions[string(ln.RHEA_ID)].lower_bound = -1000 
         model.reactions[string(ln.RHEA_ID)].upper_bound = 1000
     end
 end
+ec_sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 ec_sol.fluxes["EX_30089"] #acetate 
 # make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
@@ -42,6 +44,37 @@ C.pretty(
     end; 
     format_label = x -> A.reaction_name(model, string(last(x))),
 )
+
+
+
+using RheaReactions
+# go through reaction directions of all biocyc  
+rhea_rxn_dir(rxn, qrt) = begin
+    idx = first(indexin([rxn], qrt))
+    isnothing(idx) && error("Reaction not found...")
+    idx == 1 && return (-1000, 1000)
+    idx == 2 && return (0, 1000)
+    idx == 3 && return (-1000, 0)
+    idx == 4 && return (-1000, 1000)
+end
+biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+@select!(biocyc, :rheaDir, :metacyc)
+bad_directions = String[]
+for rid in A.reactions(model)
+    isnothing(tryparse(Int,rid)) && continue
+    qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+    df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
+    isempty(df) && continue
+    lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+    model.reactions[rid].lower_bound = lb
+    model.reactions[rid].upper_bound = ub
+    ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+    if isnothing(ec_sol) || abs(ec_sol.objective) < 1e-5 || -10000 < ec_sol.fluxes["EX_30089"] < -1e-5
+        push!(bad_directions, rid)
+        model.reactions[rid].lower_bound = -1000
+        model.reactions[rid].upper_bound = 1000
+    end
+end
 
 
 28250,0,1000,loop
