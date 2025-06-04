@@ -507,3 +507,19 @@ function find_ec_info(ec_number::String)
     return a
 end
 export find_ec_info
+
+function add_special_isozymes!(reaction_isozymes,kcat_dict,model)
+    for (rid,rxn) in model.reactions 
+        if !haskey(reaction_isozymes,rid) && haskey(kcat_dict,rid*"_f")
+            reaction_isozymes[rid] = Dict(
+                "isozyme_"*string(i) => Isozyme(
+                    gene_product_stoichiometry = Dict(g => 1 for g in grr),
+                    kcat_forward = maximum([kcat_dict["$(rid)_f"][g] for g in grr]) * 3.6,
+                    kcat_reverse = maximum([kcat_dict["$(rid)_r"][g] for g in grr]) * 3.6
+                )
+                for (i,grr) in enumerate(rxn.gene_association_dnf)
+            )
+        end
+    end
+    return reaction_isozymes
+end

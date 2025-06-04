@@ -12,102 +12,20 @@ import DifferentiableMetabolism as D
 using JSONFBCModels
 
 # add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
-
 model, reaction_isozymes = build_model()
-df = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
-model.reactions["EX_15903"].upper_bound = 10 #glucose
-model.reactions["EX_47013"].upper_bound = 0 #ribose
-rxns = []
-for ln in eachrow(df) 
-    !haskey(model.reactions,string(ln.RHEA_ID)) && continue
-    model.reactions[string(ln.RHEA_ID)].lower_bound = ln.LOWER_BOUND + 0.0 
-    model.reactions[string(ln.RHEA_ID)].upper_bound = ln.UPPER_BOUND + 0.0
-    ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
-    if isnothing(ec_sol) || abs(ec_sol.objective) < 1e-5 || -10000 < ec_sol.fluxes["EX_30089"] < -1e-5
-        push!(rxns,ln.RHEA_ID)
-        model.reactions[string(ln.RHEA_ID)].lower_bound = -1000 
-        model.reactions[string(ln.RHEA_ID)].upper_bound = 1000
-    end
-end
-ec_sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
-ec_sol.fluxes["EX_30089"] #acetate 
-# make model with gene ids as reaction names
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-
-open("data/fluxes.json","w") do io 
-    JSON.print(io,ec_sol.fluxes)
-end
-C.pretty(
-    C.ifilter_leaves(ec_sol.fluxes) do ix, x
-        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
-    end; 
-    format_label = x -> A.reaction_name(model, string(last(x))),
-)
-
-
-
-using RheaReactions
-# go through reaction directions of all biocyc  
-rhea_rxn_dir(rxn, qrt) = begin
-    idx = first(indexin([rxn], qrt))
-    isnothing(idx) && error("Reaction not found...")
-    idx == 1 && return (-1000, 1000)
-    idx == 2 && return (0, 1000)
-    idx == 3 && return (-1000, 0)
-    idx == 4 && return (-1000, 1000)
-end
-biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
-@select!(biocyc, :rheaDir, :metacyc)
-bad_directions = String[]
-for rid in A.reactions(model)
-    isnothing(tryparse(Int,rid)) && continue
-    qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
-    df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
-    isempty(df) && continue
-    lb, ub = rhea_rxn_dir(df[1, 1], qrt)
-    model.reactions[rid].lower_bound = lb
-    model.reactions[rid].upper_bound = ub
-    ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
-    if isnothing(ec_sol) || abs(ec_sol.objective) < 1e-5 || -10000 < ec_sol.fluxes["EX_30089"] < -1e-5
-        push!(bad_directions, rid)
-        model.reactions[rid].lower_bound = -1000
-        model.reactions[rid].upper_bound = 1000
-    end
-end
-
-
-28250,0,1000,loop
-19625,0,1000,loop
-31258,0,1000,loop
-31162,0,1000,loop
-10155,0,1000,loop
-
-
-
-model.reactions["ATPM"].lower_bound = 8.0
-
-
+model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 # add oxphos fake isozymes 
 oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3","Ldh"]
 for rid in oxphos_reactions
-    grrs = A.reaction_gene_association_dnf(model, rid)
-    reaction_isozymes[rid] = Dict("isoyzme_1" => Isozyme(
-        gene_product_stoichiometry=Dict(g => 1 for g in model.reactions[rid].gene_association_dnf[1]), # assume subunit stoichiometry of 1 for all isozymes
-        kcat_forward=65,
-        kcat_reverse=65,
-    )
-    )
-end
-# change kcats of glycolysis to heinemann kcats 
-ecoli_df = DataFrame(CSV.File("data/ecoli_kcats.csv"))
-ecoli_kcats = Dict(Pair.(ecoli_df.RHEA_ID,ecoli_df.kcat))
-for (rid,kcat) in ecoli_kcats
-    for (id,iso) in reaction_isozymes[string(rid)] 
-        reaction_isozymes[string(rid)][id] = Isozyme(;
-            gene_product_stoichiometry = iso.gene_product_stoichiometry,
-            kcat_forward = kcat,
-            kcat_reverse = kcat
+    if !haskey(reaction_isozymes,rid)
+        grrs = A.reaction_gene_association_dnf(model, rid)
+        reaction_isozymes[rid] = Dict("isoyzme_1" => Isozyme(
+            gene_product_stoichiometry=Dict(g => 1 for g in model.reactions[rid].gene_association_dnf[1]), # assume subunit stoichiometry of 1 for all isozymes
+            kcat_forward=65,
+            kcat_reverse=65,
+        )
         )
     end
 end
@@ -141,7 +59,7 @@ end
 append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(model) && any(z -> occursin("membrane",lowercase(z)),y) ])
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
     ("membrane", membrane_gids, 50.0)
 ]
 
@@ -164,9 +82,10 @@ end
 
 ac_flux = Float64[]
 biomass = Float64[]
-for vol in 1:10:200
+vols = 1:1:100
+for vol in vols
     capacity = [
-        ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+        ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
         ("membrane", membrane_gids, vol)
     ]
     ec_sol = enzyme_constrained_flux_balance_analysis(
@@ -190,22 +109,70 @@ ax = Axis(
 )
 lines!(
     ax,
-    1:10:200,
+    vols,
     abs.(ac_flux),
     label = "Acetate exchange"
 )
 lines!(
     ax,
-    1:10:200,
+    vols,
     abs.(biomass),
-    label = "Growth rate"
+    label = "Biomass reaction"
 )
 fig[1,2] = Legend(fig,ax)
 fig
 
 
-open("data/gapfill.json","w") do io 
-    JSON.print(io,Dict(r => haskey(rxn.notes,"reason") && "gapfilling" ∈ rxn.notes["reason"] ? 1 : 0 for (r,rxn) in model.reactions))
+
+# keep membrane bound same but change biomass
+ac_flux = Float64[]
+membrane_conc = Float64[]
+vols = 0:0.05:3.5
+for biomass in vols
+    model.reactions["biomass"].upper_bound = biomass
+    ec_sol = enzyme_constrained_flux_balance_analysis(
+        model;
+        reaction_isozymes,
+        gene_product_molar_masses,
+        capacity,
+        optimizer=HiGHS.Optimizer,
+    )
+    push!(ac_flux,ec_sol.fluxes["EX_30089"])
+    push!(membrane_conc,ec_sol.gene_product_capacity.membrane)
+end
+fig = Figure(;size = (700,500))
+ax = Axis(
+    fig[1,1],
+    xlabel = "Growth rate",
+    ylabel = "Acetate exchange"
+)
+lines!(
+    ax,
+    vols,
+    abs.(ac_flux),
+    label = "Acetate exchange"
+)
+lines!(
+    ax,
+    vols,
+    abs.(membrane_conc),
+    label = "Membrane conc"
+)
+fig[1,2] = Legend(fig,ax)
+fig
+
+
+model.reactions["biomass"].upper_bound = 2.9
+ec_sol = enzyme_constrained_flux_balance_analysis(
+        model;
+        reaction_isozymes,
+        gene_product_molar_masses,
+        capacity,
+        optimizer=HiGHS.Optimizer,
+)
+
+open("data/fluxes.json","w") do io 
+    JSON.print(io,ec_sol.fluxes)
 end
 
 

@@ -1,6 +1,6 @@
 using DataFrames, CSV, StaphylococcusAureus, XLSX
 
-model = build_model()
+model,isozymes = build_model()
 
 chebi_df = DataFrame(CHEBI=String[],name = String[], smiles=String[],inchi=String[],inchikey=String[])
 open("data/databases/chebi/chebi_core.obo","r") do io 

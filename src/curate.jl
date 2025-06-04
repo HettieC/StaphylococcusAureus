@@ -100,7 +100,8 @@ function curate!(model)
             "CM.Reaction" => [
                 "ADP + phosphate + 4 H+ (periplasm) = ATP + H2O + 3 H+"
             ]
-        )
+        ),
+        gene_association_dnf = [["SAPIG2145"], ["SAPIG2147"]]
     )
 
     # add a biomass reaction
@@ -174,15 +175,3 @@ function curate!(model)
     return model
 end
 
-
-for ln in eachrow(df) 
-    !haskey(model.reactions,string(ln.RHEA_ID)) && continue
-    model.reactions[string(ln.RHEA_ID)].lower_bound = ln.LOWER_BOUND + 0.0 
-    model.reactions[string(ln.RHEA_ID)].upper_bound = ln.UPPER_BOUND + 0.0
-    ec_sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
-    if isnothing(ec_sol) || abs(ec_sol.objective) < 1e-5 || -10000 < ec_sol.fluxes["EX_30089"] < -1e-5
-        push!(rxns,ln.RHEA_ID)
-        model.reactions[string(ln.RHEA_ID)].lower_bound = -1000 
-        model.reactions[string(ln.RHEA_ID)].upper_bound = 1000
-    end
-end
