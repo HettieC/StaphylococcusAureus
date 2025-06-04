@@ -61,7 +61,12 @@ C.pretty(
     format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
 )
 
+open("data/gapfilling.json","w") do io 
+    JSON.print(io,Dict(r => isnothing(rxn.gene_association_dnf) ? 1 : 0.1 for (r,rxn) in model.reactions))
+end
 
+Dict(r => isnothing(rxn.gene_association_dnf) ? 1 : 0.1 for (r,rxn) in model.reactions)
+[r for (r,rxn) in model.reactions if isnothing(rxn.gene_association_dnf) && !isnothing(tryparse(Int,r))]
 
 model, reaction_isozymes = build_model()
 df = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
