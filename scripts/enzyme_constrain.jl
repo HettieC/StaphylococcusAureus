@@ -128,7 +128,7 @@ fig
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
 membrane_conc = Float64[]
-vols = 0:0.05:3.5
+vols = 0:0.05:5
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
     ec_sol = enzyme_constrained_flux_balance_analysis(
