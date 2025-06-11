@@ -16,6 +16,7 @@ model, reaction_isozymes = build_model()
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
+model.reactions["EX_32682"].upper_bound = 0 #block proline exchange
 # add oxphos fake isozymes 
 oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3","Ldh"]
 for rid in oxphos_reactions
