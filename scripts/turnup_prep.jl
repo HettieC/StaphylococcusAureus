@@ -1,7 +1,7 @@
 using DataFrames, CSV, StaphylococcusAureus, XLSX
 
-model,isozymes = build_model()
-
+#model,isozymes = build_model()
+model = build_model()
 chebi_df = DataFrame(CHEBI=String[],name = String[], smiles=String[],inchi=String[],inchikey=String[])
 open("data/databases/chebi/chebi_core.obo","r") do io 
     i = 0
@@ -31,7 +31,7 @@ end
 chebi_inchi_dict = Dict(Pair.(chebi_df.CHEBI,chebi_df.inchi))
 
 seq_dict = Dict{String,String}()
-id_tag = Dict{String,String}()
+#id_tag = Dict{String,String}()
 open("data/databases/ST398.txt") do io
     locus_tag = ""
     seq = ""
@@ -46,7 +46,7 @@ open("data/databases/ST398.txt") do io
         else
             seq = seq_dict[locus_tag]
             seq_dict[locus_tag] = "$seq$ln"
-            id_tag[id] = locus_tag
+            #id_tag[id] = locus_tag
         end
     end
 end
@@ -92,6 +92,48 @@ XLSX.writetable("data/turnup/turnup_input1.xlsx",df[1:499,:])
 XLSX.writetable("data/turnup/turnup_input2.xlsx",df[500:999,:])
 XLSX.writetable("data/turnup/turnup_input3.xlsx",df[1000:1499,:])
 XLSX.writetable("data/turnup/turnup_input4.xlsx",df[1500:1999,:])
-XLSX.writetable("data/turnup/turnup_input5.xlsx",df[2000:end,:])
+XLSX.writetable("data/turnup/turnup_input5.xlsx",df[2000:2499,:])
+XLSX.writetable("data/turnup/turnup_input6.xlsx",df[2500:end,:])
 
 
+
+# transporters 
+df = DataFrame(
+    rxn = String[],
+    locus_tag = String[],
+    Enzyme = String[],
+    Substrates = String[],
+    Products = String[],
+)
+for (id, r) in model.reactions
+    haskey(reaction_isozymes,id) && continue
+    if !isnothing(r.gene_association_dnf) && r.gene_association_dnf != [["g1"]]
+        subs = ""
+        prods = ""
+        for (x, y) in r.stoichiometry
+            if contains(x,"_")
+                x = split(x,'_')[1]
+            end
+            !haskey(chebi_inchi_dict,x) && continue
+            if y < 0
+                subs = "$(chebi_inchi_dict[x]);$subs"
+            else
+                prods = "$(chebi_inchi_dict[x]);$prods"
+            end
+        end
+
+        tags = vcat(r.gene_association_dnf...)
+
+        for t in tags
+            push!(df, ("$(id)_f", t, seq_dict[t], subs, prods))
+            push!(df, ("$(id)_r", t, seq_dict[t], prods, subs))
+        end
+    end
+end
+
+
+CSV.write("data/model/isozymes/transport_sequence_subs_prods.csv",df)
+select!(df, [:Enzyme, :Substrates, :Products])
+
+CSV.write("data/turnup/transport_subs_prods.csv", df; delim = ',')
+XLSX.writetable("data/turnup/transport_input.xlsx",df)

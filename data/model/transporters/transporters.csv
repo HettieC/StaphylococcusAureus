@@ -89,6 +89,7 @@ PTS,n-acetyl-glucosamine,CHEBI:506227,,1,
 PTS,mannitol,CHEBI:16899,SAPIG2210,1,
 PTS,mannitol,CHEBI:16899,SAPIG2213,1,
 PTS,sucrose,CHEBI:17992,,1,
+Permease,glucose,CHEBI:15903,SAPIG2309,1
 Permease,Nitrogen,CHEBI:17997,,1,
 Permease,glycerol,CHEBI:17754,,1,
 Antiport,aspartate/alanine,CHEBI:29991/CHEBI:57972,SAPIG1720,1,

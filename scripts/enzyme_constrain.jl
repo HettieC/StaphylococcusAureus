@@ -84,7 +84,7 @@ end
 
 ac_flux = Float64[]
 biomass = Float64[]
-vols = 1:1:100
+vols = 1:2:100
 for vol in vols
     capacity = [
         ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
@@ -184,7 +184,12 @@ C.pretty(
     end; 
     format_label = x -> A.reaction_name(model, string(last(x))),
 )
-
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 100    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
 
 # prune the model 
 flux_zero_tol = 1e-6 # these bounds make a real difference!

@@ -14,6 +14,15 @@ function build_model()
 
     extend_model!(model, ghomos)
     extend_model!(model, gheteros)
+    # add new reactions 
+    df = DataFrame(CSV.File("data/model/new_reactions.csv"))
+    heteros = @rsubset(df, !iszero(:Isozyme))
+    gheteros = groupby(heteros, [:RHEA_ID, :Isozyme])
+    homos = @rsubset(df, iszero(:Isozyme))
+    ghomos = groupby(homos, [:RHEA_ID, :Protein])
+    extend_model!(model, ghomos)
+    extend_model!(model, gheteros)
+
     gapfill!(model)
     add_sources!(model)
     add_sinks!(model)

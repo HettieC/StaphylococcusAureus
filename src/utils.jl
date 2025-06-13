@@ -431,8 +431,11 @@ function get_reaction_isozymes()
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output3.xlsx", "Sheet1")))
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output4.xlsx", "Sheet1")))
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output5.xlsx", "Sheet1")))
-    
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output6.xlsx", "Sheet1")))
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/transport_output.xlsx","Sheet1")))
+
     rxn_seq_subs_prods = DataFrame(CSV.File("data/model/isozymes/reaction_sequence_subs_prods.csv"))
+    rxn_seq_subs_prods = vcat(rxn_seq_subs_prods, DataFrame(CSV.File("data/model/isozymes/transport_sequence_subs_prods.csv")))
     
     turnup_df = DataFrames.rename!(turnup_df,
         "kcat [s^(-1)]" => "kcat",
