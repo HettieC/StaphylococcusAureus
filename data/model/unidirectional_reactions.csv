@@ -135,3 +135,15 @@ RHEA_ID,LOWER_BOUND,UPPER_BOUND,REASON
 25237,0,1000,metacyc
 51619,0,1000,metacyc
 20851,0,1000,metacyc
+19925,-1000,0,metacyc
+62372,0,1000,metacyc
+16873,0,1000,metacyc
+10119,0,1000,metacyc
+33023,0,1000,metacyc
+15216,-1000,0,metacyc
+30059,0,1000,metacyc
+44640,0,1000,metacyc
+51476,0,1000,metacyc
+17989,0,1000,metacyc
+15773,0,1000,metacyc
+76995,0,1000,loop

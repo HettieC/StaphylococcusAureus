@@ -9,6 +9,7 @@ import COBREXA as X
 using RheaReactions
 using JSONFBCModels
 using XLSX
+using JSON
 
 include("utils.jl")
 include("curate.jl")

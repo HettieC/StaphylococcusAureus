@@ -22,7 +22,6 @@ function build_model()
     ghomos = groupby(homos, [:RHEA_ID, :Protein])
     extend_model!(model, ghomos)
     extend_model!(model, gheteros)
-
     gapfill!(model)
     add_sources!(model)
     add_sinks!(model)

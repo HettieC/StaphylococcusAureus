@@ -57,22 +57,20 @@ function curate!(model)
     model.reactions["EX_15377"].lower_bound = -1000
     model.reactions["EX_15377"].upper_bound = 1000
 
-    #change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
-    # biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
-    # @select!(biocyc, :rheaDir, :metacyc)
-    # directions = String[]
-    # for rid in A.reactions(model)
-    #     isnothing(tryparse(Int,rid)) && continue
-    #     qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
-    #     df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
-    #     isempty(df) && continue
-    #     lb, ub = rhea_rxn_dir(df[1, 1], qrt)
-    #     model.reactions[rid].lower_bound = lb
-    #     model.reactions[rid].upper_bound = ub
-    #     if lb != -1000 || ub != 1000
-    #         push!(directions, rid)
-    #     end
-    # end
+    #change directions to match what is found in biocyc 
+    biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+    bidirectional = string.(JSON.parsefile("data/model/bidirectional.json"))
+    @select!(biocyc, :rheaDir, :metacyc)
+    for rid in A.reactions(model)
+        rid ∈ bidirectional && continue
+        isnothing(tryparse(Int,rid)) && continue
+        qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+        df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
+        isempty(df) && continue
+        lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+        model.reactions[rid].lower_bound = lb
+        model.reactions[rid].upper_bound = ub
+    end
 
     #add atp maintenance reaction 
     model.reactions["ATPM"] = CM.Reaction(
