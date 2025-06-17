@@ -28,7 +28,7 @@ function build_model()
     reaction_isozymes, kcat_dict = get_reaction_isozymes()
     add_periplasm_transporters!(model)
     add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
-    add_oxphos!(model)
+    #add_oxphos!(model)
 
     model = curate!(model)
     change_bounds!(model)

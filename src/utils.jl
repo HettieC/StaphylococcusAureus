@@ -153,6 +153,7 @@ function gapfill!(model)
             notes=Dict(
                 "reason" => ["gapfilling"]
             ),
+            gene_association_dnf = [["g1"]]
         )
     end
 

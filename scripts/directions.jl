@@ -17,9 +17,8 @@ for row in eachrow(df)
 end
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
-model.reactions["EX_32682"].upper_bound = 0 #block proline exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-model.reactions["EX_15903"].upper_bound = 10
+model.reactions["EX_15903"].upper_bound = 10 #glucose bound
 
 sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
