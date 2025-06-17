@@ -66,7 +66,7 @@ append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(mod
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
-    ("membrane", membrane_gids, 1.0)
+    ("membrane", membrane_gids, 10.0)
 ]
 
 # model.reactions["EX_30089"].objective_coefficient = 0

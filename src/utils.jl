@@ -355,6 +355,7 @@ function change_bounds!(model)
     df = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
 
     for row in eachrow(df)
+        !haskey(model.reactions,string(row.RHEA_ID)) && continue
         model.reactions[string(row.RHEA_ID)].lower_bound = row.LOWER_BOUND 
         model.reactions[string(row.RHEA_ID)].upper_bound = row.UPPER_BOUND 
     end

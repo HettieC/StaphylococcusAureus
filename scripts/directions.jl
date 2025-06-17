@@ -8,6 +8,26 @@ import ConstraintTrees as C
 
 # add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
 model, reaction_isozymes = build_model()
+
+biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+bidirectional = string.(JSON.parsefile("data/model/bidirectional.json"))
+@select!(biocyc, :rheaDir, :metacyc)
+for rid in A.reactions(model)
+    rid ∈ bidirectional && continue
+    isnothing(tryparse(Int,rid)) && continue
+    qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+    df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
+    isempty(df) && continue
+    lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+    model.reactions[rid].lower_bound = lb
+    model.reactions[rid].upper_bound = ub
+end
+
+
+
+
+
+
 escher_model = change_reaction_names(model)
 df = DataFrame(CSV.File("data/model/new_reactions.csv"))
 for row in eachrow(df) 
@@ -16,11 +36,12 @@ for row in eachrow(df)
     end
 end
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
+
 model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_15903"].upper_bound = 10 #glucose bound
 
-sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
 open("data/fluxes.json","w") do io 
     JSON.print(io,sol.fluxes)
