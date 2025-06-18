@@ -69,8 +69,10 @@ for (r,rxn) in model.reactions
         rxn.lower_bound = 0 
     end
 end
-model.reactions["biomass"].objective_coefficient = 1
-model.reactions["ATPS"].objective_coefficient = 1
+model.reactions["biomass"].objective_coefficient = 0
+model.reactions["ATPS"].objective_coefficient = 0
+
+model.reactions["ATPM"].objective_coefficient = 1
 sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
 open("data/fluxes.json","w") do io 
@@ -107,3 +109,12 @@ directions = Dict(
 open("data/model/directions.json","w") do io 
     JSON.print(io,directions)
 end
+
+df1 = DataFrame(CSV.File("data/model/new_reactions.csv"))
+df1 = df1[!,[1,2,3,4,6,5]]
+
+
+df = DataFrame(CSV.File("data/model/metabolic_reactions.csv"))
+df = df[!,[1,2,3,4,5,6]]
+
+CSV.write("data/model/metabolic_reactions.csv", vcat(df,df1))

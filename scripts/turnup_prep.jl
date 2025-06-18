@@ -1,7 +1,7 @@
 using DataFrames, CSV, StaphylococcusAureus, XLSX
 
 #model,isozymes = build_model()
-model = build_model()
+model,isozymes = build_model()
 chebi_df = DataFrame(CHEBI=String[],name = String[], smiles=String[],inchi=String[],inchikey=String[])
 open("data/databases/chebi/chebi_core.obo","r") do io 
     i = 0
@@ -93,7 +93,8 @@ XLSX.writetable("data/turnup/turnup_input2.xlsx",df[500:999,:])
 XLSX.writetable("data/turnup/turnup_input3.xlsx",df[1000:1499,:])
 XLSX.writetable("data/turnup/turnup_input4.xlsx",df[1500:1999,:])
 XLSX.writetable("data/turnup/turnup_input5.xlsx",df[2000:2499,:])
-XLSX.writetable("data/turnup/turnup_input6.xlsx",df[2500:end,:])
+XLSX.writetable("data/turnup/turnup_input6.xlsx",df[2500:2999,:])
+XLSX.writetable("data/turnup/turnup_input7.xlsx",df[3000:end,:])
 
 
 

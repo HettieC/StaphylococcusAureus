@@ -34,7 +34,13 @@ for rid in A.reactions(model)
         )
     end
 end
-
+# make oxphos slower 
+for rid in oxphos_reactions
+    for (id,iso) in reaction_isozymes[rid] 
+        iso.kcat_forward /= 1000 
+        iso.kcat_reverse /= 1000 
+    end
+end
 
 gene_product_molar_masses = get_gene_product_molar_mass([g for g in A.genes(model) if g != "g1"])
 gene_product_molar_masses["g1"] = mean(collect(values(gene_product_molar_masses)))
@@ -66,12 +72,8 @@ append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(mod
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
-    ("membrane", membrane_gids, 10.0)
-]
-
-# model.reactions["EX_30089"].objective_coefficient = 0
-# model.reactions["biomass"].objective_coefficient = 1
-# model.reactions["biomass"].stoichiometry["CHEBI:30089"] = -0.01
+    ("membrane", membrane_gids, 50.0)
+];
 
 ec_sol = enzyme_constrained_flux_balance_analysis(
     model;
@@ -85,7 +87,7 @@ open("data/fluxes.json","w") do io
     JSON.print(io,ec_sol.fluxes)
 end
 C.pretty(
-    C.ifilter_leaves(sol.fluxes) do ix, x
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
         abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
     end; 
     format_label = x -> A.reaction_name(model, string(last(x))),
@@ -139,7 +141,7 @@ fig
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
 membrane_conc = Float64[]
-vols = 0:0.05:5
+vols = 0:0.1:ec_sol.objective
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
     ec_sol = enzyme_constrained_flux_balance_analysis(
@@ -174,7 +176,7 @@ fig[1,2] = Legend(fig,ax)
 fig
 
 
-model.reactions["biomass"].upper_bound = 2.9
+model.reactions["biomass"].upper_bound = 3.1
 ec_sol = enzyme_constrained_flux_balance_analysis(
         model;
         reaction_isozymes,

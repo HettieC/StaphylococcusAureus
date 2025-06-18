@@ -29,8 +29,8 @@ function build_model()
     add_periplasm_transporters!(model)
     add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
     
-    change_bounds!(model)
     model = curate!(model)
+    change_bounds!(model)
     add_electron_transport_chain!(model)
     add_special_isozymes!(reaction_isozymes,kcat_dict,model)
 

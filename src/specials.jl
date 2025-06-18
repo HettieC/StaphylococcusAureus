@@ -60,10 +60,12 @@ function add_electron_transport_chain!(model)
         annotations=Dict(
             "CM.Reaction" => [
                 "a menaquinone + malate = a menaquinol + oxaloacetate"
-            ]
+            ],
+            "EC" => ["1.1.5.4"],
+            "KEGG" => ["R01257","R00361"]
         ),
         gene_association_dnf = [
-            ["SAPIG2418","SAPIG2655"]
+            ["SAPIG2418"],["SAPIG2655"]
         ]
     )
 
@@ -100,6 +102,8 @@ function add_electron_transport_chain!(model)
             "CM.Reaction" => [
                 "NAD+ + (S)-lactate = NADH + pyruvate + H+"
             ],
+            "EC" => ["1.1.1.27"],
+            "KEGG" => ["R00703"]
         ),
         gene_association_dnf = [
             ["SAPIG0252","SAPIG2650"]

@@ -87,8 +87,11 @@ function curate!(model)
         annotations = Dict(
             "CM.Reaction" => [
                 "ATP + H2O = ADP + phosphate + H+"
-            ]
-        )
+            ],
+            "EC" => ["3.6.1.5 3.6.1.8"],
+            "KEGG" => ["R00086"]
+        ),
+        gene_association_dnf = [["SAPIG2145"],["SAPIG2147"]],
     )
 
     #add atp synthase reaction 
