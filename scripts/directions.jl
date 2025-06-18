@@ -76,3 +76,34 @@ sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 open("data/fluxes.json","w") do io 
     JSON.print(io,sol.fluxes)
 end
+
+
+using RheaReactions, DataFramesMeta
+    #change directions to match what is found in biocyc 
+biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+#bidirectional = string.(JSON.parsefile("data/model/bidirectional.json"))
+@select!(biocyc, :rheaDir, :metacyc)
+bidirectional = String[]
+for rid in A.reactions(model)
+    #rid ∈ bidirectional && continue
+    isnothing(tryparse(Int,rid)) && continue
+    qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+    df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
+    isempty(df) && continue
+    lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+    model.reactions[rid].lower_bound = lb
+    model.reactions[rid].upper_bound = ub
+    sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+    if isnothing(sol) || sol.objective < 1e-3 
+        push!(bidirectional,rid)
+        model.reactions[rid].lower_bound = -1000
+        model.reactions[rid].upper_bound = 1000
+    end
+end
+
+directions = Dict(
+    rid => [rxn.lower_bound,rxn.upper_bound] for (rid,rxn) in model.reactions
+)
+open("data/model/directions.json","w") do io 
+    JSON.print(io,directions)
+end
