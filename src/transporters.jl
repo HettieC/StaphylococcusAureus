@@ -73,7 +73,7 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                     g.Protein == ["g1"] && continue
                     reaction_isozymes["ABC_$mid"]["isozyme_"*string(i+1)] = Isozyme(
                         gene_product_stoichiometry = Dict(gid => 1),
-                        kcat_forward = kcat_dict["ABC_$(mid)_f"][gid] * 3.6,
+                        kcat_forward = kcat_dict["ABC_$(mid)_f"][gid] * 3.6, #mmol/h
                         kcat_reverse = kcat_dict["ABC_$(mid)_r"][gid] * 3.6,
                     )
                     i += 1

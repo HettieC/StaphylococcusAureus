@@ -420,7 +420,7 @@ function add_isozymes!(reaction_isozymes,kcat_dict,dfs)
         i = length(reaction_isozymes[rid])
         d["isozyme_"*string(i+1)] = Isozyme( # each isozyme gets a unique name
             gene_product_stoichiometry=Dict(grr .=> stoich),
-            kcat_forward=maximum([kcat_dict["$(rid)_f"][g] for g in grr]) * 3.6,
+            kcat_forward=maximum([kcat_dict["$(rid)_f"][g] for g in grr]) * 3.6, #mmol/h
             kcat_reverse=maximum([kcat_dict["$(rid)_r"][g] for g in grr]) * 3.6,
         )
     end

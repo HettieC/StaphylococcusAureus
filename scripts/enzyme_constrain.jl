@@ -17,13 +17,14 @@ escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
+model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
+model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
 
 # add fake isozymes 
 oxphos_reactions = ["Ndh2", "Sdh", "Mqo", "Lqo", "cyt_aa3", "cyt_bd", "cyt_bo3","Ldh"]
 for rid in A.reactions(model)
     haskey(reaction_isozymes,rid) && continue
     if rid ∈ oxphos_reactions || !isnothing(tryparse(Int,rid))
-        println(rid)
         grrs = A.reaction_gene_association_dnf(model, rid)
         reaction_isozymes[rid] = Dict("isoyzme_$i" => Isozyme(
             gene_product_stoichiometry=Dict(g => 1 for g in grr), # assume subunit stoichiometry of 1 for all isozymes
@@ -71,7 +72,7 @@ end
 append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(model) && any(z -> occursin("membrane",lowercase(z)),y) ])
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
     ("membrane", membrane_gids, 50.0)
 ];
 
@@ -94,54 +95,12 @@ C.pretty(
 )
 
 
-ac_flux = Float64[]
-biomass = Float64[]
-vols = 1:2:100
-for vol in vols
-    capacity = [
-        ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
-        ("membrane", membrane_gids, vol)
-    ]
-    ec_sol = enzyme_constrained_flux_balance_analysis(
-        model;
-        reaction_isozymes,
-        gene_product_molar_masses,
-        capacity,
-        optimizer=HiGHS.Optimizer,
-    )
-    push!(ac_flux,ec_sol.fluxes["EX_30089"])
-    push!(biomass,ec_sol.fluxes["biomass"])
-end
-
-
 using CairoMakie
-fig = Figure(;size = (700,500))
-ax = Axis(
-    fig[1,1],
-    xlabel = "Membrane bound, mg/gDW",
-    ylabel = "Flux"
-)
-lines!(
-    ax,
-    vols,
-    abs.(ac_flux),
-    label = "Acetate exchange"
-)
-lines!(
-    ax,
-    vols,
-    abs.(biomass),
-    label = "Biomass reaction"
-)
-fig[1,2] = Legend(fig,ax)
-fig
-
-
 
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
 membrane_conc = Float64[]
-vols = 0:0.1:ec_sol.objective
+vols = 0:0.01:ec_sol.objective
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
     ec_sol = enzyme_constrained_flux_balance_analysis(
@@ -154,11 +113,27 @@ for biomass in vols
     push!(ac_flux,ec_sol.fluxes["EX_30089"])
     push!(membrane_conc,ec_sol.gene_product_capacity.membrane)
 end
-fig = Figure(;size = (700,500))
+
+inch = 96
+pt = 4/3
+cm = inch / 2.54
+
+set_theme!(figure_padding=3)
+
+f = Figure(; size=(10cm, 6cm))#, backgroundcolor=:transparent)
+
 ax = Axis(
-    fig[1,1],
-    xlabel = "Growth rate",
-    ylabel = "Acetate exchange"
+    f[1,1];
+    backgroundcolor=:transparent,
+    ylabel = "Growth rate (1/h)",
+    xlabel = "Acetate exchange rate (mm/h)",
+    xlabelsize=6pt,
+    ylabelsize=6pt,
+    xticklabelsize=5pt,
+    yticklabelsize=5pt,
+    xticks = [0,12,24,36,48],
+    ygridvisible=false,
+    xgridvisible=false,
 )
 lines!(
     ax,
@@ -166,13 +141,11 @@ lines!(
     abs.(ac_flux),
     label = "Acetate exchange"
 )
-lines!(
+axislegend(
     ax,
-    vols,
-    abs.(membrane_conc),
-    label = "Membrane conc"
+    position=:lt,
+    labelsize = 5pt,
 )
-fig[1,2] = Legend(fig,ax)
 fig
 
 
