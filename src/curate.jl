@@ -60,10 +60,12 @@ function curate!(model)
     #change directions to match what is found in biocyc 
     biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
     bidirectional = string.(JSON.parsefile("data/model/bidirectional.json"))
+    manual_directions = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
     @select!(biocyc, :rheaDir, :metacyc)
     for rid in A.reactions(model)
         rid ∈ bidirectional && continue
         isnothing(tryparse(Int,rid)) && continue
+        rid ∈ string.(manual_directions.RHEA_ID) && continue # ignore if direction manually specified
         qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
         df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
         isempty(df) && continue

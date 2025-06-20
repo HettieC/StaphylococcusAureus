@@ -8,26 +8,6 @@ import ConstraintTrees as C
 
 # add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
 model, reaction_isozymes = build_model()
-
-biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
-bidirectional = string.(JSON.parsefile("data/model/bidirectional.json"))
-@select!(biocyc, :rheaDir, :metacyc)
-for rid in A.reactions(model)
-    rid ∈ bidirectional && continue
-    isnothing(tryparse(Int,rid)) && continue
-    qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
-    df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
-    isempty(df) && continue
-    lb, ub = rhea_rxn_dir(df[1, 1], qrt)
-    model.reactions[rid].lower_bound = lb
-    model.reactions[rid].upper_bound = ub
-end
-
-
-
-
-
-
 escher_model = change_reaction_names(model)
 df = DataFrame(CSV.File("data/model/new_reactions.csv"))
 for row in eachrow(df) 
@@ -83,12 +63,14 @@ end
 using RheaReactions, DataFramesMeta
     #change directions to match what is found in biocyc 
 biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+manual_directions = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
 #bidirectional = string.(JSON.parsefile("data/model/bidirectional.json"))
 @select!(biocyc, :rheaDir, :metacyc)
 bidirectional = String[]
 for rid in A.reactions(model)
     #rid ∈ bidirectional && continue
     isnothing(tryparse(Int,rid)) && continue
+    rid ∈ string.(manual_directions.RHEA_ID) && continue
     qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
     df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
     isempty(df) && continue
@@ -103,18 +85,22 @@ for rid in A.reactions(model)
     end
 end
 
+open("data/model/bidirectional.json","w") do io 
+    JSON.print(io,bidirectional)
+end
+
+[r for r in manual_directions.RHEA_ID if haskey(model.reactions,string(r)) && model.reactions[string(r)].lower_bound == -1000 && model.reactions[string(r)].upper_bound == 1000]
+
+
+
+
 directions = Dict(
     rid => [rxn.lower_bound,rxn.upper_bound] for (rid,rxn) in model.reactions
 )
-open("data/model/directions.json","w") do io 
+open("data/model/directions2.json","w") do io 
     JSON.print(io,directions)
 end
 
-df1 = DataFrame(CSV.File("data/model/new_reactions.csv"))
-df1 = df1[!,[1,2,3,4,6,5]]
+dir = Dict(x=>y for (x,y) in JSON.parsefile("data/model/directions.json"))
 
-
-df = DataFrame(CSV.File("data/model/metabolic_reactions.csv"))
-df = df[!,[1,2,3,4,5,6]]
-
-CSV.write("data/model/metabolic_reactions.csv", vcat(df,df1))
+Dict(x=>(y,dir[x]) for (x,y) in directions if y != dir[x])
