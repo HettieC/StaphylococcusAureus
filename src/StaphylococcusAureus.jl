@@ -16,5 +16,6 @@ include("curate.jl")
 include("reconstruct.jl")
 include("specials.jl")
 include("transporters.jl")
+include("enzyme_constrain.jl")
 
 end

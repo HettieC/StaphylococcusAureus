@@ -78,7 +78,7 @@ function curate!(model)
     model.reactions["ATPM"] = CM.Reaction(
         ;
         name="ATP maintenance",
-        lower_bound=1.0,
+        lower_bound=5.0,
         stoichiometry=Dict(
             "CHEBI:30616" => -1, #atp
             "CHEBI:15377" => -1, #h2o
