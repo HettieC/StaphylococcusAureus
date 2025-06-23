@@ -93,8 +93,8 @@ ax = Axis(
 )
 lines!(
     ax,
-    vols[1:27],
-    abs.(ac_flux)[1:27],
+    vols,
+    abs.(ac_flux),
     label = "Acetate exchange"
 )
 axislegend(
@@ -104,11 +104,13 @@ axislegend(
 )
 f
 
-save("plots/acetate_exchange.png", f, px_per_unit = 1200/inch)
+save("data/plots/acetate_exchange.png", f, px_per_unit = 1200/inch)
 
+model.reactions["biomass"].upper_bound = 1000
 
 # iterate over membrane bounds
 ac_flux = Float64[]
+membrane_capacity = Float64[]
 vols = 20:10:300
 for membrane_bound in vols
     capacity = [
@@ -122,7 +124,8 @@ for membrane_bound in vols
         capacity,
         optimizer=HiGHS.Optimizer,
     )
-    push!(ac_flux,ec_sol.fluxes["EX_30089"])
+    push!(ac_flux,ec_sol.fluxes["EX_30089"]/ec_sol.fluxes["EX_15903"])
+    push!(membrane_capacity,ec_sol.gene_product_capacity["membrane"]/membrane_bound*100)
 end
 
 inch = 96
@@ -137,7 +140,7 @@ ax = Axis(
     f[1,1];
     backgroundcolor=:transparent,
     xlabel = "Membrane bound (mg/gDW)",
-    ylabel = "Acetate exchange rate (mMol/h)",
+    ylabel = "Acetate molecules excreted per glucose consumes",
     xlabelsize=6pt,
     ylabelsize=6pt,
     xticklabelsize=5pt,
@@ -145,11 +148,29 @@ ax = Axis(
     ygridvisible=false,
     xgridvisible=false,
 )
+ax2 = Axis(
+    f[1, 1], 
+    yaxisposition = :right,
+    ylabel = "Membrane capacity used (%)",
+    ylabelsize=6pt,
+    yticklabelsize=5pt,
+    ygridvisible=false,
+    xgridvisible=false,
+)
+hidespines!(ax2)
+hidexdecorations!(ax2)
 lines!(
     ax,
     vols,
     abs.(ac_flux),
     label = "Acetate exchange"
+)
+lines!(
+    ax2,
+    vols,
+    membrane_capacity,
+    label = "Membrane capacity",
+    color = :red
 )
 axislegend(
     ax,

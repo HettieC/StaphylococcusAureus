@@ -143,15 +143,17 @@ function curate!(model)
             "CHEBI:15378" => 50, #h+
             "CHEBI:456216" => 50, #adp
 
-            "CHEBI:46398" => -0.1,   #UTP
-            "CHEBI:37565" => -0.059,   #GTP
-            "CHEBI:37563" => -0.059,   #CTP 
-            "CHEBI:57692" => -0.007,    #FAD  
-            "CHEBI:61404" => -0.02,    #dATP
+            "CHEBI:46398" => -0.506,   #UTP
+            "CHEBI:37565" => -0.496,   #GTP
+            "CHEBI:37563" => -0.496,   #CTP 
+            "CHEBI:57692" => -0.00067,    #FAD  
+            "CHEBI:61404" => -0.676,    #dATP
             "CHEBI:57287" => -4.42e-4, #CoA
-            "CHEBI:37568" => -0.02,    #dTTP
-            "CHEBI:61429" => -0.099,   #dGTP
-            "CHEBI:61481" => -0.099,   #dCTP
+            "CHEBI:37568" => -0.676,    #dTTP
+            "CHEBI:61429" => -0.33,   #dGTP
+            "CHEBI:61481" => -0.33,   #dCTP
+
+            "CHEBI:57288" => -0.00033, #acetyl-coa
 
             "CHEBI:57783" => 2e-4, #NADPH 
             "CHEBI:57945" => 2e-4, #NADH
@@ -164,29 +166,32 @@ function curate!(model)
             "CHEBI:18262" => -0.1,    #dodecanoate
             "CHEBI:27689" => -0.1,    #decanoate
             "CHEBI:25629" => -0.1,    #octadecanoate
+            # "POLYMER:9537" => -0.0765, #menaquinone 
+            # "POLYMER:9539" => -0.0765, #menaquinol
 
-            "CHEBI:57427" => -0.282,  #L-leucine
-            "CHEBI:32682" => -0.111,  #L-arginine  
-            "CHEBI:57762" => -0.207,  #L-valine  
-            "CHEBI:60039" => -0.116,  #L-proline
-            "CHEBI:35235" => -0.019,  #L-cysteine
+            #protein
+            "CHEBI:57427" => -0.699,  #L-leucine
+            "CHEBI:32682" => -0.268,  #L-arginine  
+            "CHEBI:57762" => -0.514,  #L-valine  
+            "CHEBI:60039" => -0.246,  #L-proline
+            "CHEBI:35235" => -0.048,  #L-cysteine
             "CHEBI:57305" => -0.19,  #glycine
-            "CHEBI:33384" => -0.19, #L-serine         
-            "CHEBI:29991" => -0.261, #L-aspartate
-            "CHEBI:57972" => -0.212, #L-alanine
-            "CHEBI:58359" => -1.2,   #L-glutamine
-            "CHEBI:29985" => -1.0,   #L-glutamate
-            "CHEBI:32551" => -0.235, #L-lysine
-            "CHEBI:58045" => -0.269, #L-isoleucine
-            "CHEBI:57305" => -0.1,  #glycine
-            "CHEBI:57926" => -0.179, #L-threonine
-            "CHEBI:58095" => -0.137, #L-phenylalanine
-            "CHEBI:58315" => -0.119, #L-tyrosine
-            "CHEBI:57912" => -1.0,   #L-tryptophan
-            "CHEBI:57595" => -0.073, #L-histidine
+            "CHEBI:33384" => -0.469, #L-serine         
+            "CHEBI:29991" => -0.446, #L-aspartate
+            "CHEBI:57972" => -0.492, #L-alanine
+            "CHEBI:58359" => -0.318,  #L-glutamine
+            "CHEBI:29985" => -0.497,   #L-glutamate
+            "CHEBI:32551" => -0.576, #L-lysine
+            "CHEBI:58045" => -0.658, #L-isoleucine
+            "CHEBI:57305" => -0.462,  #glycine
+            "CHEBI:57926" => -0.443, #L-threonine
+            "CHEBI:58095" => -0.246, #L-phenylalanine
+            "CHEBI:58315" => -0.298, #L-tyrosine
+            "CHEBI:57912" => -0.057,   #L-tryptophan
+            "CHEBI:57595" => -0.178, #L-histidine
             "CHEBI:58199" => -0.1, #L-homocysteine
-            "CHEBI:58048" => -0.1,  #L-asparagine
-            "CHEBI:57844" => -0.084, #L-methionine
+            "CHEBI:58048" => -0.433,  #L-asparagine
+            "CHEBI:57844" => -0.202, #L-methionine
         ),
         objective_coefficient=1.0,
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
