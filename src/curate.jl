@@ -14,6 +14,14 @@ function curate!(model)
     # modify rhea reactions to use beta-D isomer instead of D-fructose 
     # modify rhea reactions to use menaquinol/menaquinone instead of ubiquinol/ubiquinone
 
+
+    # #remove general quinone/quinol/ubiquinone/ubiquinone reactions 
+    for (r,rxn) in model.reactions 
+        if haskey(rxn.stoichiometry,"CHEBI:132124") || haskey(rxn.stoichiometry,"CHEBI:24646") || haskey(rxn.stoichiometry,"POLYMER:9566") || haskey(rxn.stoichiometry,"POLYMER:9565") || haskey(rxn.stoichiometry,"POLYMER:9563")
+            delete!(model.reactions,r)
+        end
+    end
+
     for (r, rxn) in model.reactions
         if haskey(rxn.stoichiometry, "CHEBI:4167") # D-glucose -> beta-D-glucose
             rxn.stoichiometry["CHEBI:15903"] = rxn.stoichiometry["CHEBI:4167"]

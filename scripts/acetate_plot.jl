@@ -7,7 +7,6 @@ using CairoMakie
 using HiGHS, JSON
 using JSONFBCModels
 
-# add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
 model, reaction_isozymes = build_model()
 
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)

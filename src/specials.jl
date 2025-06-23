@@ -149,7 +149,7 @@ function add_electron_transport_chain!(model)
             ]
         ),
         gene_association_dnf = [
-            ["SAPIG1083","SAPIG1084"]
+            ["SAPIG1083","SAPIG1084"],
         ]
     )
 
