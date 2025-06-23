@@ -199,9 +199,6 @@ function curate!(model)
 
     # add missing transporters 
     add_permease!(model, "CHEBI:32682", ["g1"], nothing)
-
-    # make acsA bidirectional 
-    model.reactions["23176"].lower_bound = -1000
     return model
 end
 

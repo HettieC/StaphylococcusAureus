@@ -34,6 +34,7 @@ function build_model()
     add_electron_transport_chain!(model)
     add_special_isozymes!(reaction_isozymes,kcat_dict,model)
 
+    add_genes!(model)
     return model, reaction_isozymes
 end
 export build_model

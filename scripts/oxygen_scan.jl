@@ -11,6 +11,8 @@ model, reaction_isozymes = build_model()
 
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_15903"].upper_bound = 10 #limit glucose
+model.reactions["EX_15379"].upper_bound = 1000
+model.reactions["EX_15379"].lower_bound = 0
 
 sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 open("data/fluxes.json","w") do io 
@@ -20,8 +22,10 @@ sol.fluxes["EX_15379"]
 
 # scan growth rate across limited oxygen with fba model 
 growth = Float64[]
-for o2_uptake in 0:10:100
+o2_iter = 0:1:70
+for o2_uptake in o2_iter
     model.reactions["EX_15379"].upper_bound = o2_uptake
+    model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
     sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
     push!(growth,sol.objective)
 end
@@ -66,16 +70,28 @@ model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
 model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
 model.reactions["EX_15903"].upper_bound = 1000 #unlimit glucose
+model.reactions["EX_15379"].lower_bound = 0 #unlimit o2
+model.reactions["EX_15379"].upper_bound = 1000
+
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 180.0),
     ("membrane", membrane_gids, 60.0)
 ];
 
-growth = Float64[]
-o2_iter = 0:0.005:0.6
+ec_sol = enzyme_constrained_flux_balance_analysis(
+    model;
+    reaction_isozymes,
+    gene_product_molar_masses,
+    capacity,
+    optimizer=HiGHS.Optimizer,
+) 
+ec_sol.fluxes["EX_15379"]
+
+ec_growth = Float64[]
 for o2_uptake in o2_iter
     model.reactions["EX_15379"].upper_bound = o2_uptake
+    model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
     ec_sol = enzyme_constrained_flux_balance_analysis(
         model;
         reaction_isozymes,
@@ -83,9 +99,9 @@ for o2_uptake in o2_iter
         capacity,
         optimizer=HiGHS.Optimizer,
     )    
-    push!(growth,ec_sol.objective)
+    push!(ec_growth,ec_sol.objective)
 end
-growth
+ec_growth
 
 inch = 96
 pt = 4/3
@@ -110,13 +126,29 @@ ax = Axis(
 lines!(
     ax,
     o2_iter,
-    growth,
-    label = "Growth rate"
+    ec_growth,
+    label = "ecFBA",
 )
-# axislegend(
-#     ax,
-#     position=:lt,
-#     labelsize = 5pt,
-# )
+lines!(
+    ax,
+    o2_iter,
+    growth,
+    label = "FBA",
+    color=:red,
+    linestyle=:dash
+)
+axislegend(
+    ax,
+    position=:rb,
+    labelsize = 5pt,
+)
 f
-save("plots/o2_scan.png", f, px_per_unit = 1200/inch)
+save("data/plots/o2_scan.png", f, px_per_unit = 1200/inch)
+
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+

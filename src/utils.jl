@@ -527,3 +527,15 @@ function add_special_isozymes!(reaction_isozymes,kcat_dict,model)
     end
     return reaction_isozymes
 end
+
+function add_genes!(model)
+    for (r,rxn) in model.reactions
+        isnothing(rxn.gene_association_dnf) && continue 
+        for gid in vcat(rxn.gene_association_dnf...)
+            if !haskey(model.genes,gid)
+                model.genes[gid] = CM.Gene(;name = gid)
+            end
+        end
+    end
+    return model 
+end
