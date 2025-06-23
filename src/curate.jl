@@ -13,6 +13,7 @@ function curate!(model)
     # modify rhea reactions to use general sucrose 6(F)-phosphate instead of 6G
     # modify rhea reactions to use beta-D isomer instead of D-fructose 
     # modify rhea reactions to use menaquinol/menaquinone instead of ubiquinol/ubiquinone
+    # modify rhea reactions to use (S)-1-pyrroline-5-carboxylate instead of 1-pyrroline-5-carboxylate 
 
 
     # #remove general quinone/quinol/ubiquinone/ubiquinone reactions 
@@ -44,12 +45,16 @@ function curate!(model)
             delete!(rxn.stoichiometry, "CHEBI:61527")
         end
         if haskey(rxn.stoichiometry, "CHEBI:16389") # a ubiquinone -> a menaquinone
-            rxn.stoichiometry["CHEBI:16389"] = rxn.stoichiometry["POLYMER:9537"]
+            rxn.stoichiometry["POLYMER:9537"] = rxn.stoichiometry["CHEBI:16389"]
             delete!(rxn.stoichiometry, "CHEBI:16389")
         end
         if haskey(rxn.stoichiometry, "CHEBI:17976") # a ubiquinol -> a menaquinol
-            rxn.stoichiometry["CHEBI:17976"] = rxn.stoichiometry["POLYMER:9539"]
+            rxn.stoichiometry["POLYMER:9539"] = rxn.stoichiometry["CHEBI:17976"]
             delete!(rxn.stoichiometry, "CHEBI:17976")
+        end
+        if haskey(rxn.stoichiometry, "CHEBI:15893") # 1-pyrroline-5-carboxylate  -> (S)-1-pyrroline-5-carboxylate 
+            rxn.stoichiometry["CHEBI:17388"] = rxn.stoichiometry["CHEBI:15893"]
+            delete!(rxn.stoichiometry, "CHEBI:15893")
         end
     end
 
@@ -140,13 +145,13 @@ function curate!(model)
 
             "CHEBI:46398" => -0.1,   #UTP
             "CHEBI:37565" => -0.059,   #GTP
-             "CHEBI:37563" => -0.059,   #CTP 
-             "CHEBI:57692" => -0.007,    #FAD  
+            "CHEBI:37563" => -0.059,   #CTP 
+            "CHEBI:57692" => -0.007,    #FAD  
             "CHEBI:61404" => -0.02,    #dATP
             "CHEBI:57287" => -4.42e-4, #CoA
-             "CHEBI:37568" => -0.02,    #dTTP
-             "CHEBI:61429" => -0.099,   #dGTP
-             "CHEBI:61481" => -0.099,   #dCTP
+            "CHEBI:37568" => -0.02,    #dTTP
+            "CHEBI:61429" => -0.099,   #dGTP
+            "CHEBI:61481" => -0.099,   #dCTP
 
             "CHEBI:57783" => 2e-4, #NADPH 
             "CHEBI:57945" => 2e-4, #NADH
@@ -182,7 +187,6 @@ function curate!(model)
             "CHEBI:58199" => -0.1, #L-homocysteine
             "CHEBI:58048" => -0.1,  #L-asparagine
             "CHEBI:57844" => -0.084, #L-methionine
-
         ),
         objective_coefficient=1.0,
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),

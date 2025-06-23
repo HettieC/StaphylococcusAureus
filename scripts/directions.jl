@@ -8,6 +8,11 @@ import ConstraintTrees as C
 
 # add this to transporters.csv: Permease,glucose,CHEBI:15903,SAPIG2309,1
 model, reaction_isozymes = build_model()
+
+
+sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+
+
 escher_model = change_reaction_names(model)
 df = DataFrame(CSV.File("data/model/new_reactions.csv"))
 for row in eachrow(df) 
@@ -21,7 +26,8 @@ model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_15903"].upper_bound = 10 #glucose bound
 
-sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+
+sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 
 open("data/fluxes.json","w") do io 
     JSON.print(io,sol.fluxes)
