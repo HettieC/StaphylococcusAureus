@@ -174,27 +174,27 @@ function gapfill!(model)
     model
 end
 
-"""
-$(TYPEDSIGNATURES)
+# """
+# $(TYPEDSIGNATURES)
 
-Get the SAPIG ID of a gene.
-"""
-function id_tag(gene)
-    id_tag = Dict{String,String}()
-    open("data/databases/ST398.txt") do io
-        locus_tag = ""
-        id = ""
-        for ln in eachline(io)
-            if startswith(ln, '>')
-                id = split(ln; limit=2)[1][2:end]
-                locus_tag = split(split(ln, "locus_tag=")[2], ']'; limit=2)[1]
-            end
-            id_tag[id] = locus_tag
-        end
-    end
-    return id_tag[gene]
-end
-export id_tag
+# Get the SAPIG ID of a gene.
+# """
+# function id_tag(gene)
+#     id_tag = Dict{String,String}()
+#     open("data/databases/ST398.txt") do io
+#         locus_tag = ""
+#         id = ""
+#         for ln in eachline(io)
+#             if startswith(ln, '>')
+#                 id = split(ln; limit=2)[1][2:end]
+#                 locus_tag = split(split(ln, "locus_tag=")[2], ']'; limit=2)[1]
+#             end
+#             id_tag[id] = locus_tag
+#         end
+#     end
+#     return id_tag[gene]
+# end
+# export id_tag
 
 """
 $(TYPEDSIGNATURES)
@@ -565,6 +565,6 @@ function add_names_pathways!(model)
     dic = Dict(x => y for (x,y) in JSON.parsefile("data/model/reactions/kegg_names_pathways.json"))
     for (x,y) in dic
         model.reactions[x].name = y[1] 
-        model.reactions[x].annotations["Pathway"] = y[2]
+        model.reactions[x].annotations["Pathway"] = y[2] == [""] ? [""] : [string(split(p,"  ")[2])*"; " for p in y[2]]
     end
 end
