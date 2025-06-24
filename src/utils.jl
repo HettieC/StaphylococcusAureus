@@ -119,7 +119,7 @@ end
 
 function gapfill!(model)
 
-    df = DataFrame(CSV.File("data/model/gapfilling_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/gapfilling_reactions.csv"))
     ms = RheaReactions.RheaMetabolite[]
 
     for row in eachrow(unique(df))
@@ -352,7 +352,7 @@ function add_oxphos!(model)
 end
 
 function change_bounds!(model)
-    df = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/unidirectional_reactions.csv"))
 
     for row in eachrow(df)
         !haskey(model.reactions,string(row.RHEA_ID)) && continue
@@ -454,7 +454,7 @@ function get_reaction_isozymes()
         end
     end
     
-    df = DataFrame(CSV.File("data/model/metabolic_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/metabolic_reactions.csv"))
     
     heteros = @rsubset(df, !iszero(:Isozyme))
     @select!(heteros, :RHEA_ID, :Protein, :Stoichiometry, :Isozyme)
@@ -538,4 +538,33 @@ function add_genes!(model)
         end
     end
     return model 
+end
+
+function _add_kegg_info!(model)
+    for (r,rxn) in model.reactions 
+        println(r)
+        if !isnothing(rxn.name) && !isnothing(tryparse(Int,r))
+            rxn.annotations["NameDB"] = ["Rhea"]
+            kegg_info = get_kegg_info(rxn.annotations["KEGG"][1])
+            model.reactions[r].annotations["Pathway"] = isnothing(kegg_info["pathway"]) ? [""] : kegg_info["pathway"]
+        elseif isnothing(tryparse(Int,r))
+            rxn.annotations["NameDB"] = ["none"]
+        elseif haskey(rxn.annotations,"KEGG") && rxn.annotations["KEGG"] != ["R"]
+            println(r)
+            rxn.annotations["NameDB"] = ["KEGG"]
+            kegg_info = get_kegg_info(rxn.annotations["KEGG"][1])
+            isnothing(kegg_info) && continue
+            model.reactions[r].name = kegg_info["name"]
+            model.reactions[r].annotations["Pathway"] = isnothing(kegg_info["pathway"]) ? [""] : kegg_info["pathway"]
+        end
+    end
+    return model 
+end
+
+function add_names_pathways!(model)
+    dic = Dict(x => y for (x,y) in JSON.parsefile("data/model/reactions/kegg_names_pathways.json"))
+    for (x,y) in dic
+        model.reactions[x].name = y[1] 
+        model.reactions[x].annotations["Pathway"] = y[2]
+    end
 end

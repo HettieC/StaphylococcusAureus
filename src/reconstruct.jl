@@ -1,6 +1,6 @@
 function build_model()
 
-    df = DataFrame(CSV.File("data/model/metabolic_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/metabolic_reactions.csv"))
 
     heteros = @rsubset(df, !iszero(:Isozyme))
     gheteros = groupby(heteros, [:RHEA_ID, :Isozyme])
@@ -15,7 +15,7 @@ function build_model()
     extend_model!(model, ghomos)
     extend_model!(model, gheteros)
     # add new reactions 
-    df = DataFrame(CSV.File("data/model/new_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/new_reactions.csv"))
     heteros = @rsubset(df, !iszero(:Isozyme))
     gheteros = groupby(heteros, [:RHEA_ID, :Isozyme])
     homos = @rsubset(df, iszero(:Isozyme))
@@ -35,6 +35,7 @@ function build_model()
     add_special_isozymes!(reaction_isozymes,kcat_dict,model)
 
     add_genes!(model)
+    add_names_pathways!(model)
     return model, reaction_isozymes
 end
 export build_model

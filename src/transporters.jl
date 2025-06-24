@@ -89,8 +89,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-        else
-            @warn "$mid not in model (ABC)"
         end
     end
 
@@ -134,8 +132,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-        else
-            @warn "$mid not in model (PTS)"
         end
     end
 
@@ -177,8 +173,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-        else
-            @warn "$mid1 or $mid2 not in model (symport)"
         end
     end
 
@@ -221,9 +215,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-
-        else
-            @warn "$mid1 or $mid2 not in model (antiport)"
         end
     end
 
@@ -265,9 +256,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-
-        else
-            @warn "$mid not in model (permease)"
         end
     end
 
