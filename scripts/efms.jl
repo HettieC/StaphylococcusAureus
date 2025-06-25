@@ -12,6 +12,7 @@ import DifferentiableMetabolism as D
 import FastDifferentiation as F
 const Ex = F.Node
 using CairoMakie
+using Latexify
 
 flux_zero_tol = 1e-6
 gene_zero_tol = 1e-6
@@ -108,6 +109,22 @@ OFM_dicts[1]["EX_15379"] #o2
 OFM_dicts[2]["EX_15379"]
 
 Dict(x => [y,OFM_dicts[2][x]] for (x,y) in OFM_dicts[1] if startswith(x,"EX"))
+
+ofm_df = DataFrame(Exchange_metabolite=String[],OFM_1=Float64[],OFM_2=Float64[])
+for (x,y) in OFM_dicts[1]
+    if startswith(x,"EX")
+        push!(
+            ofm_df,
+            [
+                A.metabolite_name(model,"CHEBI:"*string(split(x,"_")[2])),
+                round(y,sigdigits=4),
+                round(OFM_dicts[2][x],sigdigits=4)
+            ])
+    end
+end
+ofm_df
+sort!(ofm_df,:OFM_1)
+latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
 
 
 ## calculate lambda
