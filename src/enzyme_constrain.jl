@@ -19,13 +19,12 @@ function enzyme_constraints!(model,reaction_isozymes)
     gene_product_molar_masses["g1"] = sum(collect(values(gene_product_molar_masses)))/length(gene_product_molar_masses)
 
     # get membrane gids 
-    cytosol_gids = String[] 
+    membrane_gids = String[] 
     for (r,isos) in reaction_isozymes 
-        if !isnothing(tryparse(Int,r))
-            append!(cytosol_gids,[g for (x,y) in isos for (g,s) in y.gene_product_stoichiometry])
+        if isnothing(tryparse(Int,r))
+            append!(membrane_gids,[g for (x,y) in isos for (g,s) in y.gene_product_stoichiometry])
         end
     end
-    membrane_gids = [g for g in A.genes(model) if g ∉ cytosol_gids]
     df1 = DataFrame(CSV.File("data/databases/uniprot/s_aureus.csv"))
     df2 = DataFrame(CSV.File("data/databases/uniprot/idmapping_2025_05_19.csv"))
     rename!(df2,:Entry => :uniprot_accesion)

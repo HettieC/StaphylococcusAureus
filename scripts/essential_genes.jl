@@ -3,7 +3,6 @@ import AbstractFBCModels as A
 import AbstractFBCModels.CanonicalModel as CM
 import ConstraintTrees as C
 using COBREXA
-using CairoMakie
 using HiGHS, JSON, CSV
 using JSONFBCModels, DataFrames, XLSX
 using Latexify
@@ -13,65 +12,6 @@ model, reaction_isozymes = build_model()
 
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_15903"].upper_bound = 10 #limit glucose
-
-# ess_rxn = String[] 
-# for (r,rxn) in model.reactions 
-#     r == "biomass" && continue
-#     lb = rxn.lower_bound 
-#     ub = rxn.upper_bound 
-#     model.reactions[r].lower_bound = 0 
-#     model.reactions[r].upper_bound = 0 
-#     sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
-#     if isnothing(sol) || sol.objective < 1e-5 
-#         push!(ess_rxn,r)
-#     end
-#     model.reactions[r].lower_bound = lb 
-#     model.reactions[r].upper_bound = ub 
-# end
-
-
-# df = DataFrame(ID=String[],Name=String[],Stoichiometry=String[],Pathway=String[])
-# for r in sort(ess_rxn)
-#     println(r)
-#     stoich = !haskey(model.reactions[r].annotations,"REACTION") ? "" : model.reactions[r].annotations["REACTION"][1]
-#     fwrd = model.reactions[r].upper_bound > 0 && model.reactions[r].lower_bound >= 0
-#     rvrs = model.reactions[r].upper_bound <= 0 && model.reactions[r].lower_bound < 0
-#     bi = model.reactions[r].upper_bound > 0 && model.reactions[r].lower_bound < 0
-#     if stoich == "" 
-#         subs = [m for (m,s) in A.reaction_stoichiometry(model,r) if s<0]
-#         prods = [m for (m,s) in A.reaction_stoichiometry(model,r) if s>0]
-#         if fwrd || bi 
-#             for m in subs 
-#                 stoich *= A.metabolite_name(model,m)*" + "
-#             end
-#             stoich *= fwrd ? " => " : " <=> " 
-#             for m in prods 
-#                 stoich *= A.metabolite_name(model,m)*" + "
-#             end
-#         else 
-#             for m in prods 
-#                 stoich *= A.metabolite_name(model,m)*" + "
-#             end
-#             stoich *= fwrd ? " => " : " <=> " 
-#             for m in subs 
-#                 stoich *= A.metabolite_name(model,m)*" + "
-#             end
-#         end
-#     elseif stoich != "" && rvrs 
-#         stoich = string(split(stoich, " <=> "))[2]*" => "* string(split(stoich, " <=> "))[1]
-#     end
-#     push!(
-#         df,
-#         [
-#             r,
-#             isnothing(model.reactions[r].name) ? "" : model.reactions[r].name,
-#             stoich,
-#             !haskey(model.reactions[r].annotations,"Pathway") ? "" : join(model.reactions[r].annotations["Pathway"])
-#         ]
-#     )
-# end
-
-# df
 
 
 # find essential genes
@@ -100,6 +40,8 @@ rename!(exp_df, Symbol.(replace.(string.(names(exp_df)), Ref(r"\s"=>"_"))))
 filter!(row -> string(split(row.Gene_ID,"=")[2]) ∈ A.genes(model),exp_df)
 exp_df.Gene_ID = string.([split(g,"=")[2] for g in exp_df.Gene_ID])
 
+nader_df = DataFrame(XLSX.readtable("data/experimental/Essential_gene_Nader.xlsx", "essential genes"))
+
 # make df of gene and reaction
 df = DataFrame(GeneID=String[],Name=String[],Reaction=String[],Pathway=String[])
 for (g,ko) in ko_dict
@@ -110,7 +52,7 @@ for (g,ko) in ko_dict
             push!(
                 df,
                 [
-                    "ID=$g" ∈ exp_df.Gene_ID ? "\\textcolor{red}{$g}" : g,
+                    g,
                     g == "" ? "" : g_name[g],
                     isnothing(model.reactions[r].name) ? r : model.reactions[r].name,
                     haskey(model.reactions[r].annotations,"Pathway") ? join(model.reactions[r].annotations["Pathway"]) : ""
@@ -121,10 +63,15 @@ for (g,ko) in ko_dict
 end
 
 unique!(df)
+unique([g for g in df.GeneID if g ∈ exp_df.Gene_ID || g ∈ nader_df.locus_tag])
+
 
 new_gid = String[] 
 for g in unique(df.GeneID)
     n_g = length([gid for gid in df.GeneID if gid==g])
+    if g ∈ exp_df.Gene_ID || g ∈ nader_df.locus_tag
+        g = "\\textcolor{red}{$g}"
+    end
     if n_g == 1 
         push!(new_gid,g)
     else 
@@ -133,6 +80,7 @@ for g in unique(df.GeneID)
     end
 end
 df.GeneID = new_gid
+
 
 new_pway = String[] 
 for p in df.Pathway 
@@ -148,7 +96,6 @@ df.Pathway = new_pway
 
 latexify(df; env = :table, booktabs = true, latex = false) |> print
 
-[g for g in df.GeneID if g ∈ exp_df.Gene_ID]
 
 newdf = filter(row -> row.GeneID ∈ exp_df.Gene_ID,df)
 

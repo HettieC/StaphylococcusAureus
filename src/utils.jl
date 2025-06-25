@@ -441,6 +441,7 @@ function get_reaction_isozymes()
     turnup_df = DataFrames.rename!(turnup_df,
         "kcat [s^(-1)]" => "kcat",
     )
+
     kcat_df = insertcols(rxn_seq_subs_prods, 5, :kcat => turnup_df.kcat)
     kcat_dict = Dict{String,Dict{String,Float64}}()
     for row in eachrow(kcat_df)
