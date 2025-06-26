@@ -108,6 +108,9 @@ OFM_dicts[2]["EX_30089"]/OFM_dicts[2]["EX_15903"]
 OFM_dicts[1]["EX_15379"] #o2
 OFM_dicts[2]["EX_15379"]
 
+OFM_dicts[1]["ATPS"]
+OFM_dicts[2]["ATPS"]
+
 Dict(x => [y,OFM_dicts[2][x]] for (x,y) in OFM_dicts[1] if startswith(x,"EX"))
 
 ofm_df = DataFrame(Exchange_metabolite=String[],OFM_1=Float64[],OFM_2=Float64[])
@@ -125,6 +128,26 @@ end
 ofm_df
 sort!(ofm_df,:OFM_1)
 latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
+
+# df of big difference reactions 
+ofm_df = DataFrame(Reaction=String[],Name=String[],OFM_1=Float64[],OFM_2=Float64[])
+for (x,y) in OFM_dicts[1]
+    if abs(y - OFM_dicts[2][x])/y > 1 || abs(y - OFM_dicts[2][x])/OFM_dicts[2][x] > 1
+        push!(
+            ofm_df,
+            [
+                x,
+                isnothing(A.reaction_name(model,x)) ? A.reaction_name(escher_model,x) : A.reaction_name(model,x),
+                round(y,sigdigits=4),
+                round(OFM_dicts[2][x],sigdigits=4)
+            ]
+        )
+    end
+end
+ofm_df
+sort!(ofm_df,:OFM_1)
+latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
+
 
 
 ## calculate lambda
@@ -161,57 +184,70 @@ end
 order = sortperm(scaled_sens[1, :])
 colors = Makie.wong_colors()[5:6]
 
-# ensure plot is correct size
-inch = 96
-pt = 4/3
-cm = inch / 2.54
 
-set_theme!(figure_padding=1)
-
-fig = Figure(; size=(10cm, 7cm))#, backgroundcolor=:transparent)
+f = Figure(; size = (18cm,9cm))
 data = (
     x=1:length(parameters),
-    height=[c[1] > 0 ? c[1] : c[2] for c in eachcol(scaled_sens[:, order])],
-    grp=[c[1] > 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])],
+    height1=[c[1] > 0 ? c[1] : c[2] for c in eachcol(scaled_sens[:, order])],
+    height2=abs.([c[1] < 0 ? c[1] : c[2] for c in eachcol(scaled_sens[:, order])]),
+    grp1=[c[1] > 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])],
+    grp2=[c[1] < 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])]
 )
-ax = Axis(
-    fig[1, 1],
-    ylabel="OFM control coefficient",
-    xlabelsize=6pt,
+ax1 = Axis(
+    f[1, 1], 
+    xreversed = true, 
+    xautolimitmargin = (0, 0.1),
+    xlabel = "log(Absolute OFM Sensitivity)", 
+    xlabelsize=9pt,
     ylabelsize=6pt,
-    xticklabelsize=5pt,
-    yticklabelsize=5pt,
+    xticklabelsize=8pt,
     xgridvisible=false,
     ygridvisible=false,
-    #xlabel = "Parameter",
-    xticks=([length([c for c in eachcol(scaled_sens) if c[1]<0])/2, size(scaled_sens,2)-length([c for c in eachcol(scaled_sens) if c[1]>0])/2], ["Cytosolic\nEnzymes", "Membrane\nEnzymes"]),
-    yscale=log10
+    yticksvisible = false,
+    xscale = log10,
 )
-barplot!(
-    ax,
-    data.x,
-    data.height,
-    color=colors[data.grp]
+ax2 = Axis(
+    f[1, 2], 
+    alignmode = Mixed(left = Makie.Protrusion(0)), 
+    xautolimitmargin = (0, 0.1),
+    xlabel = "log(OFM Sensitivity)",
+    xlabelsize=9pt,
+    ylabelsize=6pt,
+    xticklabelsize=8pt,
+    yticklabelsize=8pt,
+    xgridvisible=false,
+    ygridvisible=false,
+    xscale = log10,
+    yticksvisible = false,
+    yticks = ([95,203],["Cytosol   ", "Membrane   "]),
+    #yticklabelrotationion = π/2
 )
-labels = ["More fermentative OFM", "More respiratory OFM"]
-elements = [MarkerElement(marker=:rect,color=colors[2],markersize=10), MarkerElement(marker=:rect,color=colors[1],markersize=10)]
+hideydecorations!(ax1, grid = false)
+linkyaxes!(ax1, ax2)
+colgap!(f.layout, 0)
+barplot!(ax1, data.x, data.height1, direction = :x, color = colors[data.grp1], label = "OFM 1: Respiratory")
+barplot!(ax2, data.x, data.height2, direction = :x, color = colors[data.grp2], label = "OFM 2: Fermentative")
+xlims!(ax1, [6,1e-6])
+xlims!(ax2, [1e-6,6])
+labels = ["Respiratory OFM", "Fermentative OFM"]
+elements = [MarkerElement(marker=:hline,color=colors[2],markersize=12), MarkerElement(marker=:hline,color=colors[1],markersize=12)]
 Legend(
-    fig[1, 1],
+    f[1, 1],
     elements,
     labels,
     tellheight=false,
     tellwidth=false,
-    labelsize = 5pt,
-    halign = :center,
-    valign = :top,
+    labelsize = 8pt,
+    halign = :left,
+    valign = :center,
     margin = (20,0,0,0),
     framevisible = false
 )
-bracket!(ax, 0, 4e-7, findlast(x -> x == 2, data.grp), 4e-7, style=:curly, orientation=:down,linewidth=0.5, width = 10)
-bracket!(ax, findfirst(x -> x == 1, data.grp), 4e-7, length(data.grp), 4e-7, style=:curly, orientation=:down, linewidth=0.5,width=10)
-fig
+bracket!(ax1, 1e-6, 0, 1e-6, findlast(x -> x == 2, data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+bracket!(ax1, 1e-6, findlast(x -> x == 2, data.grp1), 1e-6, length(data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+f
 
-save("data/plots/ofm.png", fig, px_per_unit = 1200/inch)
+save("data/plots/ofm.png", f, px_per_unit = 1200/inch)
 
 ### location of parameter 
 param_loc = Dict(rid => any(g -> g ∈ membrane_gids, collect(keys(first(iso).second.gene_product_stoichiometry))) ? "membrane" : "cytosol" for (rid,iso) in pruned_reaction_isozymes)
