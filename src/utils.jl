@@ -260,7 +260,7 @@ function add_sources!(model)
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
-            lower_bound = 0.0,
+            lower_bound = 0,
             upper_bound = 1000.0,
             stoichiometry = Dict(mid => 1),
         )

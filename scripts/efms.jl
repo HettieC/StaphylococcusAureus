@@ -184,7 +184,11 @@ end
 order = sortperm(scaled_sens[1, :])
 colors = Makie.wong_colors()[5:6]
 
+inch = 96
+pt = 4/3
+cm = inch / 2.54
 
+set_theme!(figure_padding=3)
 f = Figure(; size = (18cm,9cm))
 data = (
     x=1:length(parameters),

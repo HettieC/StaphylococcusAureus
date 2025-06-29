@@ -13,6 +13,7 @@ model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_15903"].upper_bound = 10 #limit glucose
 model.reactions["EX_15379"].upper_bound = 1000
 model.reactions["EX_15379"].lower_bound = 0
+model.reactions["EX_15378"].upper_bound = 0
 
 sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 open("data/fluxes.json","w") do io 
@@ -22,7 +23,7 @@ sol.fluxes["EX_15379"]
 
 # scan growth rate across limited oxygen with fba model 
 growth = Float64[]
-o2_iter = 0:1:70
+o2_iter = 0:1:40
 for o2_uptake in o2_iter
     model.reactions["EX_15379"].upper_bound = o2_uptake
     model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
@@ -62,6 +63,16 @@ C.pretty(
     format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
 )
 
+# CHEBI:28938 nh4+ producing 
+C.pretty(
+    C.ifilter_leaves(sol.fluxes) do ix, x
+        abs(x) > 1e-5 && 
+            haskey(model.reactions[string(last(ix))].stoichiometry,"CHEBI:28938") && 
+            ((model.reactions[string(last(ix))].stoichiometry["CHEBI:28938"] > 0 && x > 1e-5) || 
+            (model.reactions[string(last(ix))].stoichiometry["CHEBI:28938"] < 0 && x < -1e-5))
+    end; 
+    format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
+)
 
 # oxygen scan with EC model 
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)

@@ -1,10 +1,9 @@
-rhea_rxn_dir(rxn, qrt) = begin
-    idx = first(indexin([rxn], qrt))
-    isnothing(idx) && error("Reaction not found...")
-    idx == 1 && return (-1000, 1000)
-    idx == 2 && return (0, 1000)
-    idx == 3 && return (-1000, 0)
-    idx == 4 && return (-1000, 1000)
+rhea_rxn_dir(master_rid, consensus) = begin
+    idx = consensus - master_rid
+    idx == 0 && return (-1000, 1000)
+    idx == 1 && return (0, 1000)
+    idx == 2 && return (-1000, 0)
+    idx == 3 && return (-1000, 1000)
 end
 
 function curate!(model)
@@ -80,9 +79,10 @@ function curate!(model)
         isnothing(tryparse(Int,rid)) && continue
         rid ∈ string.(manual_directions.RHEA_ID) && continue # ignore if direction manually specified
         qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+        master_rid = minimum(qrt)
         df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
         isempty(df) && continue
-        lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+        lb, ub = rhea_rxn_dir(master_rid, df[1, 1])
         model.reactions[rid].lower_bound = lb
         model.reactions[rid].upper_bound = ub
     end
