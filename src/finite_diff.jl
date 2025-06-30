@@ -2,7 +2,6 @@
 Use finite difference on a model.
 """
 function finite_difference(pruned_model, pruned_reaction_isozymes, gene_product_molar_masses, capacity;flux_zero_tol = 1e-6,gene_zero_tol = 1e-6)
-    using HiGHS
 
     ## loop over parameters and change kcats one by one
     delta_pos = 1.001

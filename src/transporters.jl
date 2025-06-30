@@ -429,7 +429,7 @@ function add_permease!(model, mid, iso, ss)
             objective_coefficient=0.0,
             lower_bound=-1000,
             upper_bound=1000,
-            gene_association_dnf=isnothing(iso) ? nothing : [iso],
+            gene_association_dnf=isnothing(iso) ? [["g1"]] : [iso],
             annotations=Dict("SBO" => ["SBO_0000284"]),
         )
         if !haskey(model.metabolites,mid* "_p")

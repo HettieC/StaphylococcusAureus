@@ -63,7 +63,37 @@ for (g,ko) in ko_dict
 end
 
 unique!(df)
-unique([g for g in df.GeneID if g ∈ exp_df.Gene_ID || g ∈ nader_df.locus_tag])
+
+
+exp_match = filter(row->row.GeneID ∈ exp_df.Gene_ID,df)# || g ∈ nader_df.locus_tag])
+
+new_gid = String[] 
+for g in unique(exp_match.GeneID)
+    n_g = length([gid for gid in exp_match.GeneID if gid==g])
+    if n_g == 1 
+        push!(new_gid,g)
+    else 
+        push!(new_gid, "\\multirow{$(n_g)}{=}{$g}")
+        append!(new_gid,repeat([""],n_g-1))
+    end
+end
+exp_match.GeneID = new_gid
+
+new_pway = String[] 
+for p in exp_match.Pathway 
+    p = replace(p, "; Biosynthesis of secondary metabolites;" => "; ")
+    p = replace(p, "Metabolic pathways; " => "")
+    p = replace(p, "Fatty acid biosynthesis; Fatty acid metabolism" => "Fatty acid biosynthesis; ")
+    p = replace(p, "Fatty acid degradation; Fatty acid metabolism" => "Fatty acid biosynthesis; ")
+    p = replace(p, "; Biosynthesis of secondary metabolites;" => "; ")
+    p = replace(p, "Histidine metabolism;  Biosynthesis of amino acids; " => "Histidine metabolism; ")
+    push!(new_pway,p)
+end
+exp_match.Pathway = new_pway
+
+latexify(exp_match; env = :table, booktabs = true, latex = false) |> print
+
+
 
 
 new_gid = String[] 
@@ -95,7 +125,6 @@ end
 df.Pathway = new_pway
 
 latexify(df; env = :table, booktabs = true, latex = false) |> print
-
 
 newdf = filter(row -> row.GeneID ∈ exp_df.Gene_ID,df)
 

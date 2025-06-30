@@ -54,18 +54,6 @@ C.pretty(
 )
 
 
-# atp-producing rxns
-C.pretty(
-    C.ifilter_leaves(ec_sol.fluxes) do ix, x
-        abs(x) > 1e-5 && 
-            haskey(model.reactions[string(last(ix))].stoichiometry,"CHEBI:30616") && 
-            ((model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] > 0 && x > 1e-5) || 
-            (model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] < 0 && x < -1e-5))
-    end; 
-    format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
-)
-
-
 
 pruned_model, pruned_reaction_isozymes = D.prune_model(
     model,
@@ -137,25 +125,59 @@ sens = D.differentiate_solution(
 
 
 ### use finite diff...
-pruned_reaction_isozymes = Dict(r => Dict("iso" => iso for (iso_id,iso) in isos) for (r,isos) in pruned_reaction_isozymes)
+## loop over parameters and change kcats one by one
+pruned_reaction_isozymes = Dict(r => Dict("iso" => iso for (id,iso) in isos) for (r,isos) in pruned_reaction_isozymes)
+delta_pos = 1.001
+delta_neg = 0.999
 
-    ec_solution = X.enzyme_constrained_flux_balance_analysis(
-        model;
-        reaction_isozymes,
-        gene_product_molar_masses,
-        capacity,
+d_v = zeros(length(pruned_reaction_isozymes),length(A.reactions(pruned_model)))
+for (i,r) in enumerate(collect(keys(pruned_reaction_isozymes)))
+    println(r)
+    pruned_reaction_isozymes[r]["iso"].kcat_forward *= delta_pos
+    # solve the gecko model with new isozyme
+    ec_solution_new = X.enzyme_constrained_flux_balance_analysis(
+        pruned_model;
+        reaction_isozymes=pruned_reaction_isozymes,
+        gene_product_molar_masses=gene_product_molar_masses,
+        capacity=capacity,
+        optimizer = HiGHS.Optimizer
+    )
+
+    v_pos = collect(values(ec_solution_new.fluxes))
+
+    pruned_reaction_isozymes[r]["iso"].kcat_forward *= delta_neg / delta_pos
+
+    # solve the gecko model with new isozyme
+    ec_solution_new = X.enzyme_constrained_flux_balance_analysis(
+        pruned_model;
+        reaction_isozymes=pruned_reaction_isozymes,
+        gene_product_molar_masses=gene_product_molar_masses,
+        capacity=capacity,
         optimizer=HiGHS.Optimizer
     )
-    pruned_model, pruned_reaction_isozymes = D.prune_model(
-        model,
-        ec_solution.fluxes,
-        ec_solution.gene_product_amounts,
-        reaction_isozymes,
-        ec_solution.isozyme_forward_amounts,
-        ec_solution.isozyme_reverse_amounts,
-        flux_zero_tol,
-        gene_zero_tol,
-    )
 
-finite_difference(pruned_model, pruned_reaction_isozymes, gene_product_molar_masses, capacity,optimizer=HiGHS.Optimizer)
-using HiGHS
+    v_neg = collect(values(ec_solution_new.fluxes))
+
+
+    #return to original value
+    pruned_reaction_isozymes[r]["iso"].kcat_forward /= delta_neg
+
+    # scaled sensitivity
+    d_v[i,:] = pruned_reaction_isozymes[r]["iso"].kcat_forward*(
+        v_pos .- v_neg
+    ) ./ ((delta_pos - delta_neg) * pruned_sol.fluxes[r])
+end
+
+heatmap(d_v)
+
+# pathways of reactions 
+minimum(d_v)
+
+df = DataFrame(d_v, :auto)
+collect(keys(pruned_reaction_isozymes))
+collect(values(ec_solution_new.fluxes))
+
+rename!(df,Symbol.(collect(keys(pruned_sol.fluxes))))
+oxphos_reactions = ["Sdh", "Mqo", "cyt_bo3",]
+df[:,Symbol.(oxphos_reactions)]
+heatmap(Matrix(df[:,Symbol.(oxphos_reactions)]))

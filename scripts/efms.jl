@@ -190,12 +190,24 @@ cm = inch / 2.54
 
 set_theme!(figure_padding=3)
 f = Figure(; size = (18cm,9cm))
+### location of parameter 
+param_loc = Dict(rid => any(g -> g ∈ membrane_gids, collect(keys(first(iso).second.gene_product_stoichiometry))) ? "membrane" : "cytosol" for (rid,iso) in pruned_reaction_isozymes)
+grp = [param_loc[string(x)] for x in parameters[order]]
+parameters[order][191]
+parameters[order][end-15]
+param_loc[string(parameters[order][191])]
+20312
+
+"SAPIG1336" ∈ membrane_gids
+
 data = (
     x=1:length(parameters),
     height1=[c[1] > 0 ? c[1] : c[2] for c in eachcol(scaled_sens[:, order])],
     height2=abs.([c[1] < 0 ? c[1] : c[2] for c in eachcol(scaled_sens[:, order])]),
     grp1=[c[1] > 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])],
     grp2=[c[1] < 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])]
+    #grp1 = [x == "cytosol" ? 1 : 2 for x in grp],
+    #grp2 = [x == "membrane" ? 2 : 1 for x in grp],
 )
 ax1 = Axis(
     f[1, 1], 
@@ -253,10 +265,7 @@ f
 
 save("data/plots/ofm.png", f, px_per_unit = 1200/inch)
 
-### location of parameter 
-param_loc = Dict(rid => any(g -> g ∈ membrane_gids, collect(keys(first(iso).second.gene_product_stoichiometry))) ? "membrane" : "cytosol" for (rid,iso) in pruned_reaction_isozymes)
 
-[param_loc[string(x)] for x in parameters[order]]
 
 filter(((x,y),) -> y=="membrane",param_loc)
 
