@@ -14,8 +14,8 @@ const Ex = F.Node
 using CairoMakie
 using Latexify
 
-flux_zero_tol = 1e-6
-gene_zero_tol = 1e-6
+flux_zero_tol = 1e-7
+gene_zero_tol = 1e-7
 
 model, reaction_isozymes = build_model()
 
@@ -32,7 +32,7 @@ model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
     ("membrane", membrane_gids, 120.0)
 ];
 
@@ -44,6 +44,12 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     optimizer=HiGHS.Optimizer,
 )
 
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
 # atp-producing rxns
 C.pretty(
     C.ifilter_leaves(ec_sol.fluxes) do ix, x
@@ -75,10 +81,11 @@ pruned_sol = enzyme_constrained_flux_balance_analysis(
     optimizer=HiGHS.Optimizer,
 )
 
-Dict(x=>[y,abs(ec_sol.fluxes[x])] for (x,y) in pruned_sol.fluxes if abs(abs(y)-abs(ec_sol.fluxes[x]))>1e-5)
+Dict(x=>["new=$y",abs(ec_sol.fluxes[x])] for (x,y) in pruned_sol.fluxes if abs(abs(y)-abs(ec_sol.fluxes[x]))>1e-5)
 
+ec_sol.gene_product_amounts["SAPIG0566"] * reaction_isozymes["15612"]["isozyme_1"].kcat_forward 
 
-
+ec_sol.fluxes["15612"]
 
 #### calculate efms 
 # calculate EFMs

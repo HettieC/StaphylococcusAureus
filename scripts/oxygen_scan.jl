@@ -23,7 +23,7 @@ sol.fluxes["EX_15379"]
 
 # scan growth rate across limited oxygen with fba model 
 growth = Float64[]
-o2_iter = 0:1:40
+o2_iter = 0:1:30
 for o2_uptake in o2_iter
     model.reactions["EX_15379"].upper_bound = o2_uptake
     model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
@@ -86,8 +86,8 @@ model.reactions["EX_15379"].upper_bound = 1000
 
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 180.0),
-    ("membrane", membrane_gids, 60.0)
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
+    ("membrane", membrane_gids, 160.0)
 ];
 
 ec_sol = enzyme_constrained_flux_balance_analysis(
@@ -101,6 +101,7 @@ ec_sol.fluxes["EX_15379"]
 
 ec_growth = Float64[]
 for o2_uptake in o2_iter
+    println(o2_uptake)
     model.reactions["EX_15379"].upper_bound = o2_uptake
     model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
     ec_sol = enzyme_constrained_flux_balance_analysis(

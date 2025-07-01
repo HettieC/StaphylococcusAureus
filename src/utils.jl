@@ -470,25 +470,30 @@ function get_reaction_isozymes()
     add_isozymes!(reaction_isozymes,kcat_dict,ghomos)
     add_isozymes!(reaction_isozymes,kcat_dict,gheteros)
     
+    
     return reaction_isozymes, kcat_dict
 end
 export get_reaction_isozymes
 
-function add_fake_isozymes!(reaction_isozymes)
+function add_fake_isozymes!(model,reaction_isozymes)
     # use a fake gene g1 for all metabolic reactions with not grr
 
-    avg_kcat = mean(vcat([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y]...))
+    avg_kcat = sum(vcat([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y]...))/length([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y])
 
     for (r,rxn) in model.reactions 
         haskey(reaction_isozymes,r) && continue 
+        startswith(r,"EX") && continue 
+        startswith(r,"DF") && continue 
+        r == "biomass" && continue
         if rxn.gene_association_dnf == [["g1"]]
-            reaction_isozymes[r]["isozyme_1"] = Isozyme(
+            reaction_isozymes[r] = Dict("isozyme_1" => Isozyme(
                 gene_product_stoichiometry = Dict("g1" => 1),
-                kcat_forward = avg_kcat,
-                kcat_reverse = avg_kcat
+                kcat_forward = startswith(r,"PERM") ? 60 : avg_kcat,
+                kcat_reverse = startswith(r,"PERM") ? 60 : avg_kcat
+            )
             )
         else
-            println(r)
+            println("fix isozymes of $r")
         end
     end
 

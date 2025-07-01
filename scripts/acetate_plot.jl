@@ -13,12 +13,12 @@ gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_is
 
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
-model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
-model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
-model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
-model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
+# model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
+ model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
+# model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
+# model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
+# model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
+# model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 
 capacity = [

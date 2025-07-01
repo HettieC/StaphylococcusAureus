@@ -33,7 +33,7 @@ function build_model()
     change_bounds!(model)
     add_electron_transport_chain!(model)
     add_special_isozymes!(reaction_isozymes,kcat_dict,model)
-
+    add_fake_isozymes!(model,reaction_isozymes)
     add_genes!(model)
     add_names_pathways!(model)
     return model, reaction_isozymes

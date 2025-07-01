@@ -7,7 +7,8 @@ using HiGHS, JSON, CSV
 using JSONFBCModels, DataFrames
 using Latexify
 
-model, reaction_isozymes = build_model()
+model, reaction_isozymes = build_model();
+gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 
 carbon_sources = Dict(
     "15903" => "beta-D-glucose",
@@ -46,15 +47,13 @@ for (x,y) in carbon_sources
     model.reactions["EX_$x"].upper_bound = 10
     sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
     delete!(model.reactions,"EX_$x")
-    isnothing(sol) && continue 
     # C.pretty(
     #     C.ifilter_leaves(sol.fluxes) do ix, x
     #         abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
     #     end; 
     #     format_label = x -> A.reaction_name(model, string(last(x))),
     # )
-    growth[y] = sol.objective 
-    println(sol.fluxes["EX_$x"])
+    growth[y] = isnothing(sol) ? 0 : sol.objective 
 end
 growth
 
