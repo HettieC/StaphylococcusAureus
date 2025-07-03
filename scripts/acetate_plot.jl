@@ -13,18 +13,20 @@ gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_is
 
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-# model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
- model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-# model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
-# model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
-# model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
-# model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
+model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
+model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
+model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
+model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
+model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
+model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
     ("membrane", membrane_gids, 120.0)
 ];
+
+
 
 ec_sol = enzyme_constrained_flux_balance_analysis(
     model;
@@ -59,7 +61,7 @@ using CairoMakie
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
 membrane_conc = Float64[]
-vols = 0.01:0.1:ec_sol.objective
+vols = 0.0001:0.01:ec_sol.objective
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
     ec_sol = enzyme_constrained_flux_balance_analysis(
@@ -90,7 +92,7 @@ ax = Axis(
     ylabelsize=6pt,
     xticklabelsize=5pt,
     yticklabelsize=5pt,
-    xticks = [0,0.5,1,1.5,2,2.5],
+    #xticks = [0,0.5,1,1.5,2,2.5],
     ygridvisible=false,
     xgridvisible=false,
 )
@@ -102,7 +104,7 @@ lines!(
 )
 axislegend(
     ax,
-    position=:lt,
+    position=:lb,
     labelsize = 5pt,
 )
 f

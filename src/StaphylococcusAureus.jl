@@ -33,5 +33,6 @@ include("transporters.jl")
 include("enzyme_constrain.jl")
 include("kegg.jl")
 include("finite_diff.jl")
+include("biomass.jl")
 
 end

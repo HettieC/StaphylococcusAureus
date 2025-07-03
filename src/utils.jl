@@ -531,6 +531,15 @@ function add_special_isozymes!(reaction_isozymes,kcat_dict,model)
             )
         end
     end
+    #make ATPS faster
+    reaction_isozymes["ATPS"] = Dict(
+        id => Isozyme(
+            iso.gene_product_stoichiometry,
+            iso.kcat_forward * 10,
+            iso.kcat_reverse
+        )
+        for (id,iso) in reaction_isozymes["ATPS"]
+    )
     return reaction_isozymes
 end
 

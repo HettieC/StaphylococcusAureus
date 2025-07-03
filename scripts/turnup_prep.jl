@@ -2,7 +2,7 @@ using DataFrames, CSV, StaphylococcusAureus, XLSX
 
 #model,isozymes = build_model()
 model,isozymes = build_model()
-chebi_df = DataFrame(CHEBI=String[],name = String[], smiles=String[],inchi=String[],inchikey=String[])
+chebi_df = DataFrame(CHEBI=String[],name = String[], smiles=String[],inchi=String[],inchikey=String[],mass=Float64[])
 open("data/databases/chebi/chebi_core.obo","r") do io 
     i = 0
     chebi = "" 
@@ -10,6 +10,7 @@ open("data/databases/chebi/chebi_core.obo","r") do io
     smile = ""
     inchi_key = "" 
     inchi_val = ""
+    mass = 0
     for ln in eachline(io)
         i += 1
         i < 20 && continue
@@ -17,6 +18,8 @@ open("data/databases/chebi/chebi_core.obo","r") do io
             chebi = string(split(ln,"id: ")[2])
         elseif startswith(ln,"name: ")
             Name = string(split(ln; limit = 2)[2])
+        elseif startswith(ln,"property_value: http://purl.obolibrary.org/obo/chebi/mass ")
+            mass = parse(Float64,split(ln)[3][2:end-1])    
         elseif startswith(ln,"property_value: http://purl.obolibrary.org/obo/chebi/smiles ")
             smile = string(split(ln)[3][2:end-1])
         elseif startswith(ln, "property_value: http://purl.obolibrary.org/obo/chebi/inchi ")
@@ -24,10 +27,13 @@ open("data/databases/chebi/chebi_core.obo","r") do io
         elseif startswith(ln, "property_value: http://purl.obolibrary.org/obo/chebi/inchikey ")
             inchi_key = string(split(ln)[3][2:end-1])
         elseif ln == "[Term]"
-            push!(chebi_df, [chebi, Name, smile, inchi_val, inchi_key])
+            push!(chebi_df, [chebi, Name, smile, inchi_val, inchi_key, mass])
         end
     end
 end
+
+filter!(row -> row.CHEBI ∈ A.metabolites(model),chebi_df)
+
 chebi_inchi_dict = Dict(Pair.(chebi_df.CHEBI,chebi_df.inchi))
 
 seq_dict = Dict{String,String}()
