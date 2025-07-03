@@ -13,6 +13,7 @@ import FastDifferentiation as F
 const Ex = F.Node
 using CairoMakie
 using Latexify
+using LaTeXStrings
 
 flux_zero_tol = 1e-6
 gene_zero_tol = 1e-6
@@ -203,15 +204,6 @@ cm = inch / 2.54
 
 set_theme!(figure_padding=3)
 f = Figure(; size = (18cm,9cm))
-### location of parameter 
-param_loc = Dict(rid => any(g -> g ∈ membrane_gids, collect(keys(first(iso).second.gene_product_stoichiometry))) ? "membrane" : "cytosol" for (rid,iso) in pruned_reaction_isozymes)
-grp = [param_loc[string(x)] for x in parameters[order]]
-parameters[order][191]
-parameters[order][end-15]
-param_loc[string(parameters[order][191])]
-20312
-
-"SAPIG1336" ∈ membrane_gids
 
 data = (
     x=1:length(parameters),
@@ -226,7 +218,6 @@ ax1 = Axis(
     f[1, 1], 
     xreversed = true, 
     xautolimitmargin = (0, 0.1),
-    xlabel = "log(Absolute OFM Sensitivity)", 
     xlabelsize=9pt,
     ylabelsize=6pt,
     xticklabelsize=8pt,
@@ -239,7 +230,6 @@ ax2 = Axis(
     f[1, 2], 
     alignmode = Mixed(left = Makie.Protrusion(0)), 
     xautolimitmargin = (0, 0.1),
-    xlabel = "log(OFM Sensitivity)",
     xlabelsize=9pt,
     ylabelsize=6pt,
     xticklabelsize=8pt,
@@ -248,7 +238,7 @@ ax2 = Axis(
     ygridvisible=false,
     xscale = log10,
     yticksvisible = false,
-    yticks = ([95,203],["Cytosol   ", "Membrane   "]),
+    yticks = ([findlast(x -> x == 2, data.grp1)/2,length(filter(g->g==1,data.grp1))/2+findlast(x -> x == 2, data.grp1)],[L"\textbf{Membrane   }\;", L"\textbf{Cytosol   }\;"]),
     #yticklabelrotationion = π/2
 )
 hideydecorations!(ax1, grid = false)
@@ -256,9 +246,9 @@ linkyaxes!(ax1, ax2)
 colgap!(f.layout, 0)
 barplot!(ax1, data.x, data.height1, direction = :x, color = colors[data.grp1], label = "OFM 1: Respiratory")
 barplot!(ax2, data.x, data.height2, direction = :x, color = colors[data.grp2], label = "OFM 2: Fermentative")
-xlims!(ax1, [6,1e-6])
-xlims!(ax2, [1e-6,6])
-labels = ["Respiratory OFM", "Fermentative OFM"]
+xlims!(ax1, [10,8e-6])
+xlims!(ax2, [2e-6,20])
+labels = [L"\textbf{Respiratory OFM}", L"\textbf{Fermentative OFM}"]
 elements = [MarkerElement(marker=:hline,color=colors[2],markersize=12), MarkerElement(marker=:hline,color=colors[1],markersize=12)]
 Legend(
     f[1, 1],
@@ -269,18 +259,12 @@ Legend(
     labelsize = 8pt,
     halign = :left,
     valign = :center,
-    margin = (20,0,0,0),
+    margin = (16,0,0,0),
     framevisible = false
 )
-bracket!(ax1, 1e-6, 0, 1e-6, findlast(x -> x == 2, data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
-bracket!(ax1, 1e-6, findlast(x -> x == 2, data.grp1), 1e-6, length(data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+bracket!(ax1, 8e-6, 0, 8e-6, findlast(x -> x == 2, data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+bracket!(ax1, 8e-6, findlast(x -> x == 2, data.grp1), 8e-6, length(data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+Label(f[2,:],L"\textbf{OFM Sensitivity: }\frac{p}{\lambda}\frac{\partial \lambda}{\partial p}")
 f
 
 save("data/plots/ofm.png", f, px_per_unit = 1200/inch)
-
-
-
-filter(((x,y),) -> y=="membrane",param_loc)
-
-[r for (r,v) in pruned_sol.fluxes if isnothing(tryparse(Int,string(r)))]
-

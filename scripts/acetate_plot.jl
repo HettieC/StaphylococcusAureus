@@ -13,20 +13,18 @@ gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_is
 
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
+#model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
-model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
+# model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
+# model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
 model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
 model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
-    ("membrane", membrane_gids, 120.0)
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
+    ("membrane", membrane_gids, 100.0)
 ];
-
-
 
 ec_sol = enzyme_constrained_flux_balance_analysis(
     model;
@@ -61,9 +59,12 @@ using CairoMakie
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
 membrane_conc = Float64[]
-vols = 0.0001:0.01:ec_sol.objective
+ex_fluxes = []
+vols = 0.1:1:ec_sol.objective
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
+    model.reactions["biomass"].lower_bound = biomass-0.1
+
     ec_sol = enzyme_constrained_flux_balance_analysis(
         model;
         reaction_isozymes,
@@ -72,8 +73,13 @@ for biomass in vols
         optimizer=HiGHS.Optimizer,
     )
     push!(ac_flux,ec_sol.fluxes["EX_30089"])
+    push!(ex_fluxes,Dict(A.reaction_name(model, string(x))=>y for(x,y) in ec_sol.fluxes if startswith(string(x),"EX") && abs(y) > 1e-5)) 
     push!(membrane_conc,ec_sol.gene_product_capacity.membrane)
 end
+ac_flux
+ex_fluxes
+membrane_conc
+
 
 inch = 96
 pt = 4/3
@@ -104,7 +110,7 @@ lines!(
 )
 axislegend(
     ax,
-    position=:lb,
+    position=:rb,
     labelsize = 5pt,
 )
 f
