@@ -32,8 +32,8 @@ model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 300.0),
-    ("membrane", membrane_gids, 110.0)
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+    ("membrane", membrane_gids, 120.0)
 ];
 
 
@@ -91,8 +91,7 @@ diff_flux = Dict(string(x)=>[y-abs(ec_sol.fluxes[x])] for (x,y) in pruned_sol.fl
 pruned_sol.gene_product_capacity
 
 sum([pruned_sol.gene_product_amounts[g]*gene_product_molar_masses[g] for g in membrane_gids if haskey(pruned_sol.gene_product_amounts,g)])
-
-sum([e*gene_product_molar_masses[string(g)] for (g,e) in pruned_sol.gene_product_amounts if g ∉ membrane_gids])
+sum([e*gene_product_molar_masses[string(g)] for (g,e) in pruned_sol.gene_product_amounts if string(g) ∉ membrane_gids])
 
 #### calculate efms 
 # calculate EFMs
@@ -146,7 +145,7 @@ latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
 # df of big difference reactions 
 ofm_df = DataFrame(Reaction=String[],Name=String[],OFM_1=Float64[],OFM_2=Float64[])
 for (x,y) in OFM_dicts[1]
-    if abs(y - OFM_dicts[2][x])/y > 1 || abs(y - OFM_dicts[2][x])/OFM_dicts[2][x] > 1
+    if abs(y - OFM_dicts[2][x])/y > 1 || abs(y - OFM_dicts[2][x])/OFM_dicts[2][x] > 0.75
         push!(
             ofm_df,
             [
