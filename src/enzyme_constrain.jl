@@ -40,6 +40,6 @@ function enzyme_constraints!(model,reaction_isozymes)
     end
     append!(membrane_gids, [x for (x,y) in subcellular_location if x ∈ A.genes(model) && any(z -> occursin("membrane",lowercase(z)),y) ])
 
-    return gene_product_molar_masses, membrane_gids
+    return gene_product_molar_masses, unique(membrane_gids)
 end
 export enzyme_constraints!
