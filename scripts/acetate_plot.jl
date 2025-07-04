@@ -22,8 +22,8 @@ model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
-    ("membrane", membrane_gids, 100.0)
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+    ("membrane", membrane_gids, 120.0)
 ];
 
 ec_sol = enzyme_constrained_flux_balance_analysis(
@@ -60,7 +60,7 @@ using CairoMakie
 ac_flux = Float64[]
 membrane_conc = Float64[]
 ex_fluxes = []
-vols = 0.1:1:ec_sol.objective
+vols = 0.1:0.1:ec_sol.objective
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
     model.reactions["biomass"].lower_bound = biomass-0.1
