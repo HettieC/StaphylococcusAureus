@@ -8,15 +8,14 @@ using HiGHS, JSON
 using JSONFBCModels
 
 model, reaction_isozymes = build_model()
-
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-#model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
+model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-# model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
-# model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
+model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
+model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
 model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
 model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
@@ -55,11 +54,10 @@ C.pretty(
 
 
 using CairoMakie
-
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
 membrane_conc = Float64[]
-ex_fluxes = []
+growth = []
 vols = 0.1:0.1:ec_sol.objective
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
@@ -73,11 +71,11 @@ for biomass in vols
         optimizer=HiGHS.Optimizer,
     )
     push!(ac_flux,ec_sol.fluxes["EX_30089"])
-    push!(ex_fluxes,Dict(A.reaction_name(model, string(x))=>y for(x,y) in ec_sol.fluxes if startswith(string(x),"EX") && abs(y) > 1e-5)) 
+    push!(growth,ec_sol.objective) 
     push!(membrane_conc,ec_sol.gene_product_capacity.membrane)
 end
 ac_flux
-ex_fluxes
+growth
 membrane_conc
 
 
@@ -92,8 +90,8 @@ f = Figure(; size=(10cm, 6cm))#, backgroundcolor=:transparent)
 ax = Axis(
     f[1,1];
     backgroundcolor=:transparent,
-    xlabel = "Growth rate (1/h)",
-    ylabel = "Acetate exchange rate (mMol/h)",
+    xlabel = "Growth rate (gDW/h)",
+    ylabel = "Acetate exchange rate (mMol/gDW/h)",
     xlabelsize=6pt,
     ylabelsize=6pt,
     xticklabelsize=5pt,
@@ -105,17 +103,19 @@ ax = Axis(
 lines!(
     ax,
     vols,
-    abs.(ac_flux),
+    abs.(ac_flux)./growth,
     label = "Acetate exchange"
 )
 axislegend(
     ax,
-    position=:rb,
+    position=:lt,
     labelsize = 5pt,
 )
 f
 
-save("data/plots/acetate_exchange.png", f, px_per_unit = 1200/inch)
+
+save("plots/acetate_exchange.png",f,px_per_unit = 1200/inch)
+
 
 model.reactions["biomass"].upper_bound = 1000
 
