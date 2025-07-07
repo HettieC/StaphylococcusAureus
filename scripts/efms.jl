@@ -34,7 +34,7 @@ model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
-    ("membrane", membrane_gids, 110.0)
+    ("membrane", membrane_gids, 120.0)
 ];
 
 
