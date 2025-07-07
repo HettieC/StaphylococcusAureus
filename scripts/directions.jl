@@ -21,7 +21,7 @@ model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
-    ("membrane", membrane_gids, 100.0)
+    ("membrane", membrane_gids, 120.0)
 ];
 
 ec_sol = enzyme_constrained_flux_balance_analysis(
@@ -104,6 +104,7 @@ set_theme!(figure_padding=3)
 #try changing the bound of a rxn and making the ac plot
 i = 0
 for r in ac_rxns 
+    r != "10255" && continue
     i += 1
     lb = copy(model.reactions[r].lower_bound)
     ub = copy(model.reactions[r].upper_bound)
@@ -113,7 +114,7 @@ for r in ac_rxns
 
     ac_flux = Float64[]
 
-    vols = 0.1:0.2:3
+    vols = 0.1:0.4:3
     for biomass in vols
         model.reactions["biomass"].upper_bound = biomass
         model.reactions["biomass"].lower_bound = biomass-0.1

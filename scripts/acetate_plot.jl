@@ -32,6 +32,8 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     capacity,
     optimizer=HiGHS.Optimizer,
 )
+ec_sol.fluxes["EX_30089"]
+
 open("data/fluxes.json","w") do io 
     JSON.print(io,ec_sol.fluxes)
 end
@@ -56,9 +58,7 @@ C.pretty(
 using CairoMakie
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
-membrane_conc = Float64[]
-growth = []
-vols = 0.1:0.1:ec_sol.objective
+vols = 0.1:0.05:3.7
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
     model.reactions["biomass"].lower_bound = biomass-0.1
@@ -71,21 +71,15 @@ for biomass in vols
         optimizer=HiGHS.Optimizer,
     )
     push!(ac_flux,ec_sol.fluxes["EX_30089"])
-    push!(growth,ec_sol.objective) 
-    push!(membrane_conc,ec_sol.gene_product_capacity.membrane)
 end
 ac_flux
-growth
-membrane_conc
-
-
 inch = 96
 pt = 4/3
 cm = inch / 2.54
 
 set_theme!(figure_padding=3)
 
-f = Figure(; size=(10cm, 6cm))#, backgroundcolor=:transparent)
+f = Figure(; size=(10cm, 6cm))
 
 ax = Axis(
     f[1,1];
@@ -103,18 +97,14 @@ ax = Axis(
 lines!(
     ax,
     vols,
-    abs.(ac_flux)./growth,
+    abs.(round.(ac_flux))./vols,
     label = "Acetate exchange"
 )
-axislegend(
-    ax,
-    position=:lt,
-    labelsize = 5pt,
-)
-f
+display(f)
 
 
-save("plots/acetate_exchange.png",f,px_per_unit = 1200/inch)
+
+save("data/plots/acetate_exchange.png",f,px_per_unit = 1200/inch)
 
 
 model.reactions["biomass"].upper_bound = 1000
