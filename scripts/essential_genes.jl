@@ -7,7 +7,6 @@ using HiGHS, JSON, CSV
 using JSONFBCModels, DataFrames, XLSX
 using Latexify
 
-
 model, reaction_isozymes = build_model()
 
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
@@ -61,7 +60,7 @@ for (g,ko) in ko_dict
         end
     end
 end
-
+df
 unique!(df)
 
 

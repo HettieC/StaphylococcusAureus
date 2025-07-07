@@ -1,6 +1,6 @@
 CHEBI,Name
 CHEBI:15379,oxygen
-CHEBI:43474,phosphoric acid
+CHEBI:43474,phosphoricacid
 CHEBI:15903,beta-D-glucose
 CHEBI:28938,nh4(+)
 CHEBI:35235,L-cysteine
@@ -9,3 +9,25 @@ CHEBI:57986,riboflavin
 CHEBI:47013,D-ribose
 CHEBI:17154,nicotinimide
 CHEBI:15378,H+
+CHEBI:57427,L-leucine
+CHEBI:32682,L-arginine
+CHEBI:57762,L-valine
+CHEBI:60039,L-proline
+CHEBI:35235,L-cysteine
+CHEBI:57305,glycine
+CHEBI:33384,L-serine
+CHEBI:29991,L-aspartate
+CHEBI:57972,L-alanine
+CHEBI:58359,L-glutamine
+CHEBI:29985,L-glutamate
+CHEBI:32551,L-lysine
+CHEBI:58045,L-isoleucine
+CHEBI:57305,glycine
+CHEBI:57926,L-threonine
+CHEBI:58095,L-phenylalanine
+CHEBI:58315,L-tyrosine
+CHEBI:57912,L-tryptophan
+CHEBI:57595,L-histidine
+CHEBI:58199,L-homocysteine
+CHEBI:58048,L-asparagine
+CHEBI:57844,L-methionine
