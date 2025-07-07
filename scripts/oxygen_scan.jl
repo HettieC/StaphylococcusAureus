@@ -16,22 +16,21 @@ model.reactions["EX_15379"].lower_bound = 0
 model.reactions["EX_15378"].upper_bound = 0
 
 sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
-open("data/fluxes.json","w") do io 
-    JSON.print(io,sol.fluxes)
-end
 sol.fluxes["EX_15379"]
 
 # scan growth rate across limited oxygen with fba model 
 growth = Float64[]
-o2_iter = 0:1:30
+o2_rate = Float64[]
+o2_iter = 0:1:57
 for o2_uptake in o2_iter
     model.reactions["EX_15379"].upper_bound = o2_uptake
     #model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
     sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
     push!(growth,sol.objective)
+    push!(o2_rate,o2_uptake/sol.objective)
 end
 growth
-
+o2_rate
 
 
 C.pretty(
@@ -83,6 +82,8 @@ model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
 model.reactions["EX_15903"].upper_bound = 1000 #unlimit glucose
 model.reactions["EX_15379"].lower_bound = 0 #unlimit o2
 model.reactions["EX_15379"].upper_bound = 1000
+model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
+
 
 
 capacity = [
@@ -100,6 +101,7 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
 ec_sol.fluxes["EX_15379"]
 
 ec_growth = Float64[]
+bounds = Vector{Tuple{Float64,Float64}}()
 for o2_uptake in o2_iter
     println(o2_uptake)
     model.reactions["EX_15379"].upper_bound = o2_uptake
@@ -112,9 +114,11 @@ for o2_uptake in o2_iter
         optimizer=HiGHS.Optimizer,
     )    
     push!(ec_growth,ec_sol.objective)
+    push!(bounds,(ec_sol.gene_product_capacity.cytosol,ec_sol.gene_product_capacity.membrane))
+    o2_uptake/ec_sol.objective > maximum(o2_rate) && break
 end
 ec_growth
-
+bounds
 inch = 96
 pt = 4/3
 cm = inch / 2.54
@@ -126,25 +130,26 @@ f = Figure(; size=(10cm, 6cm))#, backgroundcolor=:transparent)
 ax = Axis(
     f[1,1];
     backgroundcolor=:transparent,
-    ylabel = "Growth rate (1/h)",
-    xlabel = "Oxygen uptake rate (mMol/h)",
+    ylabel = "Growth rate (gDW/h)",
+    xlabel = "Oxygen uptake rate (mMol/gDW/h)",
     xlabelsize=6pt,
     ylabelsize=6pt,
     xticklabelsize=5pt,
     yticklabelsize=5pt,
     ygridvisible=false,
     xgridvisible=false,
+    xticks = [0,5,10,15]
 )
 lines!(
     ax,
-    o2_iter,
+    o2_iter[1:length(ec_growth)]./ec_growth,
     ec_growth,
     label = "ecFBA",
     linewidth = 2.5
 )
 lines!(
     ax,
-    o2_iter,
+    o2_rate,
     growth,
     label = "FBA",
     color=:red,
@@ -156,10 +161,10 @@ axislegend(
     position=:cb,
     labelsize = 5pt,
 )
-xlims!(ax,(-0,31))
-ylims!(ax,(0,5))
+xlims!(ax,(0,maximum(o2_rate)+0.1))
+ylims!(ax,(0,maximum(vcat(growth,ec_growth))*1.1))
 f
-save("data/plots/o2_scan.png", f, px_per_unit = 1200/inch)
+save("data/plots/o2_scan_gDW.png", f, px_per_unit = 1200/inch)
 
 C.pretty(
     C.ifilter_leaves(ec_sol.fluxes) do ix, x
@@ -167,4 +172,3 @@ C.pretty(
     end; 
     format_label = x -> A.reaction_name(model, string(last(x))),
 )
-
