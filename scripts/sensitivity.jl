@@ -12,6 +12,7 @@ import FastDifferentiation as F
 const Ex = F.Node
 using CairoMakie
 using Latexify
+using ColorSchemes
 flux_zero_tol = 1e-6
 gene_zero_tol = 1e-6
 
@@ -122,3 +123,152 @@ sens = D.differentiate_solution(
     parameter_values,
     scale = true, # unitless sensitivities
 )
+
+
+# look at biomass 
+flux_id = [:biomass]
+flux_idx = findall(x -> last(x) == :biomass && first(x) == :fluxes, vids)
+
+order = sortperm(sens[flux_idx, :],dims=2)
+
+sens[flux_idx, :][1:end]
+inch = 96
+pt = 4/3
+cm = inch / 2.54
+
+set_theme!(figure_padding=2)
+
+f = Figure(; size=(10cm, 8cm))#, backgroundcolor=:transparent)
+escher_model = change_reaction_names(pruned_model)
+xticklabels = [A.reaction_name(escher_model,string(r)) for r in parameters[order][210:end]]
+ax = Axis(
+    f[1,1],
+    #backgroundcolor=:transparent,
+    xlabel = "Turnover number",
+    xticklabelrotation = -pi / 3,
+    ylabel = "Sensitivity of biomass",
+    xlabelsize=6pt,
+    ylabelsize=6pt,
+    xticklabelsize=5pt,
+    yticklabelsize=5pt,
+    xticks = (1:20,xticklabels),
+    ygridvisible=false,
+    xgridvisible=false,
+)
+barplot!(
+    ax,
+    1:20,
+    sens[flux_idx,:][order][210:end]
+)
+f
+
+save("data/plots/biomass_sens.png", f, px_per_unit = 1200/inch)
+
+
+open("data/biomass_sens.json","w") do io 
+    JSON.print(io,Dict(string.(parameters[order]) .=> 1000*sens[flux_idx,:][order]))
+end
+
+
+
+# look at ox phos 
+subset_ids = [:cyt_bo3, :Sdh, :Mqo, :ATPS, :biomass]
+
+flux_idxs = findall(x -> last(x) in subset_ids && first(x) == :fluxes, vids)
+flux_ids = last.(vids[flux_idxs])
+
+param_idxs = findall(x -> x in subset_ids, parameters)
+param_ids = parameters[param_idxs]
+
+
+inch = 96
+pt = 4/3
+cm = inch / 2.54
+
+set_theme!(figure_padding=3)
+
+f = Figure(; size=(10cm, 8cm))#, backgroundcolor=:transparent)
+ax = Axis(
+    f[1,1],
+    xlabel = "Turnover number",
+    xticks = (1:length(param_ids), string.(param_ids)),
+    xticklabelrotation = -pi / 2,
+    ylabel = "Flux",
+    yticks = (1:length(flux_ids), string.(flux_ids)),
+    xlabelsize=6pt,
+    ylabelsize=6pt,
+    xticklabelsize=5pt,
+    yticklabelsize=5pt,
+)
+hm = heatmap!(
+    ax,
+    sens[flux_idxs, param_idxs]';
+    colormap = reverse(ColorSchemes.RdBu),
+    colorrange = (-0.25,0.25)
+)
+Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
+f
+
+flux_idxs = findall(x -> first(x) == :fluxes, vids)
+flux_ids = last.(vids[flux_idxs])
+# whole solution
+f = Figure()#, backgroundcolor=:transparent)
+ax = Axis(
+    f[1,1],
+    xlabel = "Turnover number",
+    xticklabelrotation = -pi / 2,
+    ylabel = "Flux",
+    xticks = (1:length(parameters), string.(parameters)),
+    xlabelsize=6pt,
+    ylabelsize=6pt,
+    xticklabelsize=5pt,
+    yticklabelsize=5pt,
+)
+hm = heatmap!(
+    ax,
+    sens[flux_idxs,:]';
+    colormap = reverse(ColorSchemes.RdBu),
+    colorrange = (-0.25,0.25)
+)
+Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
+f
+
+using Clustering
+
+# cluster flux sensitivity into 10 clusters using K-means
+R = kmeans(sens[flux_idxs,:]',15; maxiter=400,display=:iter)
+
+a = assignments(R) # get the assignments of points to clusters
+
+
+xtickvals = [i for (i,j) in sens[flux_idxs,:]' if abs(sum(sens[flux_idxs,i]')/248)>0.01]
+
+xtickvals = []
+for i in axes(sens[flux_idxs,:]',1)
+    if abs(sum(sens[flux_idxs,:]'[i,:])/248)>0.009
+        push!(xtickvals,i)
+    end
+end
+xtickvals
+
+f = Figure(; size=(30cm,25cm))#, backgroundcolor=:transparent)
+ax = Axis(
+    f[1,1],
+    xlabel = "Turnover number",
+    xticklabelrotation = -pi / 3,
+    ylabel = "Flux",
+    xticks = (xtickvals, string.(parameters[xtickvals])),
+    xlabelsize=7pt,
+    ylabelsize=7pt,
+    xticklabelsize=6pt,
+    yticklabelsize=6pt,
+)
+hm = heatmap!(
+    ax,
+    sens[flux_idxs,:]'[:,sortperm(a)];
+    colormap = reverse(ColorSchemes.RdBu),
+    colorrange = (-0.25,0.25)
+)
+Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
+f
+

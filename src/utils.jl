@@ -223,15 +223,20 @@ function change_reaction_names(model)
     for (r, rxn) in model.reactions
         startswith(r,"EX") && continue
         g_name = ""
-        if !isnothing(rxn.annotations) && haskey(rxn.annotations, "EC")
-            for ec in split(rxn.annotations["EC"][1])
-                g_name *= "$ec, "
-            end
-        end
+        # if !isnothing(rxn.annotations) && haskey(rxn.annotations, "EC")
+        #     for ec in split(rxn.annotations["EC"][1])
+        #         g_name *= "$ec, "
+        #     end
+        # end
         if !isnothing(rxn.gene_association_dnf)
             rxn.gene_association_dnf == [["g1"]] && continue
             for g in unique([eggnog_dict[tag_id[g]] for g in vcat(rxn.gene_association_dnf...)])
-                g_name *= "$g, "
+                g == "-" && continue
+                if g_name == "" 
+                    g_name *= "$g"
+                else 
+                    g_name *=", $g"
+                end
             end
         end
         rhea_id_gene_id[r] = g_name

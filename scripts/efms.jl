@@ -34,7 +34,7 @@ model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
-    ("membrane", membrane_gids, 110.0)
+    ("membrane", membrane_gids, 120.0)
 ];
 
 
@@ -45,27 +45,6 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     capacity,
     optimizer=HiGHS.Optimizer,
 )
-# ec_sol.gene_product_capacity
-
-# open("data/fluxes.json","w") do io 
-#     JSON.print(io,ec_sol.fluxes)
-# end
-# C.pretty(
-#     C.ifilter_leaves(ec_sol.fluxes) do ix, x
-#         abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
-#     end; 
-#     format_label = x -> A.reaction_name(model, string(last(x))),
-# )
-# # atp-producing rxns
-# C.pretty(
-#     C.ifilter_leaves(ec_sol.fluxes) do ix, x
-#         abs(x) > 1e-5 && 
-#             haskey(model.reactions[string(last(ix))].stoichiometry,"CHEBI:30616") && 
-#             ((model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] > 0 && x > 1e-5) || 
-#             (model.reactions[string(last(ix))].stoichiometry["CHEBI:30616"] < 0 && x < -1e-5))
-#     end; 
-#     format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
-# )
 
 
 pruned_model, pruned_reaction_isozymes = D.prune_model(
@@ -87,14 +66,7 @@ pruned_sol = enzyme_constrained_flux_balance_analysis(
     optimizer=HiGHS.Optimizer,
 )
 
-# diff_flux = Dict(string(x)=>[y-abs(ec_sol.fluxes[x])] for (x,y) in pruned_sol.fluxes if abs(abs(y)-abs(ec_sol.fluxes[x]))>1e-5)
 
-#pruned_sol.gene_product_capacity
-
-# sum([pruned_sol.gene_product_amounts[g]*gene_product_molar_masses[g] for g in membrane_gids if haskey(pruned_sol.gene_product_amounts,g)])
-# sum([e*gene_product_molar_masses[string(g)] for (g,e) in pruned_sol.gene_product_amounts if string(g) ∉ membrane_gids])
-
-#### calculate efms 
 # calculate EFMs
 N = A.stoichiometry(pruned_model)
 
@@ -134,8 +106,8 @@ for (x,y) in OFM_dicts[1]
             ofm_df,
             [
                 A.metabolite_name(model,"CHEBI:"*string(split(x,"_")[2])),
-                round(y,sigdigits=4),
-                round(OFM_dicts[2][x],sigdigits=4)
+                round(y,sigdigits=3),
+                round(OFM_dicts[2][x],sigdigits=3)
             ])
     end
 end
@@ -146,14 +118,14 @@ latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
 # df of big difference reactions 
 ofm_df = DataFrame(Reaction=String[],Name=String[],OFM_1=Float64[],OFM_2=Float64[])
 for (x,y) in OFM_dicts[1]
-    if abs(y - OFM_dicts[2][x])/y > 1 || abs(y - OFM_dicts[2][x])/OFM_dicts[2][x] > 0.75
+    if abs(y - OFM_dicts[2][x])/y > 0.3 || abs(y - OFM_dicts[2][x])/OFM_dicts[2][x] > 0.3
         push!(
             ofm_df,
             [
                 x,
                 isnothing(A.reaction_name(model,x)) ? A.reaction_name(escher_model,x) : A.reaction_name(model,x),
-                round(y,sigdigits=4),
-                round(OFM_dicts[2][x],sigdigits=4)
+                round(y,sigdigits=3),
+                round(OFM_dicts[2][x],sigdigits=3)
             ]
         )
     end
@@ -161,6 +133,18 @@ end
 ofm_df
 sort!(ofm_df,:OFM_1)
 latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
+
+# OFM fluxes for escher:
+ofm_escher = Dict(
+    x => OFM_dicts[1][x] - y for (x,y) in OFM_dicts[2]
+)
+
+open("data/ofm_fluxes.json","w") do io 
+    JSON.print(io,ofm_escher)
+end
+
+escher_model = change_reaction_names(pruned_model)
+save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/pruned_escher_model.json")
 
 
 
@@ -211,8 +195,6 @@ data = (
     height2=abs.([c[1] < 0 ? c[1] : c[2] for c in eachcol(scaled_sens[:, order])]),
     grp1=[c[1] > 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])],
     grp2=[c[1] < 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])]
-    #grp1 = [x == "cytosol" ? 1 : 2 for x in grp],
-    #grp2 = [x == "membrane" ? 2 : 1 for x in grp],
 )
 ax1 = Axis(
     f[1, 1], 
@@ -225,6 +207,7 @@ ax1 = Axis(
     ygridvisible=false,
     yticksvisible = false,
     xscale = log10,
+    xticks = ([1,0.01,0.0001],[L"-10^0",L"-10^{-2}",L"-10^{-4}"]),
 )
 ax2 = Axis(
     f[1, 2], 
@@ -236,9 +219,10 @@ ax2 = Axis(
     yticklabelsize=8pt,
     xgridvisible=false,
     ygridvisible=false,
+    xticks = ([0.0001,0.01,1],[L"-10^{-4}",L"-10^{-2}",L"-10^0",]),
     xscale = log10,
     yticksvisible = false,
-    yticks = ([findlast(x -> x == 2, data.grp1)/2,length(filter(g->g==1,data.grp1))/2+findlast(x -> x == 2, data.grp1)],[L"\textbf{Membrane   }\;", L"\textbf{Cytosol   }\;"]),
+    yticks = ([findlast(x -> x == 2, data.grp1)/2,length(filter(g->g==1,data.grp1))/2+findlast(x -> x == 2, data.grp1)],[L"\textbf{Cytosol   }\;", L"\textbf{Membrane   }\;"]),
     #yticklabelrotationion = π/2
 )
 hideydecorations!(ax1, grid = false)
@@ -246,9 +230,9 @@ linkyaxes!(ax1, ax2)
 colgap!(f.layout, 0)
 barplot!(ax1, data.x, data.height1, direction = :x, color = colors[data.grp1], label = "OFM 1: Respiratory")
 barplot!(ax2, data.x, data.height2, direction = :x, color = colors[data.grp2], label = "OFM 2: Fermentative")
-xlims!(ax1, [10,8e-6])
+xlims!(ax1, [10,5e-6])
 xlims!(ax2, [2e-6,20])
-labels = [L"\textbf{Respiratory OFM}", L"\textbf{Fermentative OFM}"]
+labels = [L"\textbf{H2O OFM}", L"\textbf{CO2 OFM}"]
 elements = [MarkerElement(marker=:hline,color=colors[2],markersize=12), MarkerElement(marker=:hline,color=colors[1],markersize=12)]
 Legend(
     f[1, 1],
@@ -262,9 +246,9 @@ Legend(
     margin = (16,0,0,0),
     framevisible = false
 )
-bracket!(ax1, 8e-6, 0, 8e-6, findlast(x -> x == 2, data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
-bracket!(ax1, 8e-6, findlast(x -> x == 2, data.grp1), 8e-6, length(data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+bracket!(ax1, 5e-6, 0, 5e-6, findlast(x -> x == 2, data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+bracket!(ax1, 5e-6, findlast(x -> x == 2, data.grp1), 5e-6, length(data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
 Label(f[2,:],L"\textbf{OFM Sensitivity: }\frac{p}{\lambda}\frac{\partial \lambda}{\partial p}")
-f
+display(f)
 
 save("data/plots/ofm.png", f, px_per_unit = 1200/inch)
