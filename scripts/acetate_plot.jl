@@ -130,3 +130,13 @@ vols[337]
 ac_flux[337]
 
 save("data/plots/acetate_exchange.png",f,px_per_unit = 1200/inch)
+
+
+model_ac = load_model("data/model_ac.json")
+
+directions = Dict(
+    rxn["id"] => (isnothing(rxn["lower_bound"]) ? -Inf : rxn["lower_bound"],isnothing(rxn["upper_bound"]) ? Inf : rxn["upper_bound"]) for rxn in model_ac.reactions
+)
+
+Dict(r => ([rxn.lower_bound,rxn.upper_bound],[first(directions[r]),last(directions[r])]) for (r,rxn) in model.reactions if first(directions[r]) != rxn.lower_bound || last(directions[r]) != rxn.upper_bound)
+
