@@ -1,6 +1,6 @@
 CHEBI,Name
 CHEBI:15379,oxygen
-CHEBI:43474,phosphoric acid
+CHEBI:43474,phosphate
 CHEBI:15903,beta-D-glucose
 CHEBI:28938,nh4(+)
 CHEBI:35235,L-cysteine
@@ -8,4 +8,3 @@ CHEBI:32682,L-arginine
 CHEBI:57986,riboflavin
 CHEBI:47013,D-ribose
 CHEBI:17154,nicotinimide
-CHEBI:15378,H+

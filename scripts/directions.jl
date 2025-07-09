@@ -8,15 +8,13 @@ using HiGHS, JSON
 using JSONFBCModels
 
 model, reaction_isozymes = build_model()
-
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 
-model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
+ model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
-model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
-model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
-model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
+# model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
+# model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
+ model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
 
 
 capacity = [
@@ -61,7 +59,7 @@ for (r,rxn) in model.reactions
     abs(sol.fluxes["EX_30089"]) < 1e-4 && continue
     ac_flux[r] = [sol.fluxes["EX_30089"]]
     biomass[r] = [sol.objective]
-    model.reactions["biomass"].upper_bound = copy(sol.objective)/10
+    model.reactions["biomass"].upper_bound = 1
     sol_new = enzyme_constrained_flux_balance_analysis(
         model;
         reaction_isozymes,
@@ -71,7 +69,7 @@ for (r,rxn) in model.reactions
     )
     push!(ac_flux[r],sol_new.fluxes["EX_30089"])
     push!(biomass[r],sol_new.objective)
-    model.reactions["biomass"].upper_bound = copy(sol_new.objective)/10
+    model.reactions["biomass"].upper_bound = 0.2
     new_sol = enzyme_constrained_flux_balance_analysis(
         model;
         reaction_isozymes,
@@ -88,11 +86,11 @@ end
 
 ac_rxns = [x for (x,y) in ac_flux if abs(y[3])<1e-3 && !haskey(model.reactions[x].stoichiometry,"CHEBI:30616")]
 
-open("maybe_bidirectional.JSON","w") do io 
+open("maybe_bidirectional2.JSON","w") do io 
     JSON.print(io,ac_rxns)
 end
 
-ac_rxns = JSON.parsefile("maybe_bidirectional.JSON")
+ac_rxns = JSON.parsefile("maybe_bidirectional2.JSON")
 filter!(r -> !haskey(model.reactions[r].stoichiometry,"CHEBI:30616"),ac_rxns)
 inch = 96
 pt = 4/3
@@ -104,7 +102,6 @@ set_theme!(figure_padding=3)
 #try changing the bound of a rxn and making the ac plot
 i = 0
 for r in ac_rxns 
-    r != "10255" && continue
     i += 1
     lb = copy(model.reactions[r].lower_bound)
     ub = copy(model.reactions[r].upper_bound)
@@ -116,15 +113,15 @@ for r in ac_rxns
 
     vols = 0.1:0.4:3
     for biomass in vols
-        model.reactions["biomass"].upper_bound = biomass
-        model.reactions["biomass"].lower_bound = biomass-0.1
-
-        ec_sol = enzyme_constrained_flux_balance_analysis(
-            model;
-            reaction_isozymes,
-            gene_product_molar_masses,
-            capacity,
-            optimizer=HiGHS.Optimizer,
+        model.reactions["biomass"].lower_bound = biomass 
+        model.reactions["biomass"].upper_bound = biomass+0.01
+        ct = enzyme_constrained_flux_balance_constraints(model;reaction_isozymes,gene_product_molar_masses,capacity)
+        
+        ec_sol = optimized_values(
+            ct;
+            optimizer = HiGHS.Optimizer,
+            objective = sum_value(ct.gene_product_amounts),
+            sense = Minimal
         )
         push!(ac_flux,ec_sol.fluxes["EX_30089"])
     end

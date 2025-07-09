@@ -1,0 +1,144 @@
+using StaphylococcusAureus
+import AbstractFBCModels as A
+import AbstractFBCModels.CanonicalModel as CM
+import ConstraintTrees as C
+using COBREXA
+using CairoMakie
+using HiGHS, JSON
+using JSONFBCModels
+
+model, reaction_isozymes = build_model();
+gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
+capacity = [
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+    ("membrane", membrane_gids, 120.0)
+];
+#model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
+#model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
+#model.reactions["EX_15589"].lower_bound = 0 #block (S)-malate exchange
+model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
+model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
+#model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
+#model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
+#model.reactions["EX_17544"].lower_bound = 0 #block hydrogencarbonate exchange
+
+
+ct = enzyme_constrained_flux_balance_constraints(model;reaction_isozymes,gene_product_molar_masses,capacity);
+ec_sol = optimized_values(
+    ct;
+    optimizer = HiGHS.Optimizer,
+    objective = ct.objective.value,
+    sense = Maximal
+);
+ec_sol.objective
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+
+
+model.reactions["biomass"].upper_bound = 1
+ct = enzyme_constrained_flux_balance_constraints(model;reaction_isozymes,gene_product_molar_masses,capacity);
+ec_sol = optimized_values(
+    ct;
+    optimizer = HiGHS.Optimizer,
+    objective = sum_value(ct.gene_product_amounts),
+    sense = Minimal
+);
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+
+
+
+
+
+
+
+
+
+
+
+
+ac_flux = Float64[]
+max_growth = copy(ec_sol.objective)
+exchanges = String[]
+bio_iter = 0:0.05:max_growth
+for bio in bio_iter
+    model.reactions["biomass"].lower_bound = bio 
+    model.reactions["biomass"].upper_bound = bio+0.01
+    ct = enzyme_constrained_flux_balance_constraints(model;reaction_isozymes,gene_product_molar_masses,capacity)
+    
+    ec_sol = optimized_values(
+        ct;
+        optimizer = HiGHS.Optimizer,
+        objective = sum_value(ct.gene_product_amounts),
+        sense = Minimal
+    )
+    push!(ac_flux,ec_sol.fluxes["EX_30089"])
+    append!(exchanges,[string(r) for (r,v) in ec_sol.fluxes if startswith(string(r),"EX") && v<0 && string(r) ∉ exchanges])
+end
+ac_flux
+[A.reaction_name(model,r) for r in exchanges]
+inch = 96
+pt = 4/3
+cm = inch / 2.54
+
+set_theme!(figure_padding=3)
+
+f = Figure(; size=(10cm, 6cm))
+
+ax = Axis(
+    f[1,1];
+    backgroundcolor=:transparent,
+    xlabel = "Growth rate (gDW/h)",
+    ylabel = "Acetate exchange rate (mMol/gDW/h)",
+    xlabelsize=6pt,
+    ylabelsize=6pt,
+    xticklabelsize=5pt,
+    yticklabelsize=5pt,
+    #xticks = [0,0.5,1,1.5,2,2.5],
+    ygridvisible=false,
+    xgridvisible=false,
+)
+lines!(
+    ax,
+    bio_iter,
+    abs.(round.(ac_flux)),
+    label = "Membrane: 120mg/gDW",
+    color = :red,
+    linestyle = :dash,
+    linewidth=2.5
+
+)
+axislegend(
+    ax,
+    position=:lt,
+    labelsize = 5pt,
+)
+display(f)
+
+
+model.reactions["biomass"].lower_bound = 1 ;
+model.reactions["biomass"].upper_bound = 1.01;
+model.reactions["biomass"].objective_coefficient = 0
+ct = enzyme_constrained_flux_balance_constraints(model;reaction_isozymes,gene_product_molar_masses,capacity);
+
+ec_sol = optimized_values(
+    ct;
+    optimizer = HiGHS.Optimizer,
+    objective = sum_value(ct.gene_product_capacity),
+    sense = Minimal
+);
+ec_sol.fluxes["EX_30089"]
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)

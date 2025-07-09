@@ -240,9 +240,6 @@ R = kmeans(sens[flux_idxs,:]',15; maxiter=400,display=:iter)
 
 a = assignments(R) # get the assignments of points to clusters
 
-
-xtickvals = [i for (i,j) in sens[flux_idxs,:]' if abs(sum(sens[flux_idxs,i]')/248)>0.01]
-
 xtickvals = []
 for i in axes(sens[flux_idxs,:]',1)
     if abs(sum(sens[flux_idxs,:]'[i,:])/248)>0.009
