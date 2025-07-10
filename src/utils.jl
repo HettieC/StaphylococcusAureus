@@ -254,7 +254,7 @@ export change_reaction_names
 """
 $(TYPEDSIGNATURES)
 
-Add source reactions to the model, allow bidirectional.
+Add source reactions to the model.
 """
 function add_sources!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sources.csv"))
@@ -265,7 +265,7 @@ function add_sources!(model)
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
-            lower_bound = -1000,
+            lower_bound = 0,
             upper_bound = 1000.0,
             stoichiometry = Dict(mid => 1),
         )
@@ -287,7 +287,6 @@ function add_sinks!(model)
         mid = row.CHEBI
         chebi = split(row.CHEBI,':')[2]
         mid *= "_e"
-        haskey(model.reactions,"EX_$chebi") && continue
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",

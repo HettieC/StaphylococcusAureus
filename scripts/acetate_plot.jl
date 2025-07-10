@@ -7,25 +7,22 @@ using CairoMakie
 using HiGHS, JSON
 using JSONFBCModels
 
-model, reaction_isozymes = build_model();
+model, reaction_isozymes = build_model()
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
-model.reactions["EX_15589"].lower_bound = 0 #block (S)-malate exchange
 model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
 model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
-model.reactions["EX_17544"].lower_bound = 0 #block hydrogencarbonate exchange
+model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
+model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
     ("membrane", membrane_gids, 120.0)
 ];
-
-
 ec_sol = enzyme_constrained_flux_balance_analysis(
     model;
     reaction_isozymes,
@@ -33,16 +30,9 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     capacity,
     optimizer=HiGHS.Optimizer,
 )
-C.pretty(
-    C.ifilter_leaves(ec_sol.fluxes) do ix, x
-        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
-    end; 
-    format_label = x -> A.reaction_name(model, string(last(x))),
-)
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
-exchanges = String[]
-vols = 0.1:0.1:3.8
+vols = 0.1:0.05:3.7
 bounds = Vector{Tuple{Float64,Float64}}()
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
@@ -56,11 +46,8 @@ for biomass in vols
         optimizer=HiGHS.Optimizer,
     )
     push!(ac_flux,ec_sol.fluxes["EX_30089"])
-    append!(exchanges,[string(r) for (r,v) in ec_sol.fluxes if startswith(string(r),"EX") && v<0 && string(r) ∉ exchanges])
     push!(bounds,(ec_sol.gene_product_capacity.membrane,ec_sol.gene_product_capacity.cytosol))
 end
-ac_flux
-[A.reaction_name(model,r) for r in exchanges]
 model.reactions["biomass"].lower_bound = 0 
 model.reactions["biomass"].upper_bound = 1000
 capacity = [
@@ -75,7 +62,7 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     optimizer=HiGHS.Optimizer,
 )
 ac_flux_2 = Float64[]
-vols_2 = 0.1:0.1:1.8
+vols_2 = 0.1:0.05:1.82
 bounds_2 = Vector{Tuple{Float64,Float64}}()
 for biomass in vols_2
     model.reactions["biomass"].upper_bound = biomass
@@ -116,7 +103,7 @@ ax = Axis(
 lines!(
     ax,
     vols_2,
-    abs.(round.(ac_flux_2)),
+    abs.(round.(ac_flux_2))./vols_2,
     label = "Membrane: 60mg/gDW",
     linewidth=2.5
 
@@ -124,7 +111,7 @@ lines!(
 lines!(
     ax,
     vols,
-    abs.(round.(ac_flux)),
+    abs.(round.(ac_flux))./vols,
     label = "Membrane: 120mg/gDW",
     color = :red,
     linestyle = :dash,
@@ -139,15 +126,7 @@ axislegend(
 )
 display(f)
 
+vols[337]
+ac_flux[337]
 
 save("data/plots/acetate_exchange.png",f,px_per_unit = 1200/inch)
-
-
-model_ac = load_model("data/model_ac.json")
-
-directions = Dict(
-    rxn["id"] => (isnothing(rxn["lower_bound"]) ? -Inf : rxn["lower_bound"],isnothing(rxn["upper_bound"]) ? Inf : rxn["upper_bound"]) for rxn in model_ac.reactions
-)
-
-Dict(r => ([rxn.lower_bound,rxn.upper_bound],[first(directions[r]),last(directions[r])]) for (r,rxn) in model.reactions if first(directions[r]) != rxn.lower_bound || last(directions[r]) != rxn.upper_bound)
-
