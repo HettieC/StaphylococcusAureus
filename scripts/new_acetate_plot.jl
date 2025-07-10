@@ -8,6 +8,71 @@ using HiGHS, JSON
 using JSONFBCModels
 
 model, reaction_isozymes = build_model();
+
+model.reactions["EX_15903"].upper_bound = 10 #glucose
+model.reactions["EX_47013"].upper_bound = 0 #ribose
+model.reactions["EX_28938"].lower_bound = 0 #nh4+
+model.reactions["EX_15378"].lower_bound = 0 #H+
+
+fba_sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+C.pretty(
+    C.ifilter_leaves(fba_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+fba_sol.fluxes["EX_30089"]
+
+open("data/fluxes.json","w") do io 
+    JSON.print(io,fba_sol.fluxes)
+end
+
+
+
+
+
+rids = filter(x -> !startswith(x, "EX_") && x != "biomass", A.reactions(model))
+unbal_rids = String[]
+for rid in rids
+    s = A.reaction_stoichiometry(model, rid)
+    m = Dict()
+    for (k, v) in s
+        isnothing(A.metabolite_formula(model, k)) && continue
+        for (kk, vv) in A.metabolite_formula(model, k)
+            m[kk] = get(m, kk, 0) + vv * v
+        end
+    end
+    m
+    all(values(m) .== 0) || push!(unbal_rids, rid)
+end
+unbal_rids
+
+rid = "10580"
+s = A.reaction_stoichiometry(model, rid)
+m = Dict()
+for (k, v) in s
+    isnothing(A.metabolite_formula(model, k)) && continue
+    for (kk, vv) in A.metabolite_formula(model, k)
+        m[kk] = get(m, kk, 0) + vv * v
+    end
+end
+m
+
+
+
+#asparagine
+C.pretty(
+    C.ifilter_leaves(fba_sol.fluxes) do ix, x
+        abs(x) > 1e-5 && 
+            haskey(model.reactions[string(last(ix))].stoichiometry,"CHEBI:58048") && 
+            ((model.reactions[string(last(ix))].stoichiometry["CHEBI:58048"] > 0 && x > 1e-5) || 
+            (model.reactions[string(last(ix))].stoichiometry["CHEBI:58048"] < 0 && x < -1e-5))
+    end; 
+    format_label = x -> (string(last(x)),A.reaction_name(model, string(last(x)))),
+)
+Dict(r => rxn.name for (r,rxn) in model.reactions if haskey(rxn.stoichiometry,"CHEBI:58048"))
+
+model.reactions["EX_15903"].upper_bound = 1000
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),

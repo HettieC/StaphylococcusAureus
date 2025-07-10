@@ -36,7 +36,9 @@ function build_model()
     add_fake_isozymes!(model,reaction_isozymes)
     add_genes!(model)
     add_names_pathways!(model)
+    annotate_metabolite_masses!(model)
     scale_biomass!(model)
+    # reaction_isozymes["ABC_15903"] curate
     return model, reaction_isozymes
 end
 export build_model

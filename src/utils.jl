@@ -4,29 +4,16 @@ $(TYPEDSIGNATURES)
 Parse the chemical formula from a RheaReaction.formula
 """
 function parse_formula(x::Union{Nothing,String})
-    if isnothing(x)
-        return nothing
-    elseif occursin("(", x)
-        first_part = split(x, '(')[1]
-        last_part = split(split(x, '(')[2], ')')[1]
-        fla = Dict(
-            string(atom.match) => parse.(Int, replace(split(first_part, r"[A-Za-z]+"), "" => "1")[2:end])[i] for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", first_part))
-        )
-        for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", last_part))
-            if haskey(fla, atom.match)
-                fla[atom.match] += 7 * parse.(Int, replace(split(last_part, r"[A-Za-z]+"), "" => "1")[2:end])[i]
-            else
-                fla[atom.match] = 7 * parse.(Int, replace(split(last_part, r"[A-Za-z]+"), "" => "1")[2:end])[i]
-            end
-        end
-    else
-        fla = Dict(
-            string(atom.match) => parse.(Int, replace(split(x, r"[A-Za-z]+"), "" => "1")[2:end])[i] for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", x))
-        )
-    end
-    return fla
-end
+    isnothing(x) && return nothing
+    x == "" && return nothing
 
+    res = Dict{String,Int}()
+    pattern = @r_str "([A-Z][a-z]*)([1-9][0-9]*)?"
+    for m in eachmatch(pattern, x)
+        res[m.captures[1]] = isnothing(m.captures[2]) ? 1 : parse(Int, m.captures[2])
+    end
+    return res
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -36,117 +23,100 @@ Add metabolic reactions to the model.
 function extend_model!(model, dfs)
 
     gs = String[]
-    ms = RheaReactions.RheaMetabolite[]
+    ms = String[]
 
     for df in dfs
 
-        rid = parse(Int64, split(first(df.RHEA_ID), ':')[2])
+        rid = first(df.RHEA_ID)
+        rid = split(rid,":")[2]
         grr = String.(df.Protein[:])
-        stoich = Int.(df.Stoichiometry[:])
+        grr = String.(df.Protein[:])
         append!(gs, grr)
 
         if haskey(model.reactions, string(rid)) # isozyme
-
             push!(model.reactions[string(rid)].gene_association_dnf, grr)
 
         else # first time seeing this reaction
-            rxn = get_reaction(rid)
-            coeff_mets = get_reaction_metabolites(rid)
-            stoichiometry = Dict(
-                string(v.accession) => s
-                for (s, v) in coeff_mets
+
+           rxn = nothing 
+            try 
+                rxn = get_reaction(rid; verbose = false)
+            catch 
+                println("$rid")
+                continue           
+            end
+
+            stoichiometry = rxn.stoichiometry
+            append!(ms, collect(keys(stoichiometry)))
+            ecs = [first(df.EC)] 
+            model.reactions[string(rid)] = CM.Reaction(;
+                lower_bound = -1000.0, # reversible by default
+                upper_bound = 1000.0,
+                gene_association_dnf = [grr],
+                stoichiometry = stoichiometry,
+                annotations = Dict(
+                    "rhea-reaction-description" => [rxn.equation],
+                    "EC" => ecs,
+                    "KEGG" => [first(df.KEGG_ID)]
+                ),
             )
 
-            append!(ms, last.(coeff_mets))
+        end
+    end
+    append!(ms,["61684","44027"])
+    add_genes!(model, gs)
+    add_metabolites!(model, ms)
+end
 
-            ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
-            name = rxn.name
+function add_genes!(model, gs)
+    for g in unique(gs)
+        haskey(model.genes, g) || begin
+            model.genes[g] = CM.Gene(;)
+        end
+    end
+end
 
-            # #direction 
-            # reversibility_index_threshold = 5 
-            # rev_ind = ismissing(first(df.RevIndex)) ? nothing : first(df.RevIndex) 
-
-            # if isnothing(rev_ind) || (abs(rev_ind) <= reversibility_index_threshold)
-            #     lb = -1000
-            #     ub = 1000
-            # elseif rev_ind < -reversibility_index_threshold # forward
-            #     lb = 0
-            #     ub = 1000
-            # elseif rev_ind > reversibility_index_threshold # reverse
-            #     lb = -1000
-            #     ub = 0
-            # end
-
-
-            model.reactions[string(rid)] = CM.Reaction(;
-                name=name,
-                lower_bound = -1000,
-                upper_bound = 1000,
-                stoichiometry = stoichiometry,
-                gene_association_dnf = [grr],
-                annotations = Dict(
-                    "REACTION" => [rxn.equation],
-                    "EC" => ecs,
-                    "KEGG" => unique(df.KEGG_ID)
-                ),
+function add_metabolites!(model, ms)
+    for m in ms
+        haskey(model.metabolites, m) || begin
+            met = get_metabolite(m)
+            model.metabolites[m] = CM.Metabolite(;
+                name = met.name,
+                formula = parse_formula(met.formula),
+                charge = met.charge,
+                compartment = "Cytosol",
             )
         end
     end
-
-    # add metabolites 
-    for m in ms
-        haskey(model.metabolites, m.accession) && continue
-        model.metabolites[m.accession] = CM.Metabolite(
-            m.name,
-            nothing,
-            parse_formula(m.formula),
-            m.charge,
-            0.0,
-            Dict{String,Vector{String}}(),
-            Dict{String,Vector{String}}(),
-        )
-    end
-
-    # add genes
-    for g in gs
-        haskey(model.genes, g) && continue
-        model.genes[g] = CM.Gene(; name=g)
-    end
-
-    return model
-
 end
+
 
 function gapfill!(model)
 
     df = DataFrame(CSV.File("data/model/reactions/gapfilling_reactions.csv"))
-    ms = RheaReactions.RheaMetabolite[]
+    ms = String[]
 
     for row in eachrow(unique(df))
         rid = parse(Int64, split(row.RHEA_ID, ':')[2])
         haskey(model.reactions, string(rid)) && continue
 
-        rxn = get_reaction(rid)
+        rxn = nothing 
+        try 
+            rxn = get_reaction(rid; verbose = false)
+        catch 
+            println("$rid")
+            continue           
+        end        
+        stoichiometry = rxn.stoichiometry
+        append!(ms, collect(keys(stoichiometry)))
 
-        coeff_mets = get_reaction_metabolites(rid)
-
-        stoichiometry = Dict(
-            string(v.accession) => s
-            for (s, v) in coeff_mets
-        )
-
-        append!(ms, last.(coeff_mets))
-
-        ecs = isnothing(rxn.ec) ? [row.EC] : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
-        name = rxn.name
-
+        ecs = [row.EC]
         model.reactions[string(rid)] = CM.Reaction(;
-            name=name,
             lower_bound=-1000.0,
             upper_bound=1000.0,
             stoichiometry=stoichiometry,
             annotations=Dict(
-                "REACTION" => [rxn.equation],
+                "rhea-reaction-description" => [rxn.equation],
                 "EC" => ecs,
                 "KEGG" => [string(row.KEGG_ID)]
             ),
@@ -158,18 +128,7 @@ function gapfill!(model)
     end
 
     # add metabolites 
-    for m in ms
-        haskey(model.metabolites, m.accession) && continue
-        model.metabolites[m.accession] = CM.Metabolite(
-            m.name,
-            nothing,
-            parse_formula(m.formula),
-            m.charge,
-            0.0,
-            Dict{String,Vector{String}}(),
-            Dict{String,Vector{String}}(),
-        )
-    end
+    add_metabolites!(model, ms)
 
     model
 end
@@ -259,18 +218,20 @@ Add source reactions to the model.
 function add_sources!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sources.csv"))
     for row in eachrow(df)
-        mid = row.CHEBI
-        chebi = split(mid,":")[2]
-        mid *= "_e"
-        model.reactions["EX_$chebi"] = CM.Reaction(
+        mid = string(split(row.CHEBI,":")[2])
+        if !haskey(model.metabolites,mid)
+            println("$(mid) not in model")
+            continue
+        end
+        model.reactions["EX_$(mid)"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
-            lower_bound = 0,
+            lower_bound = -1000,
             upper_bound = 1000.0,
-            stoichiometry = Dict(mid => 1),
+            stoichiometry = Dict(mid*"_e" => 1),
         )
-        model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
-        model.metabolites[mid].compartment = "external"
+        model.metabolites[mid*"_e"] = deepcopy(model.metabolites[mid])
+        model.metabolites[mid*"_e"].compartment = "external"
     end
     model
 end
@@ -278,24 +239,28 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add source reactions to the model.
+Add sink reactions to the model.
 """
 function add_sinks!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sinks.csv"))
 
     for row in eachrow(df)
-        mid = row.CHEBI
+        mid = string(split(row.CHEBI,":")[2])
+        if !haskey(model.metabolites,mid)
+            println("$(mid) not in model")
+            continue
+        end
         chebi = split(row.CHEBI,':')[2]
-        mid *= "_e"
-        model.reactions["EX_$chebi"] = CM.Reaction(
+        haskey(model.reactions,"EX_$chebi") && continue
+        model.reactions["EX_$(mid)"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
             lower_bound = -1000.0,
             upper_bound = 0.0,
-            stoichiometry = Dict(mid => 1),
+            stoichiometry = Dict(mid*"_e" => 1),
         )
-        model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
-        model.metabolites[mid].compartment = "external"
+        model.metabolites[mid*"_e"] = deepcopy(model.metabolites[mid])
+        model.metabolites[mid*"_e"].compartment = "external"
     end
     model
 end
@@ -320,11 +285,9 @@ function add_oxphos!(model)
 
         append!(ms, last.(coeff_mets))
 
-        ecs = isnothing(rxn.ec) ? [row.EC] : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
-        name = rxn.name
+        ecs = [row.EC]
 
         model.reactions[string(rid)] = CM.Reaction(;
-            name=name,
             lower_bound=-1000.0,
             upper_bound=1000.0,
             stoichiometry=stoichiometry,
@@ -584,7 +547,34 @@ end
 function add_names_pathways!(model)
     dic = Dict(x => y for (x,y) in JSON.parsefile("data/model/reactions/kegg_names_pathways.json"))
     for (x,y) in dic
+        !haskey(model.reactions,x) && continue
         model.reactions[x].name = y[1] 
         model.reactions[x].annotations["Pathway"] = y[2] == [""] ? [""] : [string(split(p,"  ")[2])*"; " for p in y[2]]
     end
 end
+
+function annotate_metabolite_masses!(model)
+    chebi_mass = Dict{String,Float64}()
+    open("data/databases/chebi/chebi_core.obo","r") do io 
+        i = 0
+        chebi = "" 
+        mass = 0
+        for ln in eachline(io)
+            i += 1
+            i < 20 && continue
+            if startswith(ln,"id: ")
+                chebi = string(split(ln,"id: ")[2])
+            elseif startswith(ln,"property_value: http://purl.obolibrary.org/obo/chebi/mass ")
+                mass = parse(Float64,split(ln)[3][2:end-1])    
+            elseif ln == "[Term]"
+                chebi_mass[chebi] = mass
+            end
+        end
+    end
+    for (m,met) in model.metabolites 
+        !haskey(chebi_mass,"CHEBI:"*m) && continue
+        model.metabolites[m].annotations["molarmass"] = ["$(chebi_mass["CHEBI:"*m])"]
+    end
+    return model 
+end
+

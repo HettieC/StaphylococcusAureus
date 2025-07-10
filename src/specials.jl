@@ -1,6 +1,6 @@
 function add_electron_transport_chain!(model)
 
-    model.metabolites["CHEBI:15378_p"] = CM.Metabolite(;
+    model.metabolites["15378_p"] = CM.Metabolite(;
         name="H(+) periplasm",
         formula=Dict("H" => 1),
         charge=1,
@@ -10,16 +10,16 @@ function add_electron_transport_chain!(model)
     model.reactions["Ndh2"] = CM.Reaction(;
         name="NADH dehydrogenase II",
         stoichiometry=Dict(
-            "CHEBI:57945" => -1, #NADH 
-            "POLYMER:9537" => -1, #a menaquinone,
-            "CHEBI:15378" => -1, #H+
-            "CHEBI:57540" => 1, #NAD+ 
-            "POLYMER:9539" => 1, #a menaquinol 
+            "57945" => -1, #NADH 
+            "44027" => -1, #menaquinone-8,
+            "15378" => -1, #H+
+            "57540" => 1, #NAD+ 
+            "61684" => 1, #menaquinol-8 
         ),
         lower_bound = 0.0,
         annotations=Dict(
             "CM.Reaction" => [
-                "NADH + menaquinone + H+ = NAD+ + menaquinol"
+                "NADH + menaquinone-8 + H+ = NAD+ + menaquinol-8"
             ]
         ),
         gene_association_dnf = [
@@ -30,12 +30,12 @@ function add_electron_transport_chain!(model)
     model.reactions["Sdh"] = CM.Reaction(;
         name="Succinate dehydrogenase",
         stoichiometry=Dict(
-            "CHEBI:57945" => -1, #NADH 
-            "CHEBI:30031" => -1, #succinate,
-            "CHEBI:15378" => -1, #H+
-            "CHEBI:57540" => 1, #NAD+ 
-            "CHEBI:29806" => 1, #fumarate 
-            "CHEBI:15378_p" => 1, #H+ periplasm
+            "57945" => -1, #NADH 
+            "30031" => -1, #succinate,
+            "15378" => -1, #H+
+            "57540" => 1, #NAD+ 
+            "29806" => 1, #fumarate 
+            "15378_p" => 1, #H+ periplasm
         ),
         lower_bound = 0.0,
         annotations=Dict(
@@ -51,15 +51,15 @@ function add_electron_transport_chain!(model)
     model.reactions["Mqo"] = CM.Reaction(;
         name="Malate:quinone oxidoreductase",
         stoichiometry=Dict(
-            "POLYMER:9537" => -1, #a menaquinone 
-            "CHEBI:15589" => -1, #malate,
-            "POLYMER:9539" => 1, #a menaquinol 
-            "CHEBI:16452" => 1, #oxaloacetate 
+            "44027" => -1, #menaquinone-8 
+            "15589" => -1, #malate,
+            "61684" => 1, #menaquinol-8 
+            "16452" => 1, #oxaloacetate 
         ),
         lower_bound = 0.0,
         annotations=Dict(
             "CM.Reaction" => [
-                "a menaquinone + malate = a menaquinol + oxaloacetate"
+                "menaquinone-8 + malate = menaquinol-8 + oxaloacetate"
             ],
             "EC" => ["1.1.5.4"],
             "KEGG" => ["R01257","R00361"]
@@ -67,21 +67,21 @@ function add_electron_transport_chain!(model)
         gene_association_dnf = [
             ["SAPIG2418"],["SAPIG2655"]
         ]
-    )
+    )    
 
     #Lqo 
     model.reactions["Lqo"] = CM.Reaction(;
         name="Lactate-quinone oxidoreductase",
         stoichiometry=Dict(
-            "POLYMER:9537" => -1, #a menaquinone 
-            "CHEBI:16651" => -1, #(S)-lactate
-            "POLYMER:9539" => 1, #a menaquinol 
-            "CHEBI:15361" => 1, #pyruvate
+            "44027" => -1, #menaquinone-8 
+            "16651" => -1, #(S)-lactate
+            "61684" => 1, #menaquinol-8 
+            "15361" => 1, #pyruvate
         ),
         lower_bound = 0.0,
         annotations=Dict(
             "CM.Reaction" => [
-                "a menaquinone + (S)-lactate = a menaquinol + pyruvate"
+                "menaquinone-8 + (S)-lactate = menaquinol-8 + pyruvate"
             ],
         ),
         gene_association_dnf = [
@@ -92,11 +92,11 @@ function add_electron_transport_chain!(model)
     model.reactions["Ldh"] = CM.Reaction(;
         name="Lactate dehydrogenase",
         stoichiometry=Dict(
-            "CHEBI:57540" => -1, #NAD+ 
-            "CHEBI:16651" => -1, #(S)-lactate
-            "CHEBI:57945" => 1, #NADH 
-            "CHEBI:15361" => 1, #pyruvate
-            "CHEBI:15378" => 1, #H+
+            "57540" => -1, #NAD+ 
+            "16651" => -1, #(S)-lactate
+            "57945" => 1, #NADH 
+            "15361" => 1, #pyruvate
+            "15378" => 1, #H+
         ),
         annotations=Dict(
             "CM.Reaction" => [
@@ -114,11 +114,11 @@ function add_electron_transport_chain!(model)
     model.reactions["cyt_aa3"] = CM.Reaction(;
         name="Cytochrome aa3 oxidase",
         stoichiometry=Dict(
-            "CHEBI:15379" => -1, #O2
-            "CHEBI:15378" => -1, #H+
-            "CHEBI:29033" => -1, #Fe(2+)
-            "CHEBI:29034" => 1, #Fe(3+)
-            "CHEBI:15377" => 1, #H2O
+            "15379" => -1, #O2
+            "15378" => -1, #H+
+            "29033" => -1, #Fe(2+)
+            "29034" => 1, #Fe(3+)
+            "15377" => 1, #H2O
         ),
         lower_bound = 0.0,
         annotations=Dict(
@@ -135,21 +135,23 @@ function add_electron_transport_chain!(model)
     model.reactions["cyt_bd"] = CM.Reaction(;
         name="Cytochrome bd oxidase",
         stoichiometry=Dict(
-            "CHEBI:15379" => -1, #O2
-            "CHEBI:15378" => -4, #H+
-            "POLYMER:9539" => -2, #a menaquinol
-            "POLYMER:9537" => 2, #a menaquinone
-            "CHEBI:15377" => 2, #H2O
-            "CHEBI:15378_p" => 4, #H+ periplasm
+            "15379" => -1, #O2
+            "15378" => -4, #H+
+            "61684" => -2, #menaquinol-8
+            "44027" => 2, #menaquinone-8
+            "15377" => 2, #H2O
+            "15378_p" => 4, #H+ periplasm
         ),
         lower_bound = 0.0,
         annotations=Dict(
             "CM.Reaction" => [
-                "O2 + H+(c) + menaquinol = H2O + menaquinone + H+(p)"
-            ]
+                "O2 + H+(c) + menaquinol-8 = H2O + menaquinone-8 + H+(p)"
+            ],
+            "EC" => ["7.1.1.5"]
         ),
         gene_association_dnf = [
             ["SAPIG1083","SAPIG1084"],
+            #["SAPIG1055","SAPIG1056","SAPIG1057"]
         ]
     )
 
@@ -157,23 +159,22 @@ function add_electron_transport_chain!(model)
     model.reactions["cyt_bo3"] = CM.Reaction(;
         name="Cytochrome bo3 oxidase",
         stoichiometry=Dict(
-            "CHEBI:15379" => -1, #O2
-            "CHEBI:15378" => -8, #H+
-            "POLYMER:9539" => -2, #a menaquinol
-            "POLYMER:9537" => 2, #a menaquinone
-            "CHEBI:15377" => 2, #H2O
-            "CHEBI:15378_p" => 8, #H+ periplasm
+            "15379" => -1, #O2
+            "15378" => -8, #H+
+            "61684" => -2, #menaquinol-8
+            "44027" => 2, #menaquinone-8
+            "15377" => 2, #H2O
+            "15378_p" => 8, #H+ periplasm
         ),
         lower_bound = 0.0,
         annotations=Dict(
             "CM.Reaction" => [
-                "O2 + H+(c) + menaquinol = H2O + menaquinone + H+(p)"
+                "O2 + H+(c) + menaquinol-8 = H2O + menaquinone-8 + H+(p)"
             ]
         ),
         gene_association_dnf = [
             ["g1"]
         ]
     )
-
-    model
+    return model
 end
