@@ -11,23 +11,34 @@ model, reaction_isozymes = build_model()
 
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_15903"].upper_bound = 10 #limit glucose
-model.reactions["EX_15379"].upper_bound = 1000
-model.reactions["EX_15379"].lower_bound = 0
+model.reactions["EX_15379"].upper_bound = 0
+model.reactions["EX_15379"].lower_bound = 1000
 model.reactions["EX_15378"].upper_bound = 0
 
-sol = flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
+sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 sol.fluxes["EX_15379"]
+C.pretty(
+    C.ifilter_leaves(sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
+Dict(x => y for (x,y) in sol.fluxes if abs(y)>10)
+
+open("data/fluxes.json","w") do io 
+    JSON.print(io,sol.fluxes)
+end
 
 # scan growth rate across limited oxygen with fba model 
 growth = Float64[]
 o2_rate = Float64[]
-o2_iter = 0:1:57
+o2_iter = 0:1:35
 for o2_uptake in o2_iter
     model.reactions["EX_15379"].upper_bound = o2_uptake
-    #model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
+    model.reactions["EX_15379"].lower_bound = o2_uptake-0.1
     sol = parsimonious_flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
     push!(growth,sol.objective)
-    push!(o2_rate,o2_uptake/sol.objective)
+    push!(o2_rate,o2_uptake)
 end
 growth
 o2_rate

@@ -4,27 +4,15 @@ $(TYPEDSIGNATURES)
 Parse the chemical formula from a RheaReaction.formula
 """
 function parse_formula(x::Union{Nothing,String})
-    if isnothing(x)
-        return nothing
-    elseif occursin("(", x)
-        first_part = split(x, '(')[1]
-        last_part = split(split(x, '(')[2], ')')[1]
-        fla = Dict(
-            string(atom.match) => parse.(Int, replace(split(first_part, r"[A-Za-z]+"), "" => "1")[2:end])[i] for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", first_part))
-        )
-        for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", last_part))
-            if haskey(fla, atom.match)
-                fla[atom.match] += 7 * parse.(Int, replace(split(last_part, r"[A-Za-z]+"), "" => "1")[2:end])[i]
-            else
-                fla[atom.match] = 7 * parse.(Int, replace(split(last_part, r"[A-Za-z]+"), "" => "1")[2:end])[i]
-            end
-        end
-    else
-        fla = Dict(
-            string(atom.match) => parse.(Int, replace(split(x, r"[A-Za-z]+"), "" => "1")[2:end])[i] for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", x))
-        )
+    isnothing(x) && return nothing
+    x == "" && return nothing
+
+    res = Dict{String,Int}()
+    pattern = @r_str "([A-Z][a-z]*)([1-9][0-9]*)?"
+    for m in eachmatch(pattern, x)
+        res[m.captures[1]] = isnothing(m.captures[2]) ? 1 : parse(Int, m.captures[2])
     end
-    return fla
+    return res
 end
 
 
@@ -56,27 +44,17 @@ function extend_model!(model, dfs)
                 string(v.accession) => s
                 for (s, v) in coeff_mets
             )
+            # only use CHEBI metabolites
+            any(((k,v),)->!startswith(k,"CHEBI"),stoichiometry) && continue
 
             append!(ms, last.(coeff_mets))
 
+            if isnothing(rxn)
+                println(rid)
+                continue 
+            end
             ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
             name = rxn.name
-
-            # #direction 
-            # reversibility_index_threshold = 5 
-            # rev_ind = ismissing(first(df.RevIndex)) ? nothing : first(df.RevIndex) 
-
-            # if isnothing(rev_ind) || (abs(rev_ind) <= reversibility_index_threshold)
-            #     lb = -1000
-            #     ub = 1000
-            # elseif rev_ind < -reversibility_index_threshold # forward
-            #     lb = 0
-            #     ub = 1000
-            # elseif rev_ind > reversibility_index_threshold # reverse
-            #     lb = -1000
-            #     ub = 0
-            # end
-
 
             model.reactions[string(rid)] = CM.Reaction(;
                 name=name,
@@ -98,7 +76,7 @@ function extend_model!(model, dfs)
         haskey(model.metabolites, m.accession) && continue
         model.metabolites[m.accession] = CM.Metabolite(
             m.name,
-            nothing,
+            "Cytosol",
             parse_formula(m.formula),
             m.charge,
             0.0,
@@ -584,6 +562,7 @@ end
 function add_names_pathways!(model)
     dic = Dict(x => y for (x,y) in JSON.parsefile("data/model/reactions/kegg_names_pathways.json"))
     for (x,y) in dic
+        !haskey(model.reactions,x) && continue
         model.reactions[x].name = y[1] 
         model.reactions[x].annotations["Pathway"] = y[2] == [""] ? [""] : [string(split(p,"  ")[2])*"; " for p in y[2]]
     end

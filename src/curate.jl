@@ -43,13 +43,25 @@ function curate!(model)
             rxn.stoichiometry["CHEBI:57634"] = rxn.stoichiometry["CHEBI:61527"]
             delete!(rxn.stoichiometry, "CHEBI:61527")
         end
-        if haskey(rxn.stoichiometry, "CHEBI:16389") # a ubiquinone -> a menaquinone
-            rxn.stoichiometry["POLYMER:9537"] = rxn.stoichiometry["CHEBI:16389"]
+        if haskey(rxn.stoichiometry, "CHEBI:16389") # a ubiquinone -> menaquinone-8
+            rxn.stoichiometry["CHEBI:44027"] = rxn.stoichiometry["CHEBI:16389"]
             delete!(rxn.stoichiometry, "CHEBI:16389")
         end
-        if haskey(rxn.stoichiometry, "CHEBI:17976") # a ubiquinol -> a menaquinol
-            rxn.stoichiometry["POLYMER:9539"] = rxn.stoichiometry["CHEBI:17976"]
+        if haskey(rxn.stoichiometry, "CHEBI:17976") # a ubiquinol -> menaquinol-8
+            rxn.stoichiometry["CHEBI:61684"] = rxn.stoichiometry["CHEBI:17976"]
             delete!(rxn.stoichiometry, "CHEBI:17976")
+        end
+        if haskey(rxn.stoichiometry, "POLYMER:9537") # a menaquinone -> menaquinone-8
+            rxn.stoichiometry["CHEBI:44027"] = rxn.stoichiometry["POLYMER:9537"]
+            delete!(rxn.stoichiometry, "POLYMER:9537")
+        end
+        if haskey(rxn.stoichiometry, "POLYMER:9539") # a menaquinol -> menaquinol-8
+            rxn.stoichiometry["CHEBI:61684"] = rxn.stoichiometry["POLYMER:9539"]
+            delete!(rxn.stoichiometry, "POLYMER:9539")
+        end
+        if haskey(rxn.stoichiometry, "POLYMER:9536") # a 2-demethylmenaquinone -> 2-demethylmenaquinone-8
+            rxn.stoichiometry["CHEBI:48455"] = rxn.stoichiometry["POLYMER:9536"]
+            delete!(rxn.stoichiometry, "POLYMER:9536")
         end
         if haskey(rxn.stoichiometry, "CHEBI:15893") # 1-pyrroline-5-carboxylate  -> (S)-1-pyrroline-5-carboxylate 
             rxn.stoichiometry["CHEBI:17388"] = rxn.stoichiometry["CHEBI:15893"]
@@ -57,17 +69,39 @@ function curate!(model)
         end
     end
 
+    # add metabolite
+    model.metabolites["CHEBI:48455"] = CM.Metabolite(
+        "2-demethylmenaquinone-8",
+        "Cytosol",
+        Dict(
+            "C" => 50,
+            "H" => 70,
+            "O" => 2
+        ),
+        0,
+        0.0,
+        Dict{String,Vector{String}}(),
+        Dict{String,Vector{String}}(),
+    )
 
     delete!(model.metabolites, "CHEBI:4167") # D-glucose
     delete!(model.metabolites, "CHEBI:61548") # D-glucose 6-phosphate
     delete!(model.metabolites, "CHEBI:91002") # sucrose 6(G)-phosphate
+    delete!(model.metabolites, "POLYMER:9536") # a 2-demethylmenaquinone
+    delete!(model.metabolites, "POLYMER:9537") # a menaquinone
+    delete!(model.metabolites, "POLYMER:9539") # a menaquinol
+    delete!(model.metabolites, "CHEBI:16389") # a ubiquinone
+    delete!(model.metabolites, "CHEBI:17976") # a ubiquinol
+
+
+    # remove chemical entity metabolite 
+    delete!(model.metabolites, "CHEBI:24431")
+    for (r,rxn) in model.reactions 
+        haskey(rxn.stoichiometry,"CHEBI:24431") && delete!(rxn.stoichiometry,"CHEBI:24431")
+    end
 
     # add generic transport gene
     model.genes["g1"] = CM.Gene(name="g1")
-
-    # allow bidirectional H2O 
-    model.reactions["EX_15377"].lower_bound = -1000
-    model.reactions["EX_15377"].upper_bound = 1000
 
     #change directions to match what is found in biocyc 
     biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))

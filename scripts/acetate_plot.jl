@@ -8,6 +8,18 @@ using HiGHS, JSON
 using JSONFBCModels
 
 model, reaction_isozymes = build_model()
+
+for (r,rxn) in model.reactions 
+    !haskey(rxn.annotations,"REACTION") && continue 
+    if any(((m,s),) -> startswith(m,"P"),rxn.stoichiometry)
+        println(r)
+        delete!(model.reactions,r)
+    end
+end
+
+#TODO change all polymer reactions for chebis
+
+flux_balance_analysis(model;optimizer=HiGHS.Optimizer)
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 
 escher_model = change_reaction_names(model)
@@ -30,9 +42,13 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     capacity,
     optimizer=HiGHS.Optimizer,
 )
+
+
+
+
 # keep membrane bound same but change biomass
 ac_flux = Float64[]
-vols = 0.1:0.05:3.7
+vols = 0.1:0.05:3.4
 bounds = Vector{Tuple{Float64,Float64}}()
 for biomass in vols
     model.reactions["biomass"].upper_bound = biomass
