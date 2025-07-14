@@ -231,6 +231,38 @@ function curate!(model)
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
     )
 
+    # fix mass balance problems
+    model.reactions["20345"].stoichiometry["CHEBI:29950"] = -2
+    model.reactions["28037"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["14217"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["19993"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["28041"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["21260"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["23252"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["24164"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["28029"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["28033"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["19609"].stoichiometry["CHEBI:74411"] = -2
+    model.reactions["19609"].stoichiometry["CHEBI:74493"] = 2
+
+
+    delete_rids = [
+        "15184",
+        "20213",
+        "16413",
+       "28767",
+        "14676",
+        "14736",
+       "16585",
+       "20624",
+       "29051"
+    ]
+    for rid in delete_rids 
+        delete!(model.reactions,rid)
+    end
+
+    # add rxn name
+    model.reactions["76995"].name = "ferredoxin---NADP+ reductase"
     # add missing transporters 
     add_permease!(model, "CHEBI:32682", ["g1"], nothing)
     return model

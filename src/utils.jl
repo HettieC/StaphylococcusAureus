@@ -265,15 +265,19 @@ function add_sinks!(model)
         mid = row.CHEBI
         chebi = split(row.CHEBI,':')[2]
         mid *= "_e"
-        model.reactions["EX_$chebi"] = CM.Reaction(
-            ;
-            name = "$(row.Name) exchange",
-            lower_bound = -1000.0,
-            upper_bound = 0.0,
-            stoichiometry = Dict(mid => 1),
-        )
-        model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
-        model.metabolites[mid].compartment = "external"
+        if haskey(model.reactions,"EX_$chebi")
+            model.reactions["EX_$chebi"].lower_bound = -1000 
+        else
+            model.reactions["EX_$chebi"] = CM.Reaction(
+                ;
+                name = "$(row.Name) exchange",
+                lower_bound = -1000.0,
+                upper_bound = 0.0,
+                stoichiometry = Dict(mid => 1),
+            )
+            model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
+            model.metabolites[mid].compartment = "external"
+        end
     end
     model
 end

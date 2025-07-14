@@ -15,8 +15,8 @@ using CairoMakie
 using Latexify
 using LaTeXStrings
 
-flux_zero_tol = 1e-6
-gene_zero_tol = 1e-6
+flux_zero_tol = 1e-10
+gene_zero_tol = 1e-10
 
 model, reaction_isozymes = build_model()
 
@@ -24,16 +24,12 @@ gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_is
 
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
-model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
-model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
-model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
+model.reactions["EX_15903"].upper_bound = 1000
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
     ("membrane", membrane_gids, 120.0)
 ];
 
@@ -45,7 +41,15 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     capacity,
     optimizer=HiGHS.Optimizer,
 )
-
+open("data/fluxes.json","w") do io 
+    JSON.print(io,ec_sol.fluxes)
+end
+C.pretty(
+    C.ifilter_leaves(ec_sol.fluxes) do ix, x
+        abs(x) > 1e-6 && startswith(string(last(ix)), "EX_")    
+    end; 
+    format_label = x -> A.reaction_name(model, string(last(x))),
+)
 
 pruned_model, pruned_reaction_isozymes = D.prune_model(
     model,
@@ -65,6 +69,8 @@ pruned_sol = enzyme_constrained_flux_balance_analysis(
     capacity,
     optimizer=HiGHS.Optimizer,
 )
+
+Dict(x => [y,ec_sol.fluxes[x]] for (x,y) in pruned_sol.fluxes if abs(ec_sol.fluxes[x]) - y >1e-4)
 
 
 # calculate EFMs
@@ -130,6 +136,7 @@ for (x,y) in OFM_dicts[1]
         )
     end
 end
+
 ofm_df
 sort!(ofm_df,:OFM_1)
 latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print

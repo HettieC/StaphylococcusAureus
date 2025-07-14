@@ -9,11 +9,6 @@ using JSONFBCModels
 
 model, reaction_isozymes = build_model();
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
-
-escher_model = change_reaction_names(model)
-save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
     ("membrane", membrane_gids, 120.0)
@@ -26,8 +21,6 @@ ec_sol = enzyme_constrained_flux_balance_analysis(
     optimizer=HiGHS.Optimizer,
 )
 model.reactions["biomass"].objective_coefficient = 0
-
-# keep membrane bound same, change biomass, minimise protein usage
 ac_flux = Float64[]
 growth = Float64[]
 vols = 0.1:0.05:copy(ec_sol.objective)+0.033
@@ -41,16 +34,13 @@ for biomass in vols
     ec_sol = optimized_values(
         ct;
         optimizer = HiGHS.Optimizer,
-        objective = sum_value(ct.gene_product_capacity),
-        sense = Minimal
+        objective = ct.fluxes.EX_30089.value,
+        sense = Maximal
     )
     push!(ac_flux,abs(ec_sol.fluxes["EX_30089"]))
     push!(bounds,(ec_sol.gene_product_capacity.membrane,ec_sol.gene_product_capacity.cytosol))
     push!(growth,ec_sol.fluxes["biomass"])
 end
-ac_flux
-bounds 
-growth
 
 model.reactions["biomass"].objective_coefficient = 1
 model.reactions["biomass"].lower_bound = 0 
@@ -81,8 +71,8 @@ for biomass in vols_2
     ec_sol = optimized_values(
         ct;
         optimizer = HiGHS.Optimizer,
-        objective = sum_value(ct.gene_product_capacity),
-        sense = Minimal
+        objective = ct.fluxes.EX_30089.value,
+        sense = Maximal
     )
     push!(ac_flux_2,abs(ec_sol.fluxes["EX_30089"]))
     push!(bounds_2,(ec_sol.gene_product_capacity.membrane,ec_sol.gene_product_capacity.cytosol))
@@ -151,16 +141,7 @@ axislegend(
 )
 display(f)
 
-save("data/plots/acetate_min_enzyme.png",f,px_per_unit = 1200/inch)
+growth[findfirst(x -> x> 1e-3,ac_flux)]
+growth_2[findfirst(x -> x> 1e-3,ac_flux_2)]
 
-
-
-model.reactions["biomass"].upper_bound = 1
-ec_sol = enzyme_constrained_flux_balance_analysis(
-    model;
-    reaction_isozymes,
-    gene_product_molar_masses,
-    capacity,
-    optimizer=HiGHS.Optimizer,
-) 
-ec_sol.fluxes["EX_30089"]
+save("data/plots/acetate_min_acetate.png",f,px_per_unit = 1200/inch)
