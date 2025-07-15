@@ -137,7 +137,7 @@ for r in ac_rxns
         f[1,1];
         backgroundcolor=:transparent,
         xlabel = "Growth rate (1/h)",
-        ylabel = "Acetate exchange rate (mMol/h)",
+        ylabel = "Acetate exchange rate (mmol/h)",
         title = r,
         xlabelsize=6pt,
         ylabelsize=6pt,

@@ -122,7 +122,7 @@ ax = Axis(
     f[1,1];
     backgroundcolor=:transparent,
     xlabel = "Growth rate (gDW/h)",
-    ylabel = "Acetate exchange rate (mMol/gDW/h)",
+    ylabel = "Acetate exchange rate (mmol/gDW/h)",
     xlabelsize=6pt,
     ylabelsize=6pt,
     xticklabelsize=5pt,

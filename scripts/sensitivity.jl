@@ -22,16 +22,11 @@ gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_is
 
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-model.reactions["EX_16236"].lower_bound = 0 #block ethanol exchange
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
-model.reactions["EX_16651"].lower_bound = 0 #block (s)-lactate exchange
-model.reactions["EX_16004"].lower_bound = 0 #block (r)-lactate exchange
-model.reactions["EX_15740"].lower_bound = 0 #block formate exchange
-model.reactions["EX_15378"].lower_bound = 0 #block H+ exchange
 
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
     ("membrane", membrane_gids, 120.0)
 ];
 
@@ -140,24 +135,24 @@ set_theme!(figure_padding=2)
 
 f = Figure(; size=(10cm, 8cm))#, backgroundcolor=:transparent)
 escher_model = change_reaction_names(pruned_model)
-xticklabels = [A.reaction_name(escher_model,string(r)) for r in parameters[order][210:end]]
+xticklabels = [isnothing(A.reaction_name(model,string(r))) ? A.reaction_name(escher_model,string(r)) : A.reaction_name(model,string(r)) for r in parameters[order][210:end]]
 ax = Axis(
     f[1,1],
     #backgroundcolor=:transparent,
-    xlabel = "Turnover number",
+    xlabel = "Enzyme",
     xticklabelrotation = -pi / 3,
     ylabel = "Sensitivity of biomass",
     xlabelsize=6pt,
     ylabelsize=6pt,
     xticklabelsize=5pt,
     yticklabelsize=5pt,
-    xticks = (1:20,xticklabels),
+    xticks = (1:length(xticklabels),xticklabels),
     ygridvisible=false,
     xgridvisible=false,
 )
 barplot!(
     ax,
-    1:20,
+    1:length(xticklabels),
     sens[flux_idx,:][order][210:end]
 )
 f
@@ -211,6 +206,7 @@ f
 
 flux_idxs = findall(x -> first(x) == :fluxes, vids)
 flux_ids = last.(vids[flux_idxs])
+
 # whole solution
 f = Figure()#, backgroundcolor=:transparent)
 ax = Axis(
@@ -233,31 +229,34 @@ hm = heatmap!(
 Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
 f
 
+
+
+
 using Clustering
 
+flux_idxs = findall(x -> first(x) == :fluxes, vids)
+flux_ids = last.(vids[flux_idxs])
 # cluster flux sensitivity into 10 clusters using K-means
 R = kmeans(sens[flux_idxs,:]',15; maxiter=400,display=:iter)
 
 a = assignments(R) # get the assignments of points to clusters
 
 
-xtickvals = [i for (i,j) in sens[flux_idxs,:]' if abs(sum(sens[flux_idxs,i]')/248)>0.01]
-
 xtickvals = []
 for i in axes(sens[flux_idxs,:]',1)
-    if abs(sum(sens[flux_idxs,:]'[i,:])/248)>0.009
+    if abs(sum(sens[flux_idxs,:]'[i,:])/length(flux_ids))>0.08
         push!(xtickvals,i)
     end
 end
 xtickvals
-
-f = Figure(; size=(30cm,25cm))#, backgroundcolor=:transparent)
+xticklabels = [isnothing(A.reaction_name(escher_model,p)) ? A.reaction_name(model,p) : A.reaction_name(escher_model,p) for p in string.(parameters[xtickvals])]
+f = Figure(; size=(12cm,10cm))#, backgroundcolor=:transparent)
 ax = Axis(
     f[1,1],
-    xlabel = "Turnover number",
+    xlabel = "Enzyme",
     xticklabelrotation = -pi / 3,
-    ylabel = "Flux",
-    xticks = (xtickvals, string.(parameters[xtickvals])),
+    ylabel = "Flux sensitivity",
+    xticks = (xtickvals, xticklabels),
     xlabelsize=7pt,
     ylabelsize=7pt,
     xticklabelsize=6pt,
@@ -267,8 +266,9 @@ hm = heatmap!(
     ax,
     sens[flux_idxs,:]'[:,sortperm(a)];
     colormap = reverse(ColorSchemes.RdBu),
-    colorrange = (-0.25,0.25)
+    colorrange = (-0.5,0.5)
 )
 Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
 f
 
+save("data/plots/whole_sens.png", f, px_per_unit = 1200/inch)
