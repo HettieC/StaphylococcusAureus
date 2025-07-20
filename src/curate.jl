@@ -200,8 +200,6 @@ function curate!(model)
             "CHEBI:18262" => -0.1,    #dodecanoate
             "CHEBI:27689" => -0.1,    #decanoate
             "CHEBI:25629" => -0.1,    #octadecanoate
-            # "POLYMER:9537" => -0.0765, #menaquinone 
-            # "POLYMER:9539" => -0.0765, #menaquinol
 
             #protein
             "CHEBI:57427" => -0.699,  #L-leucine
@@ -244,6 +242,9 @@ function curate!(model)
     model.reactions["28033"].stoichiometry["CHEBI:29950"] = 2
     model.reactions["19609"].stoichiometry["CHEBI:74411"] = -2
     model.reactions["19609"].stoichiometry["CHEBI:74493"] = 2
+    # fix charge imbalance
+    model.reactions["76991"].stoichiometry["CHEBI:33723"] = -2
+    model.reactions["76991"].stoichiometry["CHEBI:33722"] = 2
 
 
     delete_rids = [

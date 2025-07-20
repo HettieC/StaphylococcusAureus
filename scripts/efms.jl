@@ -18,7 +18,7 @@ using LaTeXStrings
 flux_zero_tol = 1e-10
 gene_zero_tol = 1e-10
 
-model, reaction_isozymes = build_model()
+model, reaction_isozymes = build_model();
 
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 
@@ -30,7 +30,7 @@ model.reactions["EX_15903"].upper_bound = 1000
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
-    ("membrane", membrane_gids, 120.0)
+    ("membrane", membrane_gids, 130.0)
 ];
 
 
@@ -125,6 +125,9 @@ latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
 ofm_df = DataFrame(Reaction=String[],Name=String[],OFM_1=Float64[],OFM_2=Float64[])
 for (x,y) in OFM_dicts[1]
     if abs(y - OFM_dicts[2][x])/y > 0.3 || abs(y - OFM_dicts[2][x])/OFM_dicts[2][x] > 0.3
+        name = isnothing(A.reaction_name(model,x)) ? A.reaction_name(escher_model,x) : A.reaction_name(model,x) 
+        isnothing(name) && println(x)
+        
         push!(
             ofm_df,
             [
@@ -143,13 +146,15 @@ latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
 
 # OFM fluxes for escher:
 ofm_escher = Dict(
-    x => OFM_dicts[1][x] - y for (x,y) in OFM_dicts[2]
+    x => OFM_y for (x,y) in OFM_dicts[2]
 )
 
-open("data/ofm_fluxes.json","w") do io 
-    JSON.print(io,ofm_escher)
+open("data/ofm1_fluxes.json","w") do io 
+    JSON.print(io,OFM_dicts[1])
 end
-
+open("data/ofm2_fluxes.json","w") do io 
+    JSON.print(io,OFM_dicts[2])
+end
 escher_model = change_reaction_names(pruned_model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/pruned_escher_model.json")
 

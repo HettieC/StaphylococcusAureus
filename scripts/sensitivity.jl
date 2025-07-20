@@ -27,7 +27,7 @@ model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
-    ("membrane", membrane_gids, 120.0)
+    ("membrane", membrane_gids, 130.0)
 ];
 
 ec_sol = enzyme_constrained_flux_balance_analysis(

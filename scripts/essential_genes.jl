@@ -13,8 +13,30 @@ model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 model.reactions["EX_15903"].upper_bound = 10 #limit glucose
 
 
-# find essential genes
+# find essential genes on minimal medium
 ko_dict = gene_knockouts(model, optimizer = HiGHS.Optimizer)
+
+#### use richer medium 
+# 
+rich_medium = DataFrame(CSV.File("data/model/exchanges/rich_medium.csv"))
+for row in eachrow(rich_medium)
+    if haskey(model.reactions, "EX_$(split(row.CHEBI,":")[2])") 
+        model.reactions["EX_$(split(row.CHEBI,":")[2])"].upper_bound = 1000
+    else
+        model.reactions["EX_rich_$(split(row.CHEBI,":")[2])"] = CM.Reaction(
+            name = "Exchange of $(row.Name)",
+            lower_bound = 0,
+            upper_bound = 1000,
+            stoichiometry = Dict(row.CHEBI => 1.0),
+        )
+    end
+end
+ko_dict = gene_knockouts(model, optimizer = HiGHS.Optimizer)
+
+kos = [k for (k,v) in ko_dict if !isnothing(v) && abs(v) < 1e-4 ]
+
+fba_sol = flux_balance_analysis(model, optimizer = HiGHS.Optimizer)
+
 # get gene names
 id_tag = Dict{String,String}()
 open("data/databases/ST398.txt") do io
@@ -41,8 +63,10 @@ exp_df.Gene_ID = string.([split(g,"=")[2] for g in exp_df.Gene_ID])
 
 nader_df = DataFrame(XLSX.readtable("data/experimental/Essential_gene_Nader.xlsx", "essential genes"))
 
+unique(vcat(exp_df.Gene_ID, filter(g -> g ∈ A.genes(model), nader_df.locus_tag)))
+
 # make df of gene and reaction
-df = DataFrame(GeneID=String[],Name=String[],Reaction=String[],Pathway=String[])
+df = DataFrame(GeneID=String[],Name=String[],ReactionID=String[],Reaction=String[],Pathway=String[])
 for (g,ko) in ko_dict
     g == "g1" && continue
     if abs(ko)<1e-4
@@ -53,6 +77,7 @@ for (g,ko) in ko_dict
                 [
                     g,
                     g == "" ? "" : g_name[g],
+                    r,
                     isnothing(model.reactions[r].name) ? r : model.reactions[r].name,
                     haskey(model.reactions[r].annotations,"Pathway") ? join(model.reactions[r].annotations["Pathway"]) : ""
                 ]
@@ -64,7 +89,9 @@ df
 unique!(df)
 
 
-exp_match = filter(row->row.GeneID ∈ exp_df.Gene_ID,df)# || g ∈ nader_df.locus_tag])
+exp_match = filter(row->row.GeneID ∈ exp_df.Gene_ID || row.GeneID ∈ nader_df.locus_tag, df)
+
+filter!(row -> row.GeneID ∈ [ "SAPIG1311","SAPIG1427","SAPIG2388"], exp_match)
 
 new_gid = String[] 
 for g in unique(exp_match.GeneID)

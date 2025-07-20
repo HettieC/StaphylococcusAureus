@@ -30,25 +30,33 @@ rids = filter(x -> !startswith(x, "EX_") && x != "biomass", A.reactions(model))
 unbal_rids = String[]
 for rid in rids
     s = A.reaction_stoichiometry(model, rid)
-    m = Dict()
+    m = 0
     for (k, v) in s
-        if isnothing(A.metabolite_formula(model,k))
-            println(rid)
-            println(k)
-            continue 
-        end
-        for (kk, vv) in A.metabolite_formula(model, k)
-            m[kk] = get(m, kk, 0) + vv * v
-        end
+        m += v * A.metabolite_charge(model, k)
     end
     m
-    all(values(m) .== 0) || push!(unbal_rids, rid) 
+    m == 0 || push!(unbal_rids, rid)
 end
+unbal_rids
+
+rids = filter(x -> !startswith(x, "EX_") && x != "biomass", A.reactions(model))
+    unbal_rids = String[]
+    for rid in rids
+        s = A.reaction_stoichiometry(model, rid)
+        m = Dict()
+        for (k, v) in s
+            for (kk, vv) in A.metabolite_formula(model, k)
+                m[kk] = get(m, kk, 0) + vv * v
+            end
+        end
+        m
+        all(values(m) .== 0) || push!(unbal_rids, rid)
+    end
 unbal_rids
 [rid for rid in unbal_rids if haskey(A.reaction_stoichiometry(model,rid),"CHEBI:29950")]
 
-["20345","28037"]
-
+model.reactions["76991"].stoichiometry["CHEBI:33723"] = -2
+model.reactions["76991"].stoichiometry["CHEBI:33722"] = 2
 
 
 
