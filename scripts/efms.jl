@@ -124,10 +124,10 @@ latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
 # df of big difference reactions 
 ofm_df = DataFrame(Reaction=String[],Name=String[],OFM_1=Float64[],OFM_2=Float64[])
 for (x,y) in OFM_dicts[1]
-    if abs(y - OFM_dicts[2][x])/y > 0.3 || abs(y - OFM_dicts[2][x])/OFM_dicts[2][x] > 0.3
+    if y > 1.2*OFM_dicts[2][x] || OFM_dicts[2][x] > 1.2*y
         name = isnothing(A.reaction_name(model,x)) ? A.reaction_name(escher_model,x) : A.reaction_name(model,x) 
         isnothing(name) && println(x)
-        
+        isnothing(name) && continue
         push!(
             ofm_df,
             [
@@ -192,7 +192,7 @@ for (i, col) in enumerate(eachcol(sens_efm))
 end
 
 order = sortperm(scaled_sens[1, :])
-colors = Makie.wong_colors()[5:6]
+colors = Makie.wong_colors()[3:4]
 
 inch = 96
 pt = 4/3
@@ -208,6 +208,7 @@ data = (
     grp1=[c[1] > 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])],
     grp2=[c[1] < 0 ? 1 : 2 for c in eachcol(scaled_sens[:, order])]
 )
+# left hand side
 ax1 = Axis(
     f[1, 1], 
     xreversed = true, 
@@ -221,6 +222,7 @@ ax1 = Axis(
     xscale = log10,
     xticks = ([1,0.01,0.0001],[L"-10^0",L"-10^{-2}",L"-10^{-4}"]),
 )
+#right hand side
 ax2 = Axis(
     f[1, 2], 
     alignmode = Mixed(left = Makie.Protrusion(0)), 
@@ -231,21 +233,23 @@ ax2 = Axis(
     yticklabelsize=8pt,
     xgridvisible=false,
     ygridvisible=false,
-    xticks = ([0.0001,0.01,1],[L"-10^{-4}",L"-10^{-2}",L"-10^0",]),
+    xticks = ([0.0001,0.01,1],[L"10^{-4}",L"10^{-2}",L"10^0",]),
     xscale = log10,
     yticksvisible = false,
-    yticks = ([findlast(x -> x == 2, data.grp1)/2,length(filter(g->g==1,data.grp1))/2+findlast(x -> x == 2, data.grp1)],[L"\textbf{Cytosol   }\;", L"\textbf{Membrane   }\;"]),
+    yticks = ([findlast(x -> x == 2, data.grp1)/2,length(filter(g->g==1,data.grp1))/2+findlast(x -> x == 2, data.grp1)],[L"\textbf{Membrane   }\;",L"\textbf{Cytosol   }\;"]),
     #yticklabelrotationion = π/2
 )
+display(f)
 hideydecorations!(ax1, grid = false)
 linkyaxes!(ax1, ax2)
 colgap!(f.layout, 0)
-barplot!(ax1, data.x, data.height1, direction = :x, color = colors[data.grp1], label = "OFM 1: Respiratory")
-barplot!(ax2, data.x, data.height2, direction = :x, color = colors[data.grp2], label = "OFM 2: Fermentative")
-xlims!(ax1, [10,5e-6])
-xlims!(ax2, [2e-6,20])
-labels = [L"\textbf{H2O OFM}", L"\textbf{CO2 OFM}"]
-elements = [MarkerElement(marker=:hline,color=colors[2],markersize=12), MarkerElement(marker=:hline,color=colors[1],markersize=12)]
+barplot!(ax1, data.x, data.height2, direction = :x, color = colors[data.grp2], label = "OFM 1: Fermentative")
+barplot!(ax2, data.x, data.height1, direction = :x, color = colors[data.grp1], label = "OFM 2: Respiratory")
+xlims!(ax1, [8,2e-5])
+xlims!(ax2, [2e-5,20])
+f 
+labels = [L"\textbf{Fermentative OFM}",L"\textbf{Respiratory OFM}",]
+elements = [MarkerElement(marker=:hline,color=colors[1],markersize=12), MarkerElement(marker=:hline,color=colors[2],markersize=12)]
 Legend(
     f[1, 1],
     elements,
@@ -253,14 +257,26 @@ Legend(
     tellheight=false,
     tellwidth=false,
     labelsize = 8pt,
+    position = (0,0.3),
     halign = :left,
-    valign = :center,
-    margin = (16,0,0,0),
+    valign = :bottom,
+    margin = (16,0,50,0),
     framevisible = false
 )
-bracket!(ax1, 5e-6, 0, 5e-6, findlast(x -> x == 2, data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
-bracket!(ax1, 5e-6, findlast(x -> x == 2, data.grp1), 5e-6, length(data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+bracket!(ax1, 2e-5, 0, 2e-5, findlast(x -> x == 2, data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
+bracket!(ax1, 2e-5, findlast(x -> x == 2, data.grp1), 2e-5, length(data.grp1), style=:curly, orientation=:up,linewidth=1, width = 10)
 Label(f[2,:],L"\textbf{OFM Sensitivity: }\frac{p}{\lambda}\frac{\partial \lambda}{\partial p}")
 display(f)
 
 save("data/plots/ofm.png", f, px_per_unit = 1200/inch)
+
+findfirst(x->x=="ATPS",string.(parameters[order]))
+
+df = DataFrame(Parameter=String[],Parameter_name=String[],OFM_1=Float64[],OFM_2=Float64[])
+for (i,p) in enumerate(parameters)
+    push!(df, [string(p), isnothing(A.reaction_name(model,string(p))) ? "" : A.reaction_name(model,string(p))  ,scaled_sens[1, order[i]], scaled_sens[2, order[i]]])
+end
+df
+sort!(df,:OFM_1)
+
+df2 = filter(row -> row.Parameter ∈ ofm_df.Reaction,df)

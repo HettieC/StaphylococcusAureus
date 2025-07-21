@@ -16,7 +16,7 @@ model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 ac_flux = Dict{String,Vector{Float64}}()
 growth = Dict{String,Vector{Float64}}()
 bounds = Dict{String,Vector{Tuple{Float64,Float64}}}()
-for memb in [100,110,120]
+for memb in [100,110,120,130]
     model.reactions["biomass"].objective_coefficient = 1
     model.reactions["biomass"].upper_bound = 1000
     capacity = [
@@ -75,7 +75,7 @@ gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_is
 model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 
 glucose = Dict{String,Vector{Float64}}()
-for memb in [100,110,120]
+for memb in [100,110,120,130]
     model.reactions["EX_15903"].upper_bound = 1000 #unlimit glucose
     model.reactions["EX_15903"].lower_bound = 0 #unlimit glucose
     capacity = [
@@ -94,7 +94,7 @@ for memb in [100,110,120]
     growth["glc:$memb"] = Float64[]
     bounds["glc:$memb"] = Vector{Tuple{Float64,Float64}}()
     glucose["glc:$memb"] = Float64[]
-    for glc in 0:0.1:copy(first_sol.fluxes["EX_15903"])
+    for glc in 0:0.05:copy(first_sol.fluxes["EX_15903"])
         model.reactions["EX_15903"].upper_bound = glc
         model.reactions["EX_15903"].lower_bound = glc-0.02
         ct = enzyme_constrained_flux_balance_constraints(model;reaction_isozymes,gene_product_molar_masses,capacity)
@@ -121,11 +121,12 @@ pt = 4/3
 cm = inch / 2.54
 
 set_theme!(figure_padding=20)
-colors = Makie.wong_colors()[[4,1,6]]
+colors = Makie.wong_colors()[[2,1,6,4]]
+colors = Dict("100" => colors[1],"110"=>colors[2],"120"=>colors[3],"130"=>colors[4])
 
-xticks_enz = [0.0,1,2]
-xticks_ac = [0.0,1,2]
-xticks_glc = [0.0,5,10]
+xticks_enz = [0.0,1]
+xticks_ac = [0.0,1]
+xticks_glc = [0.0,5]
 idxs = Int64[]
 for (x,y) in ac_flux 
     if startswith(x,"enzyme")
@@ -138,7 +139,14 @@ for (x,y) in ac_flux
     end
 end
 sort!(idxs)
-xticklabels_glc = ["0","5","10","$(round(glucose["glc:100"][idxs[1]],sigdigits=3))\n$(round(growth["glc:100"][idxs[1]],sigdigits=3))","$(round(glucose["glc:110"][idxs[2]],sigdigits=3))\n$(round(growth["glc:110"][idxs[2]],sigdigits=3))","$(round(glucose["glc:120"][idxs[3]],sigdigits=3))\n$(round(growth["glc:120"][idxs[3]],sigdigits=3)) gDW/h"]
+xticklabels_glc = [
+    "0",
+    "5",
+    "10",
+    "$(round(glucose["glc:100"][idxs[1]],sigdigits=3))\n$(round(growth["glc:100"][idxs[1]],sigdigits=3))",
+    "$(round(glucose["glc:110"][idxs[2]],sigdigits=3))\n$(round(growth["glc:110"][idxs[2]],sigdigits=3))",
+    "$(round(glucose["glc:120"][idxs[3]],sigdigits=3))\n$(round(growth["glc:120"][idxs[3]],sigdigits=3)) gDW/h",
+    "$(round(glucose["glc:130"][idxs[3]],sigdigits=3))\n$(round(growth["glc:130"][idxs[3]],sigdigits=3)) gDW/h"]
 
 xticklabels_glc
 fig_enz = Figure(; size=(9cm, 7.2cm));
@@ -190,54 +198,54 @@ for (x,y) in ac_flux
             ax_enz,
             growth[x],
             y,
-            label = "Membrane: $(split(x,":")[2])mg/gDW",
+            label = "$(split(x,":")[2])mg/gDW",
             linewidth=2.5,
-            color = split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),
+            color = colors[split(x,":")[2]],
         )
         band!(
             ax_enz,
             growth[x][findfirst(((a,b),) -> a>0.999*parse(Float64,split(x,":")[2]),bounds[x])]:0.0001:growth[x][end],
             0,
             maximum(vcat(values(filter(((k,v),) -> startswith(k,"enz"),ac_flux))...)),
-            color = (split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),0.3)
+            color = (colors[split(x,":")[2]],0.2)
         )
     elseif startswith(x,"acetate") 
         lines!(
             ax_ac,
             growth[x],
             y,
-            label = "Membrane: $(split(x,":")[2])mg/gDW",
+            label = "$(split(x,":")[2])mg/gDW",
             linewidth=2.5,
-            color = split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3])
+            color = colors[split(x,":")[2]]
         )
         band!(
             ax_ac,
             growth[x][findfirst(((a,b),) -> a>0.999*parse(Float64,split(x,":")[2]),bounds[x])]:0.0001:growth[x][end],
             0,
             maximum(vcat(values(filter(((k,v),) -> startswith(k,"ace"),ac_flux))...)),
-            color = (split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),0.3)
+            color = (colors[split(x,":")[2]],0.2)
         )
     else 
         lines!(
             ax_glc,
             glucose[x],
             y,
-            label = "Membrane: $(split(x,":")[2])mg/gDW",
+            label = "$(split(x,":")[2])mg/gDW",
             linewidth=2.5,
-            color = split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3])
+            color = colors[split(x,":")[2]]
         )
         band!(
             ax_glc,
             glucose[x][findfirst(((a,b),) -> a>0.999*parse(Float64,split(x,":")[2]),bounds[x])]:0.0001:glucose[x][end],
             0,
             maximum(vcat(values(filter(((k,v),) -> startswith(k,"glc"),ac_flux))...)),
-            color = (split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),0.3)
+            color = (colors[split(x,":")[2]],0.2)
         )
     end
 end
-xlims!(ax_enz,(0,maximum(growth["enzymes:120"])))
+xlims!(ax_enz,(0,maximum(growth["enzymes:130"])))
 ylims!(ax_enz, (0,maximum(vcat(values(filter(((k,v),) -> startswith(k,"enz"),ac_flux))...))))
-xlims!(ax_ac,(0,maximum(growth["acetate:120"])))
+xlims!(ax_ac,(0,maximum(growth["acetate:130"])))
 ylims!(ax_ac, (0,maximum(vcat(values(filter(((k,v),) -> startswith(k,"ace"),ac_flux))...))))
 
 fig_glc 
@@ -248,23 +256,32 @@ ax_glc_2 = Axis(
     xlabelsize=6pt,
     xticklabelcolor=Makie.wong_colors()[3],
     ylabelsize=0pt,
-    xticklabelsize=8pt,
+    xticklabelsize=7pt,
     yticklabelsize=0pt,
     yticksvisible=false,
     xticksvisible=false,
-    xticks=([7,glucose["glc:100"][idxs[1]],glucose["glc:110"][idxs[2]],glucose["glc:120"][idxs[3]]],["\n\nGrowth (gDW/h):","\n\n$(round(growth["glc:100"][idxs[1]],sigdigits=2))","\n\n$(round(growth["glc:110"][idxs[2]],sigdigits=2))","\n\n$(round(growth["glc:120"][idxs[3]],sigdigits=2))"]),
+    xticks=([7,glucose["glc:100"][idxs[1]],glucose["glc:110"][idxs[2]],glucose["glc:120"][idxs[3]],glucose["glc:130"][idxs[4]]],["\n\nGrowth (gDW/h):","\n\n$(round(growth["glc:100"][idxs[1]],sigdigits=2))","\n\n$(round(growth["glc:110"][idxs[2]],sigdigits=2))","\n\n$(round(growth["glc:120"][idxs[3]],sigdigits=2))","\n\n$(round(growth["glc:130"][idxs[4]],sigdigits=2))"]),
     ygridvisible=false,
     xgridvisible=false,
 )
 linkaxes!(ax_glc,ax_glc_2)
 hidespines!(ax_glc_2)
-xlims!(ax_glc_2,(0,maximum(glucose["glc:120"])))
+xlims!(ax_glc_2,(0,maximum(glucose["glc:130"])))
 ylims!(ax_glc_2, (0,maximum(vcat(values(filter(((k,v),) -> startswith(k,"glc"),ac_flux))...))))
-#hidexdecorations!(ax_glc_2; ticklabels = false)
-axislegend(
-    ax_glc,
-    position=:lt,
-    labelsize = 8pt,
+labels = ["100 mg/gDW","110 mg/gDW","120 mg/gDW","130 mg/gDW"]
+elements = [
+    LineElement(color=colors["100"],linestyle=:solid,linewidth=3),
+    LineElement(color=colors["110"],linestyle=:solid,linewidth=3),
+    LineElement(color=colors["120"],linestyle=:solid,linewidth=3),
+    LineElement(color=colors["130"],linestyle=:solid,linewidth=3)]
+Legend(fig_glc[1,1],
+elements,
+labels,
+labelsize=8pt,
+tellheight = false,
+tellwidth = false,
+margin = (10, 10, 10, 10),
+halign = :left, valign = :top,
 )
 fig_glc
 fig_ac
@@ -299,7 +316,7 @@ for (x,y) in ac_flux
             y,
             label = "$x mg/gDW",
             linewidth=3,
-            color = split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),
+            color = colors[split(x,":")[2]],
             linestyle = :dot,
         )
         band!(
@@ -307,7 +324,7 @@ for (x,y) in ac_flux
             growth[x][findfirst(((a,b),) -> a>0.999*parse(Float64,split(x,":")[2]),bounds[x])]:0.0001:growth[x][end],
             0,
             maximum(vcat(values(filter(((k,v),) -> startswith(k,"enz"),ac_flux))...)),
-            color = (split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),0.3)
+            color = (colors[split(x,":")[2]],0.2)
         )
     elseif startswith(x,"acetate") 
         lines!(
@@ -316,113 +333,35 @@ for (x,y) in ac_flux
             y,
             label = "$x mg/gDW",
             linewidth=3,
-            color = split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3])
+            color = colors[split(x,":")[2]],
         )
     end
 end
-xlims!(ax,(0,maximum(growth["enzymes:120"])))
+xlims!(ax,(0,maximum(growth["acetate:130"])*1.01))
 ylims!(ax, (0,maximum(vcat(values(filter(((k,v),) -> !startswith(k,"glc"),ac_flux))...))))
-axislegend(
-    ax,
-    position=:lt,
-    labelsize = 8pt,
+labels = ["enzyme:100 mg/gDW","110 mg/gDW","120 mg/gDW","130 mg/gDW","acetate:100 mg/gDW","110 mg/gDW","120 mg/gDW","130 mg/gDW"]
+elements = [
+    LineElement(color=colors["100"],linestyle=:dot,linewidth=3), 
+    LineElement(color=colors["110"],linestyle=:dot,linewidth=3),
+    LineElement(color=colors["120"],linestyle=:dot,linewidth=3),
+    LineElement(color=colors["130"],linestyle=:dot,linewidth=3),
+    LineElement(color=colors["100"],linestyle=:solid,linewidth=3),
+    LineElement(color=colors["110"],linestyle=:solid,linewidth=3),
+    LineElement(color=colors["120"],linestyle=:solid,linewidth=3),
+    LineElement(color=colors["130"],linestyle=:solid,linewidth=3)]
+Legend(fig[1,1],
+elements,
+labels,
+labelsize=8pt,
+tellheight = false,
+tellwidth = false,
+margin = (10, 10, 10, 10),
+halign = :left, valign = :top,
 )
+
 fig
 
 save("data/plots/acetate_enzyme_and_acetate.png",fig,px_per_unit = 1200/inch)
 
 
-
-# f = Figure(; size=(12cm, 12cm))
-# ga = f[1, 1] = GridLayout()
-# axtop = Axis(
-#     ga[1,1];
-#     backgroundcolor=:transparent,
-#     ylabel = "Acetate exchange rate (mmol/gDW/h)",
-#     title = "Minimise enzyme usage",
-#     titlesize = 8pt,
-#     xlabelsize=6pt,
-#     ylabelsize=6pt,
-#     xticklabelsize=5pt,
-#     yticklabelsize=5pt,
-#     xticks=xtickstop,
-#     ygridvisible=false,
-#     xgridvisible=false,
-# );
-# axbottom = Axis(
-#     ga[2,1];
-#     backgroundcolor=:transparent,
-#     title = "Minimise acetate secretion",
-#     xlabel = "Growth rate (gDW/h)",
-#     ylabel = "Acetate exchange rate (mmol/gDW/h)",
-#     titlesize=8pt,
-#     xlabelsize=6pt,
-#     ylabelsize=6pt,
-#     xticklabelsize=5pt,
-#     yticklabelsize=5pt,
-#     xticks = xticksbottom,
-#     ygridvisible=false,
-#     xgridvisible=false,
-# );
-# ax3 = Axis(
-#     ga[1,3];
-#     backgroundcolor=:transparent,
-#     title = "Fix glucose, maximise biomass",
-#     xlabel = "Glucose uptake (mmol/gDW/h)",
-#     ylabel = "Acetate exchange rate (mmol/gDW/h)",
-#     titlesize=8pt,
-#     xlabelsize=6pt,
-#     ylabelsize=6pt,
-#     xticklabelsize=5pt,
-#     yticklabelsize=5pt,
-#     xticks = xticksbottom,
-#     ygridvisible=false,
-#     xgridvisible=false,
-# )
-# xlims!(axbottom,(0,maximum(vcat(values(growth)...))))
-# ylims!(axbottom, (0,maximum(vcat(values(ac_flux)...))))
-# linkaxes!(axtop,axbottom)
-# for (x,y) in ac_flux 
-#     if startswith(x,"enzyme")
-#         lines!(
-#             axtop,
-#             growth[x],
-#             y,
-#             label = "Membrane: $(split(x,":")[2])mg/gDW",
-#             linewidth=2.5,
-#             color = split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),
-#         )
-#         band!(
-#             axtop,
-#             growth[x][findfirst(((a,b),) -> a>0.999*parse(Float64,split(x,":")[2]),bounds[x])]:0.0001:growth[x][end],
-#             0,
-#             maximum(vcat(values(ac_flux)...)),
-#             color = (split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),0.3)
-#         )
-#     else 
-#         lines!(
-#             axbottom,
-#             growth[x],
-#             y,
-#             label = "Membrane: $(split(x,":")[2])mg/gDW",
-#             linewidth=2.5,
-#             color = split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3])
-#         )
-#         band!(
-#             axbottom,
-#             growth[x][findfirst(((a,b),) -> a>0.999*parse(Float64,split(x,":")[2]),bounds[x])]:0.0001:growth[x][end],
-#             0,
-#             maximum(vcat(values(ac_flux)...)),
-#             color = (split(x,":")[2] == "100" ? colors[1] : (split(x,":")[2] == "110" ? colors[2] : colors[3]),0.3)
-#         )
-#     end
-# end
-
-
-
-
-
-display(f)
-
-save("data/plots/acetate_min_enzyme.png",f,px_per_unit = 1200/inch)
 
