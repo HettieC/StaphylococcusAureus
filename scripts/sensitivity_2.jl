@@ -20,10 +20,16 @@ model, reaction_isozymes = build_model()
 
 gene_product_molar_masses, membrane_gids = enzyme_constraints!(model,reaction_isozymes)
 
-escher_model = change_reaction_names(model)
-save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
-model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
+# double the kcat of permease reactions 
+for (k,v) in reaction_isozymes 
+    !startswith(k,"PERM") && continue 
+    for (id,iso) in v 
+        reaction_isozymes[k][id].kcat_forward *= 2
+        reaction_isozymes[k][id].kcat_reverse *= 2
+    end
+end
 
+model.reactions["EX_47013"].upper_bound = 0 #block ribose exchange
 
 capacity = [
     ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
@@ -78,7 +84,7 @@ parameter_values = Dict(
     Symbol(x) => y[iso_id].kcat_forward for (x,y) in pruned_reaction_isozymes for (iso_id,iso) in y if ec_sol.isozyme_forward_amounts[x][iso_id] > 1e-8 || ec_sol.isozyme_reverse_amounts[x][iso_id] > 1e-8
 )
 
-parameters = Symbol.(collect(keys(parameter_values)))
+parameters_2 = Symbol.(collect(keys(parameter_values)))
 rid_pid = Dict(rid => Ex(Symbol(rid)) for (rid, v) in pruned_reaction_isozymes)
 rid_gcounts = Dict(rid => [v.gene_product_stoichiometry for (k, v) in d][1] for (rid, d) in pruned_reaction_isozymes)
 
@@ -109,8 +115,8 @@ pruned_solution = D.optimized_values(
     optimizer = HiGHS.Optimizer,
 )
 
-pkm_kkt, vids = D.differentiate_prepare_kkt(pkm, pkm.objective.value, parameters)
-sens = D.differentiate_solution(
+pkm_kkt, vids = D.differentiate_prepare_kkt(pkm, pkm.objective.value, parameters_2)
+sens_2 = D.differentiate_solution(
     pkm_kkt,
     pruned_solution.primal_values,
     pruned_solution.equality_dual_values,
@@ -122,29 +128,42 @@ sens = D.differentiate_solution(
 
 # look at biomass 
 flux_id = [:biomass]
-flux_idx = findall(x -> last(x) == :biomass && first(x) == :fluxes, vids)
+flux_idx_2 = findall(x -> last(x) == :biomass && first(x) == :fluxes, vids)
 
-order = sortperm(sens[flux_idx, :],dims=2)
+order_2 = sortperm(sens_2[flux_idx, :],dims=2)
 
-sens[flux_idx, :][1:end]
+sens_2[flux_idx_2, :][1:end]
 inch = 96
 pt = 4/3
 cm = inch / 2.54
 
-set_theme!(figure_padding=12)
+set_theme!(figure_padding=15)
 
-f = Figure(; size=(10cm, 8cm))#, backgroundcolor=:transparent)
-escher_model = change_reaction_names(pruned_model)
+# combined plot
+
+sens_dict = Dict(string.(parameters) .=> sens[flux_idx,:]')
+sens_dict_2 = Dict(string.(parameters_2) .=> sens_2[flux_idx_2,:]')
+params = [string(p) for p in reverse(parameters[order])[1:20]] 
+unique!(append!(params,[string(p) for p in reverse(parameters_2[order_2])[1:20]]))
+
+data = (
+    xs = params,
+    ys1 = float.([haskey(sens_dict,p) ? sens_dict[p] : 0 for p in params]),
+    ys2 = float.([haskey(sens_dict_2,p) ? sens_dict_2[p] : 0 for p in params]),
+)
 xticklabels = String[] 
-for r in parameters[order][207:end]
+for r in data.xs
     if isnothing(tryparse(Int,string(r)))
-         push!(xticklabels,string(r))
+         push!(xticklabels,A.reaction_name(model,string(r)))
     elseif !haskey(model.reactions[string(r)].annotations,"BiGG") || isempty(model.reactions[string(r)].annotations["BiGG"])
-        push!(xticklabels,string(r))
+        push!(xticklabels,string(r)*(length(A.reaction_name(escher_model,string(r))) > 15 ? "" : ": "*A.reaction_name(escher_model,string(r))))
     else 
         push!(xticklabels,string(r)*": "*model.reactions[string(r)].annotations["BiGG"][1])
     end
 end
+
+xticklabels
+f = Figure(; size=(12cm, 9cm))#, backgroundcolor=:transparent)
 
 ax = Axis(
     f[1,1],
@@ -152,130 +171,63 @@ ax = Axis(
     xlabel = "Enzyme",
     xticklabelrotation = -pi / 3,
     ylabel = "Sensitivity of biomass",
-    xlabelsize=6pt,
-    ylabelsize=6pt,
-    xticklabelsize=5pt,
-    yticklabelsize=5pt,
-    xticks = (1:length(xticklabels),reverse(xticklabels)),
-    ygridvisible=false,
-    xgridvisible=false,
-)
-barplot!(
-    ax,
-    1:length(xticklabels),
-    reverse(sens[flux_idx,:][order][207:end]),
-    color=Makie.wong_colors()[2]
-)
-ylims!(ax,(0,0.23))
-f
-
-save("data/plots/biomass_sens.png", f, px_per_unit = 1200/inch)
-
-
-
-# look at ox phos 
-subset_ids = [:cyt_bo3, :Sdh, :Mqo, :ATPS, :biomass]
-
-flux_idxs = findall(x -> last(x) in subset_ids && first(x) == :fluxes, vids)
-flux_ids = last.(vids[flux_idxs])
-
-param_idxs = findall(x -> x in subset_ids, parameters)
-param_ids = parameters[param_idxs]
-
-
-inch = 96
-pt = 4/3
-cm = inch / 2.54
-
-set_theme!(figure_padding=3)
-
-f = Figure(; size=(10cm, 8cm))#, backgroundcolor=:transparent)
-ax = Axis(
-    f[1,1],
-    xlabel = "Turnover number",
-    xticks = (1:length(param_ids), string.(param_ids)),
-    xticklabelrotation = -pi / 2,
-    ylabel = "Flux",
-    yticks = (1:length(flux_ids), string.(flux_ids)),
-    xlabelsize=6pt,
-    ylabelsize=6pt,
-    xticklabelsize=5pt,
-    yticklabelsize=5pt,
-)
-hm = heatmap!(
-    ax,
-    sens[flux_idxs, param_idxs]';
-    colormap = reverse(ColorSchemes.RdBu),
-    colorrange = (-0.25,0.25)
-)
-Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
-f
-
-flux_idxs = findall(x -> first(x) == :fluxes, vids)
-flux_ids = last.(vids[flux_idxs])
-
-# whole solution
-f = Figure()#, backgroundcolor=:transparent)
-ax = Axis(
-    f[1,1],
-    xlabel = "Turnover number",
-    xticklabelrotation = -pi / 2,
-    ylabel = "Flux",
-    xticks = (1:length(parameters), string.(parameters)),
-    xlabelsize=6pt,
-    ylabelsize=6pt,
-    xticklabelsize=5pt,
-    yticklabelsize=5pt,
-)
-hm = heatmap!(
-    ax,
-    sens[flux_idxs,:]';
-    colormap = reverse(ColorSchemes.RdBu),
-    colorrange = (-0.25,0.25)
-)
-Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
-f
-
-
-
-
-using Clustering
-
-flux_idxs = findall(x -> first(x) == :fluxes, vids)
-flux_ids = last.(vids[flux_idxs])
-# cluster flux sensitivity into 10 clusters using K-means
-R = kmeans(sens[flux_idxs,:]',15; maxiter=400,display=:iter)
-
-a = assignments(R) # get the assignments of points to clusters
-
-
-xtickvals = []
-for i in axes(sens[flux_idxs,:]',1)
-    if abs(sum(sens[flux_idxs,:]'[i,:])/length(flux_ids))>0.08
-        push!(xtickvals,i)
-    end
-end
-xtickvals
-xticklabels = [isnothing(A.reaction_name(escher_model,p)) ? A.reaction_name(model,p) : A.reaction_name(escher_model,p) for p in string.(parameters[xtickvals])]
-f = Figure(; size=(12cm,10cm))#, backgroundcolor=:transparent)
-ax = Axis(
-    f[1,1],
-    xlabel = "Enzyme",
-    xticklabelrotation = -pi / 3,
-    ylabel = "Flux sensitivity",
-    xticks = (xtickvals, xticklabels),
     xlabelsize=7pt,
     ylabelsize=7pt,
     xticklabelsize=6pt,
     yticklabelsize=6pt,
+    xticks = (1:length(data.xs),xticklabels),
+    ygridvisible=false,
+    xgridvisible=false,
 )
-hm = heatmap!(
+
+barplot!(
     ax,
-    sens[flux_idxs,:]'[:,sortperm(a)];
-    colormap = reverse(ColorSchemes.RdBu),
-    colorrange = (-0.5,0.5)
+    repeat(1:length(data.xs),2),
+    vcat(data.ys1,data.ys2),
+    dodge = vcat(repeat([1],length(data.xs)),repeat([2],length(data.xs))),
+    color = vcat(repeat([Makie.wong_colors()[2]],length(data.xs)),repeat([Makie.wong_colors()[6]],length(data.xs))),
 )
-Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
+ylims!(ax,(0,0.23))
+xlims!(ax, (0, length(data.xs)+1))
+labels = ["60/h","120/h"]
+elements = [
+    PolyElement(color=Makie.wong_colors()[2]),
+    PolyElement(color=Makie.wong_colors()[6]),
+]
+Legend(f[1,1],
+elements,
+labels,
+labelsize=8pt,
+tellheight = false,
+tellwidth = false,
+margin = (10, 10, 10, 10),
+halign = :right, valign = :top,
+)
 f
 
-save("data/plots/whole_sens.png", f, px_per_unit = 1200/inch)
+save("data/plots/biomass_sens_combined.png", f, px_per_unit = 1200/inch)
+
+
+[r for r in params if haskey(model.reactions[r].annotations,"Pathway") && "Glycolysis / Gluconeogenesis; " in model.reactions[r].annotations["Pathway"]]
+
+
+rs = [string(p) for p in reverse(parameters_2[order_2])[1:10]]
+for r in rs 
+    println(r)
+    println(A.reaction_name(model, r))
+    for (k,v) in model.reactions[r].annotations
+        println("  $k: $v")
+    end
+    println("")
+end
+
+for r in rs 
+    if "Pentose phosphate pathway; " ∈ model.reactions[r].annotations["Pathway"]
+        println(r)
+        println(A.reaction_name(model, r))
+        for (k,v) in model.reactions[r].annotations
+            println("  $k: $v")
+        end
+        println("")
+    end
+end

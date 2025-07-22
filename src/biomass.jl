@@ -19,10 +19,10 @@ function scale_biomass!(model)
     mass = 0
     for (m,s) in model.reactions["biomass"].stoichiometry 
         s > 0 && continue 
-        mass += chebi_mass[m]*abs(s)
+        mass += chebi_mass[m]*s
     end
     # mass in Da=g/mol, i want 1g/mmol so *1000
-    model.reactions["biomass"].stoichiometry = Dict(x => 10000*y/mass for (x,y) in model.reactions["biomass"].stoichiometry)
+    model.reactions["biomass"].stoichiometry = Dict(x => -1000*y/mass for (x,y) in model.reactions["biomass"].stoichiometry)
     return model 
 end
 export scale_biomass!

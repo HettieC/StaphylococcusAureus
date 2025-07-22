@@ -37,6 +37,7 @@ function build_model()
     add_genes!(model)
     add_names_pathways!(model)
     scale_biomass!(model)
+    metanetx_annotate!(model)
 
     return model, reaction_isozymes
 end
