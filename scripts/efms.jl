@@ -70,7 +70,7 @@ pruned_sol = enzyme_constrained_flux_balance_analysis(
     optimizer=HiGHS.Optimizer,
 )
 
-Dict(x => [y,ec_sol.fluxes[x]] for (x,y) in pruned_sol.fluxes if abs(ec_sol.fluxes[x]) - y >1e-4)
+Dict(x => [y,ec_sol.fluxes[x]] for (x,y) in pruned_sol.fluxes if abs(ec_sol.fluxes[x]) - y >1e-5)
 
 
 # calculate EFMs
