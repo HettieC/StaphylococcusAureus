@@ -191,7 +191,6 @@ inch = 96
 pt = 4/3
 cm = inch / 2.54
 
-
 set_theme!(figure_padding=3)
 
 f = Figure(; size=(10cm, 8cm))#, backgroundcolor=:transparent)
@@ -211,7 +210,7 @@ hm = heatmap!(
     ax,
     sens[flux_idxs[flux_order], param_idxs[param_order]]';
     colormap = reverse(ColorSchemes.RdBu[1:6]),
-    colorrange = (0,0.66)
+    colorrange = (0,maximum(sens[flux_idxs[flux_order], param_idxs[param_order]]))
 )
 Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
 f
@@ -221,28 +220,6 @@ save("data/plots/respiration_sens.png", f, px_per_unit = 1200/inch)
 
 
 # whole solution
-f = Figure()#, backgroundcolor=:transparent)
-ax = Axis(
-    f[1,1],
-    xlabel = "Turnover number",
-    xticklabelrotation = -pi / 2,
-    ylabel = "Flux",
-    xticks = (1:length(parameters), string.(parameters)),
-    xlabelsize=6pt,
-    ylabelsize=6pt,
-    xticklabelsize=5pt,
-    yticklabelsize=5pt,
-)
-hm = heatmap!(
-    ax,
-    sens[flux_idxs,:]';
-    colormap = reverse(ColorSchemes.RdBu),
-    colorrange = (-0.25,0.25)
-)
-Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
-f
-
-
 
 
 using Clustering
@@ -250,36 +227,47 @@ using Clustering
 flux_idxs = findall(x -> first(x) == :fluxes, vids)
 flux_ids = last.(vids[flux_idxs])
 # cluster flux sensitivity into 10 clusters using K-means
-R = kmeans(sens[flux_idxs,:]',15; maxiter=400,display=:iter)
+R = kmeans(sens[flux_idxs,:]',2; maxiter=400,display=:iter)
 
 a = assignments(R) # get the assignments of points to clusters
 
 
 xtickvals = []
-for i in axes(sens[flux_idxs,:]',1)
-    if abs(sum(sens[flux_idxs,:]'[i,:])/length(flux_ids))>0.08
+for i in axes(sens[flux_idxs[sortperm(a)],:]',1)
+    if (sum(abs.(sens[flux_idxs[sortperm(a)],:]'[i,:]))/length(parameters))>0.1
         push!(xtickvals,i)
     end
 end
 xtickvals
 xticklabels = [isnothing(A.reaction_name(escher_model,p)) ? A.reaction_name(model,p) : A.reaction_name(escher_model,p) for p in string.(parameters[xtickvals])]
+
+ytickvals = []
+for i in axes(sens[flux_idxs[sortperm(a)],:]',2)
+    if (sum(abs.(sens[flux_idxs[sortperm(a)],:]'[:,i]))/length(flux_ids))>0.1
+        push!(ytickvals,i)
+    end
+end
+ytickvals
+yticklabels = [length(A.reaction_name(escher_model,p)) > 10 ? p : A.reaction_name(escher_model,p) for p in string.(flux_ids[ytickvals])]
+
+
 f = Figure(; size=(12cm,10cm))#, backgroundcolor=:transparent)
 ax = Axis(
     f[1,1],
-    xlabel = "Enzyme",
+    xlabel = L"\text{Enzyme, }p",
     xticklabelrotation = -pi / 3,
-    ylabel = "Flux sensitivity",
-    xticks = (xtickvals, xticklabels),
+    ylabel = L"Reaction flux sensitivity, $\frac{\partial v}{\partial p}$",    xticks = (xtickvals, xticklabels),
     xlabelsize=7pt,
     ylabelsize=7pt,
     xticklabelsize=6pt,
     yticklabelsize=6pt,
+    yticks = (ytickvals, yticklabels),
 )
 hm = heatmap!(
     ax,
-    sens[flux_idxs,:]'[:,sortperm(a)];
+    sens[flux_idxs[sortperm(a)],:]';
     colormap = reverse(ColorSchemes.RdBu),
-    colorrange = (-0.5,0.5)
+    colorrange = (-0.2,0.2)
 )
 Colorbar(f[1, 2], hm, ticklabelsize = 5pt)
 f
