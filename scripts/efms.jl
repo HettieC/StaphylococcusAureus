@@ -280,3 +280,11 @@ df
 sort!(df,:OFM_1)
 
 df2 = filter(row -> row.Parameter ∈ ofm_df.Reaction,df)
+
+
+
+#############
+## check flux_ids[sortperm(a)] are used in the same quantitiy by the two OFMs
+to_check = string.(flux_ids[sortperm(a)][201:end])
+Dict(x => [y,OFM_dicts[2][x]] for (x,y) in OFM_dicts[1] if x in to_check && abs(y-OFM_dicts[2][x]) < 1e-10)
+

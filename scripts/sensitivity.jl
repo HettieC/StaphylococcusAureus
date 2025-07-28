@@ -135,7 +135,7 @@ set_theme!(figure_padding=12)
 f = Figure(; size=(10cm, 8cm))#, backgroundcolor=:transparent)
 escher_model = change_reaction_names(pruned_model)
 xticklabels = String[] 
-for r in parameters[order][207:end]
+for r in parameters[order][212:end]
     if isnothing(tryparse(Int,string(r)))
          push!(xticklabels,string(r))
     elseif !haskey(model.reactions[string(r)].annotations,"BiGG") || isempty(model.reactions[string(r)].annotations["BiGG"])
@@ -162,7 +162,7 @@ ax = Axis(
 barplot!(
     ax,
     1:length(xticklabels),
-    reverse(sens[flux_idx,:][order][207:end]),
+    reverse(sens[flux_idx,:][order][212:end]),
     color=Makie.wong_colors()[2]
 )
 ylims!(ax,(0,0.23))
@@ -221,25 +221,29 @@ save("data/plots/respiration_sens.png", f, px_per_unit = 1200/inch)
 
 # whole solution
 
-
 using Clustering
 
 flux_idxs = findall(x -> first(x) == :fluxes, vids)
 flux_ids = last.(vids[flux_idxs])
 # cluster flux sensitivity into 10 clusters using K-means
-R = kmeans(sens[flux_idxs,:]',2; maxiter=400,display=:iter)
+R = kmeans(sens[flux_idxs,:]',20; maxiter=400,display=:iter)
 
 a = assignments(R) # get the assignments of points to clusters
 
+# make heatmap of sens[flux_idxs[sortperm(a)],:]' with the flux_ids ordered by their parameter_location
 
 xtickvals = []
 for i in axes(sens[flux_idxs[sortperm(a)],:]',1)
-    if (sum(abs.(sens[flux_idxs[sortperm(a)],:]'[i,:]))/length(parameters))>0.1
+    if (sum(abs.(sens[flux_idxs[sortperm(a)],:]'[i,:]))/length(parameters))>0.06
         push!(xtickvals,i)
     end
 end
 xtickvals
 xticklabels = [isnothing(A.reaction_name(escher_model,p)) ? A.reaction_name(model,p) : A.reaction_name(escher_model,p) for p in string.(parameters[xtickvals])]
+
+
+xtickvals = findfirst(x->string(x)=="PTS_CHEBI:15903",parameters)
+xticklabels = string.(parameters[xtickvals])
 
 ytickvals = []
 for i in axes(sens[flux_idxs[sortperm(a)],:]',2)
@@ -256,16 +260,19 @@ ax = Axis(
     f[1,1],
     xlabel = L"\text{Enzyme, }p",
     xticklabelrotation = -pi / 3,
-    ylabel = L"Reaction flux sensitivity, $\frac{\partial v}{\partial p}$",    xticks = (xtickvals, xticklabels),
+    ylabel = L"Reaction flux sensitivity, $\frac{\partial v}{\partial p}$",    
+    xticks = ([xtickvals], [xticklabels]),
     xlabelsize=7pt,
     ylabelsize=7pt,
     xticklabelsize=6pt,
     yticklabelsize=6pt,
-    yticks = (ytickvals, yticklabels),
+    yticksvisible = false,
+    yticklabelsvisible = false,
+    #yticks = (ytickvals, yticklabels),
 )
 hm = heatmap!(
     ax,
-    sens[flux_idxs[sortperm(a)],:]';
+    sens[flux_idxs[sortperm(a)][201:end],:]';
     colormap = reverse(ColorSchemes.RdBu),
     colorrange = (-0.2,0.2)
 )

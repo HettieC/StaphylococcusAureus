@@ -39,8 +39,8 @@ cm = inch / 2.54
 set_theme!(figure_padding=3)
 
 capacity = [
-    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 400.0),
-    ("membrane", membrane_gids, 120.0)
+    ("cytosol", [g for g in A.genes(model) if g ∉ membrane_gids], 200.0),
+    ("membrane", membrane_gids, 130.0)
 ];
 
 fba_growth = Dict{String,Float64}()
