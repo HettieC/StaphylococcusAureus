@@ -66,7 +66,7 @@ nader_df = DataFrame(XLSX.readtable("data/experimental/Essential_gene_Nader.xlsx
 unique(vcat(exp_df.Gene_ID, filter(g -> g ∈ A.genes(model), nader_df.locus_tag)))
 
 # make df of gene and reaction
-df = DataFrame(GeneID=String[],Name=String[],ReactionID=String[],Reaction=String[],Pathway=String[])
+df = DataFrame(GeneID=String[],Name=String[],ReactionID=String[],Reaction=String[])
 for (g,ko) in ko_dict
     g == "g1" && continue
     if abs(ko)<1e-4
@@ -79,7 +79,6 @@ for (g,ko) in ko_dict
                     g == "" ? "" : g_name[g],
                     r,
                     isnothing(model.reactions[r].name) ? r : model.reactions[r].name,
-                    haskey(model.reactions[r].annotations,"Pathway") ? join(model.reactions[r].annotations["Pathway"]) : ""
                 ]
             )
         end
@@ -87,6 +86,42 @@ for (g,ko) in ko_dict
 end
 df
 unique!(df)
+new_gid = String[] 
+i = 0
+for g in unique(df.GeneID)
+    i += 1
+    n_g = length([gid for gid in df.GeneID if gid==g])
+    if n_g == 1 
+        if iseven(i)
+            push!(new_gid,"\\rowcolor[gray]{0.9}$g")
+        else 
+            push!(new_gid,g)
+        end
+    else 
+        if iseven(i)
+            push!(new_gid, "\\rowcolor[gray]{0.9}$g")
+            append!(new_gid,repeat(["\\rowcolor[gray]{0.9}"],n_g-1))
+        else
+            push!(new_gid, g)
+            append!(new_gid,repeat([""],n_g-1))
+        end
+    end
+end
+df.GeneID = new_gid
+new_gname = String[]
+for g in unique(df.Name)
+    n_g = length([gid for gid in df.Name if gid==g])
+    if n_g == 1 
+        push!(new_gname,g)
+    else 
+        push!(new_gname, g)
+        append!(new_gname,repeat([""],n_g-1))
+    end
+end
+df.Name = new_gname
+latexify(df; env = :table, booktabs = true, latex = false) |> print
+
+
 
 
 exp_match = filter(row->row.GeneID ∈ exp_df.Gene_ID || row.GeneID ∈ nader_df.locus_tag, df)
