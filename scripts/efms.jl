@@ -288,3 +288,23 @@ df2 = filter(row -> row.Parameter ∈ ofm_df.Reaction,df)
 to_check = string.(flux_ids[sortperm(a)][201:end])
 Dict(x => [y,OFM_dicts[2][x]] for (x,y) in OFM_dicts[1] if x in to_check && abs(y-OFM_dicts[2][x]) < 1e-10)
 
+most_controlling = parameters[order][vcat(1:5,222:226...)]
+[A.reaction_name(escher_model,string(r)) for r in most_controlling]
+
+dic = Dict(r => [i,A.reaction_name(escher_model,string(r)),haskey(model.reactions[string(r)].annotations,"Pathway") ? model.reactions[string(r)].annotations["Pathway"] : "" ] for (i,r) in enumerate(string.(most_controlling)))
+
+findfirst(x->x==1,data.grp1)
+data.height2[29:35]
+
+rs = string.(parameters[order][29:35])
+dic = Dict(r => [A.reaction_name(escher_model,r),haskey(model.reactions[r].annotations,"Pathway") ? model.reactions[r].annotations["Pathway"] : "" ] for r in rs)
+
+sens = Dict(string(x) => i ∈ 29:35 ? 1 : 0 for (i,x) in enumerate(string.(parameters[order])) )
+for r in A.reactions(model)
+    if !haskey(sens,r)
+        sens[r] = 0
+    end
+end
+open("data/sens.json","w") do io 
+    JSON.print(io,Dict(string.(parameters[order])[i] => data.height1[i] for i in 1:length(data.height1)))
+end

@@ -29,18 +29,18 @@ ax = Axis(
     ylabelsize=6pt,
     xticklabelsize=5pt,
     yticklabelsize=5pt,
-    xticks = [0,12,24,36,48],
+    xticks = [24,36,48,60,72],
     ygridvisible=false,
     xgridvisible=false,
 
 )
-lines!(ax, avg_df.Time, avg_df.gluc, label = "Glucose + 5AAs", color=:blue)
-lines!(ax, avg_df.Time, avg_df.no_cys, label = "no Cys", color=:red)
-lines!(ax, avg_df.Time, avg_df.no_pro, label = "no Pro", color=:green)
-lines!(ax, avg_df.Time, avg_df.no_arg, label = "no Arg", color=:purple)
-lines!(ax, avg_df.Time, avg_df.no_leu, label = "no Leu", color=:orange)
-lines!(ax, avg_df.Time, avg_df.no_val, label = "no Val", color=:black)
-lines!(ax, avg_df.Time, avg_df.ribose, label = "Ribose + 5AAs",color=:brown)
+lines!(ax, avg_df.Time.+24, avg_df.gluc, label = "Glucose + 5AAs", color=:blue)
+lines!(ax, avg_df.Time.+24, avg_df.no_cys, label = "no Cys", color=:red)
+lines!(ax, avg_df.Time.+24, avg_df.no_pro, label = "no Pro", color=:green)
+lines!(ax, avg_df.Time.+24, avg_df.no_arg, label = "no Arg", color=:purple)
+lines!(ax, avg_df.Time.+24, avg_df.no_leu, label = "no Leu", color=:orange)
+lines!(ax, avg_df.Time.+24, avg_df.no_val, label = "no Val", color=:black)
+lines!(ax, avg_df.Time.+24, avg_df.ribose, label = "Ribose + 5AAs",color=:brown)
 f
 leg = Legend(
     f[1,2], 
@@ -55,6 +55,8 @@ leg = Legend(
 )
 
 colsize!(f.layout,1,Aspect(1,1.4))
+f
+xlims!(ax,(24,72))
 f
 save("data/growth_curve.png",f)
 save("data/experimental/growth_curve.png", f, px_per_unit = 1200/inch)
