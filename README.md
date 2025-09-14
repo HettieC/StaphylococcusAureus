@@ -12,5 +12,5 @@ using StaphylococcusAureus
 model, reaction_isozymes = build_model()
 ```
 
-From there, the files in ```StaphylococcusAureus/scripts``` can be used to reproduce figures from the thesis.
+From there, the files in ```StaphylococcusAureus/scripts``` can be used to reproduce all figures from the thesis.
 
