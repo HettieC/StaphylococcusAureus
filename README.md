@@ -4,7 +4,7 @@ This repository contains the julia code to build the ecGSMM, as well as the scri
 
 ## Downloading the model
 
-If only interested in downloading the model to use elsewhere, you can download the file ```data/s_aureus.json```. This is the model as of 14th September 2025.
+If only interested in downloading the model to use elsewhere, you can download the file ```data/s_aureus.json```.
 
 ## How to build the model 
 
@@ -18,5 +18,5 @@ model, reaction_isozymes = build_model()
 
 Building the model uses  ```RheaReactions```, a small package for downloading reactions from [rhea](https://www.rhea-db.org/). This package works best once reactions have been cached locally. The first time the model is built, this will cache the reactions. Unfortunately, due to the high number of API requests, this first build often outputs errors. If this occurs, simply re-run ```build_model()``` again until it no longer errors. Each time, more reactions will be cached.
 
-After the model has been built, the files in ```StaphylococcusAureus/scripts``` can be used to reproduce all figures from the thesis.
+After the model has been built, the files in ```StaphylococcusAureus/scripts``` can be used to reproduce all figures from the thesis. A zenodo archive is available at [https://doi.org/10.5281/zenodo.17116904](https://doi.org/10.5281/zenodo.17116904) as of 14th September 2025.
 
