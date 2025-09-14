@@ -37,3 +37,5 @@ data/databases
 *.png
 
 *refsim*
+
+data/experimental_data.ods
