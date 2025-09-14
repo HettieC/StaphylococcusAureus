@@ -1,18 +1,26 @@
-rhea_rxn_dir(rxn, qrt) = begin
-    idx = first(indexin([rxn], qrt))
-    isnothing(idx) && error("Reaction not found...")
-    idx == 1 && return (-1000, 1000)
-    idx == 2 && return (0, 1000)
-    idx == 3 && return (-1000, 0)
-    idx == 4 && return (-1000, 1000)
+rhea_rxn_dir(master_rid, consensus) = begin
+    idx = consensus - master_rid
+    idx == 0 && return (-1000, 1000)
+    idx == 1 && return (0, 1000)
+    idx == 2 && return (-1000, 0)
+    idx == 3 && return (-1000, 1000)
 end
 
 function curate!(model)
 
     # modify rhea reactions to use beta-D isomer instead of D-glucose 
     # modify rhea reactions to use general sucrose 6(F)-phosphate instead of 6G
-        # modify rhea reactions to use beta-D isomer instead of D-fructose 
+    # modify rhea reactions to use beta-D isomer instead of D-fructose 
+    # modify rhea reactions to use menaquinol/menaquinone instead of ubiquinol/ubiquinone
+    # modify rhea reactions to use (S)-1-pyrroline-5-carboxylate instead of 1-pyrroline-5-carboxylate 
 
+
+    # #remove general quinone/quinol/ubiquinone/ubiquinone reactions 
+    for (r,rxn) in model.reactions 
+        if haskey(rxn.stoichiometry,"CHEBI:132124") || haskey(rxn.stoichiometry,"CHEBI:24646") || haskey(rxn.stoichiometry,"POLYMER:9566") || haskey(rxn.stoichiometry,"POLYMER:9565") || haskey(rxn.stoichiometry,"POLYMER:9563")
+            delete!(model.reactions,r)
+        end
+    end
 
     for (r, rxn) in model.reactions
         if haskey(rxn.stoichiometry, "CHEBI:4167") # D-glucose -> beta-D-glucose
@@ -35,41 +43,89 @@ function curate!(model)
             rxn.stoichiometry["CHEBI:57634"] = rxn.stoichiometry["CHEBI:61527"]
             delete!(rxn.stoichiometry, "CHEBI:61527")
         end
+        if haskey(rxn.stoichiometry, "CHEBI:16389") # a ubiquinone -> menaquinone-8
+            rxn.stoichiometry["CHEBI:44027"] = rxn.stoichiometry["CHEBI:16389"]
+            delete!(rxn.stoichiometry, "CHEBI:16389")
+        end
+        if haskey(rxn.stoichiometry, "CHEBI:17976") # a ubiquinol -> menaquinol-8
+            rxn.stoichiometry["CHEBI:61684"] = rxn.stoichiometry["CHEBI:17976"]
+            delete!(rxn.stoichiometry, "CHEBI:17976")
+        end
+        if haskey(rxn.stoichiometry, "POLYMER:9537") # a menaquinone -> menaquinone-8
+            rxn.stoichiometry["CHEBI:44027"] = rxn.stoichiometry["POLYMER:9537"]
+            delete!(rxn.stoichiometry, "POLYMER:9537")
+        end
+        if haskey(rxn.stoichiometry, "POLYMER:9539") # a menaquinol -> menaquinol-8
+            rxn.stoichiometry["CHEBI:61684"] = rxn.stoichiometry["POLYMER:9539"]
+            delete!(rxn.stoichiometry, "POLYMER:9539")
+        end
+        if haskey(rxn.stoichiometry, "POLYMER:9536") # a 2-demethylmenaquinone -> 2-demethylmenaquinone-8
+            rxn.stoichiometry["CHEBI:48455"] = rxn.stoichiometry["POLYMER:9536"]
+            delete!(rxn.stoichiometry, "POLYMER:9536")
+        end
+        if haskey(rxn.stoichiometry, "CHEBI:15893") # 1-pyrroline-5-carboxylate  -> (S)-1-pyrroline-5-carboxylate 
+            rxn.stoichiometry["CHEBI:17388"] = rxn.stoichiometry["CHEBI:15893"]
+            delete!(rxn.stoichiometry, "CHEBI:15893")
+        end
     end
+
+    # add metabolite
+    model.metabolites["CHEBI:48455"] = CM.Metabolite(
+        "2-demethylmenaquinone-8",
+        "Cytosol",
+        Dict(
+            "C" => 50,
+            "H" => 70,
+            "O" => 2
+        ),
+        0,
+        0.0,
+        Dict{String,Vector{String}}(),
+        Dict{String,Vector{String}}(),
+    )
 
     delete!(model.metabolites, "CHEBI:4167") # D-glucose
     delete!(model.metabolites, "CHEBI:61548") # D-glucose 6-phosphate
     delete!(model.metabolites, "CHEBI:91002") # sucrose 6(G)-phosphate
+    delete!(model.metabolites, "POLYMER:9536") # a 2-demethylmenaquinone
+    delete!(model.metabolites, "POLYMER:9537") # a menaquinone
+    delete!(model.metabolites, "POLYMER:9539") # a menaquinol
+    delete!(model.metabolites, "CHEBI:16389") # a ubiquinone
+    delete!(model.metabolites, "CHEBI:17976") # a ubiquinol
+
+
+    # remove chemical entity metabolite 
+    delete!(model.metabolites, "CHEBI:24431")
+    for (r,rxn) in model.reactions 
+        haskey(rxn.stoichiometry,"CHEBI:24431") && delete!(rxn.stoichiometry,"CHEBI:24431")
+    end
 
     # add generic transport gene
     model.genes["g1"] = CM.Gene(name="g1")
 
-    # allow bidirectional H2O 
-    model.reactions["EX_15377"].lower_bound = -1000
-    model.reactions["EX_15377"].upper_bound = 1000
-
-    # change directions to match what is found in biocyc - manual thermodynamics leaves much to be desired
+    #change directions to match what is found in biocyc 
     biocyc = DataFrame(CSV.File(joinpath("data", "databases", "rhea", "biocyc_rxns.csv")))
+    bidirectional = string.(JSON.parsefile("data/model/reactions/bidirectional.json"))
+    manual_directions = DataFrame(CSV.File("data/model/reactions/unidirectional_reactions.csv"))
     @select!(biocyc, :rheaDir, :metacyc)
-    directions = String[]
     for rid in A.reactions(model)
+        rid ∈ bidirectional && continue
         isnothing(tryparse(Int,rid)) && continue
+        rid ∈ string.(manual_directions.RHEA_ID) && continue # ignore if direction manually specified
         qrt = RheaReactions.get_reaction_quartet(parse(Int, rid))
+        master_rid = minimum(qrt)
         df = @subset(biocyc, in.(:rheaDir, Ref(qrt)))
         isempty(df) && continue
-        lb, ub = rhea_rxn_dir(df[1, 1], qrt)
+        lb, ub = rhea_rxn_dir(master_rid, df[1, 1])
         model.reactions[rid].lower_bound = lb
         model.reactions[rid].upper_bound = ub
-        if lb != -1000 || ub != 1000
-            push!(directions, rid)
-        end
     end
 
     #add atp maintenance reaction 
     model.reactions["ATPM"] = CM.Reaction(
         ;
         name="ATP maintenance",
-        lower_bound=1.0,
+        lower_bound=5.0,
         stoichiometry=Dict(
             "CHEBI:30616" => -1, #atp
             "CHEBI:15377" => -1, #h2o
@@ -77,6 +133,14 @@ function curate!(model)
             "CHEBI:15378" => 1, #h+
             "CHEBI:456216" => 1, #adp
         ),
+        annotations = Dict(
+            "CM.Reaction" => [
+                "ATP + H2O = ADP + phosphate + H+"
+            ],
+            "EC" => ["3.6.1.5 3.6.1.8"],
+            "KEGG" => ["R00086"]
+        ),
+        gene_association_dnf = [["SAPIG2145"],["SAPIG2147"]],
     )
 
     #add atp synthase reaction 
@@ -92,6 +156,12 @@ function curate!(model)
             "CHEBI:15377" => 1, #h2o
             "CHEBI:15378" => 3, #h+
         ),
+        annotations = Dict(
+            "CM.Reaction" => [
+                "ADP + phosphate + 4 H+ (periplasm) = ATP + H2O + 3 H+"
+            ]
+        ),
+        gene_association_dnf = [["SAPIG2145"], ["SAPIG2147"]]
     )
 
     # add a biomass reaction
@@ -101,21 +171,23 @@ function curate!(model)
         lower_bound=0.0,
         upper_bound=1000.0,
         stoichiometry=Dict(
-            "CHEBI:30616" => -20, #atp
-            "CHEBI:15377" => -20, #h2o
-            "CHEBI:43474" => 20, #phosphate
-            "CHEBI:15378" => 20, #h+
-            "CHEBI:456216" => 20, #adp
+            "CHEBI:30616" => -50, #atp
+            "CHEBI:15377" => -50, #h2o
+            "CHEBI:43474" => 50, #phosphate
+            "CHEBI:15378" => 50, #h+
+            "CHEBI:456216" => 50, #adp
 
-            "CHEBI:46398" => -0.1,   #UTP
-            "CHEBI:37565" => -0.059,   #GTP
-            "CHEBI:37563" => -0.059,   #CTP 
-            "CHEBI:57692" => -0.007,    #FAD  
-            "CHEBI:61404" => -0.02,    #dATP
+            "CHEBI:46398" => -0.506,   #UTP
+            "CHEBI:37565" => -0.496,   #GTP
+            "CHEBI:37563" => -0.496,   #CTP 
+            "CHEBI:57692" => -0.00067,    #FAD  
+            "CHEBI:61404" => -0.676,    #dATP
             "CHEBI:57287" => -4.42e-4, #CoA
-            "CHEBI:37568" => -0.02,    #dTTP
-            "CHEBI:61429" => -0.099,   #dGTP
-            "CHEBI:61481" => -0.099,   #dCTP
+            "CHEBI:37568" => -0.676,    #dTTP
+            "CHEBI:61429" => -0.33,   #dGTP
+            "CHEBI:61481" => -0.33,   #dCTP
+
+            "CHEBI:57288" => -0.00033, #acetyl-coa
 
             "CHEBI:57783" => 2e-4, #NADPH 
             "CHEBI:57945" => 2e-4, #NADH
@@ -129,38 +201,71 @@ function curate!(model)
             "CHEBI:27689" => -0.1,    #decanoate
             "CHEBI:25629" => -0.1,    #octadecanoate
 
-            "CHEBI:57427" => -0.282,  #L-leucine
-            "CHEBI:32682" => -0.111,  #L-arginine  
-            "CHEBI:57762" => -0.207,  #L-valine  
-            #"CHEBI:60039" => -0.116,  #L-proline
-            "CHEBI:35235" => -0.019,  #L-cysteine
+            #protein
+            "CHEBI:57427" => -0.699,  #L-leucine
+            "CHEBI:32682" => -0.268,  #L-arginine  
+            "CHEBI:57762" => -0.514,  #L-valine  
+            "CHEBI:60039" => -0.246,  #L-proline
+            "CHEBI:35235" => -0.048,  #L-cysteine
             "CHEBI:57305" => -0.19,  #glycine
-            "CHEBI:33384" => -0.19, #L-serine         
-            "CHEBI:29991" => -0.261, #L-aspartate
-            "CHEBI:57972" => -0.212, #L-alanine
-            "CHEBI:58359" => -1.2,   #L-glutamine
-            "CHEBI:29985" => -1.0,   #L-glutamate
-            "CHEBI:32551" => -0.235, #L-lysine
-            "CHEBI:58045" => -0.269, #L-isoleucine
-            "CHEBI:57305" => -0.1,  #glycine
-            "CHEBI:57926" => -0.179, #L-threonine
-            "CHEBI:58095" => -0.137, #L-phenylalanine
-            "CHEBI:58315" => -0.119, #L-tyrosine
-            "CHEBI:57912" => -1.0,   #L-tryptophan
-            "CHEBI:57595" => -0.073, #L-histidine
+            "CHEBI:33384" => -0.469, #L-serine         
+            "CHEBI:29991" => -0.446, #L-aspartate
+            "CHEBI:57972" => -0.492, #L-alanine
+            "CHEBI:58359" => -0.318,  #L-glutamine
+            "CHEBI:29985" => -0.497,   #L-glutamate
+            "CHEBI:32551" => -0.576, #L-lysine
+            "CHEBI:58045" => -0.658, #L-isoleucine
+            "CHEBI:57305" => -0.462,  #glycine
+            "CHEBI:57926" => -0.443, #L-threonine
+            "CHEBI:58095" => -0.246, #L-phenylalanine
+            "CHEBI:58315" => -0.298, #L-tyrosine
+            "CHEBI:57912" => -0.057,   #L-tryptophan
+            "CHEBI:57595" => -0.178, #L-histidine
             "CHEBI:58199" => -0.1, #L-homocysteine
-            "CHEBI:58048" => -0.1,  #L-asparagine
-            "CHEBI:57844" => -0.084, #L-methionine
-
+            "CHEBI:58048" => -0.433,  #L-asparagine
+            "CHEBI:57844" => -0.202, #L-methionine
         ),
         objective_coefficient=1.0,
         notes=Dict("ref" => ["Diaz Calvo, S. epidermis, Metabolites 2022"]),
     )
 
+    # fix mass balance problems
+    model.reactions["20345"].stoichiometry["CHEBI:29950"] = -2
+    model.reactions["28037"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["14217"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["19993"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["28041"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["21260"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["23252"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["24164"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["28029"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["28033"].stoichiometry["CHEBI:29950"] = 2
+    model.reactions["19609"].stoichiometry["CHEBI:74411"] = -2
+    model.reactions["19609"].stoichiometry["CHEBI:74493"] = 2
+    # fix charge imbalance
+    model.reactions["76991"].stoichiometry["CHEBI:33723"] = -2
+    model.reactions["76991"].stoichiometry["CHEBI:33722"] = 2
+
+
+    delete_rids = [
+        "15184",
+        "20213",
+        "16413",
+       "28767",
+        "14676",
+        "14736",
+       "16585",
+       "20624",
+       "29051"
+    ]
+    for rid in delete_rids 
+        delete!(model.reactions,rid)
+    end
+
+    # add rxn name
+    model.reactions["76995"].name = "ferredoxin---NADP+ reductase"
     # add missing transporters 
     add_permease!(model, "CHEBI:32682", ["g1"], nothing)
-
-    # make acsA bidirectional 
-    model.reactions["23176"].lower_bound = -1000
     return model
 end
+

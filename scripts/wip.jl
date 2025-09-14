@@ -3,7 +3,7 @@ using COBREXA, JSONFBCModels
 import AbstractFBCModels.CanonicalModel as CM
 using HiGHS, JSON
 
-model,directions = build_model();
+model,reaction_isozymes = build_model();
 
 save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 
@@ -11,7 +11,7 @@ save_model(convert(JSONFBCModels.JSONFBCModel, model), "data/model.json")
 escher_model = change_reaction_names(model)
 save_model(convert(JSONFBCModels.JSONFBCModel, escher_model), "data/escher_model.json")
 
-id_tag("lcl|AM990992.1_prot_CAQ50256.1_1816")
+id_tag("lcl|AM990992.1_prot_CAQ49274.1_834")
 ####################################
 
 fba_sol = parsimonious_flux_balance_analysis(model; optimizer=HiGHS.Optimizer)

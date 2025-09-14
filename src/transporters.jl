@@ -73,7 +73,7 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                     g.Protein == ["g1"] && continue
                     reaction_isozymes["ABC_$mid"]["isozyme_"*string(i+1)] = Isozyme(
                         gene_product_stoichiometry = Dict(gid => 1),
-                        kcat_forward = kcat_dict["ABC_$(mid)_f"][gid] * 3.6,
+                        kcat_forward = kcat_dict["ABC_$(mid)_f"][gid] * 3.6, #mmol/h
                         kcat_reverse = kcat_dict["ABC_$(mid)_r"][gid] * 3.6,
                     )
                     i += 1
@@ -89,8 +89,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-        else
-            @warn "$mid not in model (ABC)"
         end
     end
 
@@ -134,8 +132,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-        else
-            @warn "$mid not in model (PTS)"
         end
     end
 
@@ -172,13 +168,11 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 add_symport!(model, mid1, mid2, iso, ss)
                 reaction_isozymes[rid]["isozyme_"*string(i+1)] = Isozyme(
                     gene_product_stoichiometry = Dict(iso .=> ss),
-                    kcat_forward = maximum([kcat_dict["$(rid)_f"][g] for g in iso]) * 3.6,
-                    kcat_reverse = maximum([kcat_dict["$(rid)_r"][g] for g in iso]) * 3.6,
+                    kcat_forward = haskey(kcat_dict,"$(rid)_f") ? maximum([kcat_dict["$(rid)_f"][g] for g in iso]) * 3.6 : 100,
+                    kcat_reverse = haskey(kcat_dict,"$(rid)_r") ? maximum([kcat_dict["$(rid)_r"][g] for g in iso]) * 3.6 : 100, 
                 )
                 i += 1
             end
-        else
-            @warn "$mid1 or $mid2 not in model (symport)"
         end
     end
 
@@ -221,9 +215,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-
-        else
-            @warn "$mid1 or $mid2 not in model (antiport)"
         end
     end
 
@@ -265,9 +256,6 @@ function add_membrane_transporters!(model,reaction_isozymes,kcat_dict)
                 )
                 i += 1
             end
-
-        else
-            @warn "$mid not in model (permease)"
         end
     end
 
@@ -441,7 +429,7 @@ function add_permease!(model, mid, iso, ss)
             objective_coefficient=0.0,
             lower_bound=-1000,
             upper_bound=1000,
-            gene_association_dnf=isnothing(iso) ? nothing : [iso],
+            gene_association_dnf=isnothing(iso) ? [["g1"]] : [iso],
             annotations=Dict("SBO" => ["SBO_0000284"]),
         )
         if !haskey(model.metabolites,mid* "_p")

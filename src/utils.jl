@@ -4,27 +4,15 @@ $(TYPEDSIGNATURES)
 Parse the chemical formula from a RheaReaction.formula
 """
 function parse_formula(x::Union{Nothing,String})
-    if isnothing(x)
-        return nothing
-    elseif occursin("(", x)
-        first_part = split(x, '(')[1]
-        last_part = split(split(x, '(')[2], ')')[1]
-        fla = Dict(
-            string(atom.match) => parse.(Int, replace(split(first_part, r"[A-Za-z]+"), "" => "1")[2:end])[i] for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", first_part))
-        )
-        for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", last_part))
-            if haskey(fla, atom.match)
-                fla[atom.match] += 7 * parse.(Int, replace(split(last_part, r"[A-Za-z]+"), "" => "1")[2:end])[i]
-            else
-                fla[atom.match] = 7 * parse.(Int, replace(split(last_part, r"[A-Za-z]+"), "" => "1")[2:end])[i]
-            end
-        end
-    else
-        fla = Dict(
-            string(atom.match) => parse.(Int, replace(split(x, r"[A-Za-z]+"), "" => "1")[2:end])[i] for (i, atom) in enumerate(eachmatch(r"[A-Za-z]+", x))
-        )
+    isnothing(x) && return nothing
+    x == "" && return nothing
+
+    res = Dict{String,Int}()
+    pattern = @r_str "([A-Z][a-z]*)([1-9][0-9]*)?"
+    for m in eachmatch(pattern, x)
+        res[m.captures[1]] = isnothing(m.captures[2]) ? 1 : parse(Int, m.captures[2])
     end
-    return fla
+    return res
 end
 
 
@@ -56,32 +44,22 @@ function extend_model!(model, dfs)
                 string(v.accession) => s
                 for (s, v) in coeff_mets
             )
+            # only use CHEBI metabolites
+            any(((k,v),)->!startswith(k,"CHEBI"),stoichiometry) && continue
 
             append!(ms, last.(coeff_mets))
 
+            if isnothing(rxn)
+                println(rid)
+                continue 
+            end
             ecs = isnothing(rxn.ec) ? df.EC : [rsplit(x, '/'; limit=2)[2] for x in rxn.ec]
             name = rxn.name
 
-            #direction 
-            reversibility_index_threshold = 5 
-            rev_ind = ismissing(first(df.RevIndex)) ? nothing : first(df.RevIndex) 
-
-            if isnothing(rev_ind) || (abs(rev_ind) <= reversibility_index_threshold)
-                lb = -1000
-                ub = 1000
-            elseif rev_ind < -reversibility_index_threshold # forward
-                lb = 0
-                ub = 1000
-            elseif rev_ind > reversibility_index_threshold # reverse
-                lb = -1000
-                ub = 0
-            end
-
-
             model.reactions[string(rid)] = CM.Reaction(;
                 name=name,
-                lower_bound = lb,
-                upper_bound = ub,
+                lower_bound = -1000,
+                upper_bound = 1000,
                 stoichiometry = stoichiometry,
                 gene_association_dnf = [grr],
                 annotations = Dict(
@@ -98,7 +76,7 @@ function extend_model!(model, dfs)
         haskey(model.metabolites, m.accession) && continue
         model.metabolites[m.accession] = CM.Metabolite(
             m.name,
-            nothing,
+            "Cytosol",
             parse_formula(m.formula),
             m.charge,
             0.0,
@@ -119,7 +97,7 @@ end
 
 function gapfill!(model)
 
-    df = DataFrame(CSV.File("data/model/gapfilling_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/gapfilling_reactions.csv"))
     ms = RheaReactions.RheaMetabolite[]
 
     for row in eachrow(unique(df))
@@ -153,6 +131,7 @@ function gapfill!(model)
             notes=Dict(
                 "reason" => ["gapfilling"]
             ),
+            gene_association_dnf = [["g1"]]
         )
     end
 
@@ -172,28 +151,6 @@ function gapfill!(model)
 
     model
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-Get the SAPIG ID of a gene.
-"""
-function id_tag(gene)
-    id_tag = Dict{String,String}()
-    open("data/databases/ST398.txt") do io
-        locus_tag = ""
-        id = ""
-        for ln in eachline(io)
-            if startswith(ln, '>')
-                id = split(ln; limit=2)[1][2:end]
-                locus_tag = split(split(ln, "locus_tag=")[2], ']'; limit=2)[1]
-            end
-            id_tag[id] = locus_tag
-        end
-    end
-    return id_tag[gene]
-end
-export id_tag
 
 """
 $(TYPEDSIGNATURES)
@@ -222,15 +179,15 @@ function change_reaction_names(model)
     for (r, rxn) in model.reactions
         startswith(r,"EX") && continue
         g_name = ""
-        if !isnothing(rxn.annotations) && haskey(rxn.annotations, "EC")
-            for ec in split(rxn.annotations["EC"][1])
-                g_name *= "$ec, "
-            end
-        end
         if !isnothing(rxn.gene_association_dnf)
             rxn.gene_association_dnf == [["g1"]] && continue
             for g in unique([eggnog_dict[tag_id[g]] for g in vcat(rxn.gene_association_dnf...)])
-                g_name *= "$g, "
+                g == "-" && continue
+                if g_name == "" 
+                    g_name *= "$g"
+                else 
+                    g_name *=", $g"
+                end
             end
         end
         rhea_id_gene_id[r] = g_name
@@ -252,18 +209,14 @@ Add source reactions to the model.
 """
 function add_sources!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sources.csv"))
-    i = 0 
     for row in eachrow(df)
-        i += 1
         mid = row.CHEBI
         chebi = split(mid,":")[2]
-        if i ∈ [1,2,3,4,5,6,7,8,9]  
-            mid *= "_e"
-        end
+        mid *= "_e"
         model.reactions["EX_$chebi"] = CM.Reaction(
             ;
             name = "$(row.Name) exchange",
-            lower_bound = 0.0,
+            lower_bound = 0,
             upper_bound = 1000.0,
             stoichiometry = Dict(mid => 1),
         )
@@ -282,16 +235,22 @@ function add_sinks!(model)
     df = DataFrame(CSV.File("data/model/exchanges/sinks.csv"))
 
     for row in eachrow(df)
+        mid = row.CHEBI
         chebi = split(row.CHEBI,':')[2]
-        model.reactions["EX_$chebi"] = CM.Reaction(
-            ;
-            name = "$(row.Name) exchange",
-            lower_bound = -1000.0,
-            upper_bound = 0.0,
-            stoichiometry = Dict(row.CHEBI => 1),
-        )
-        model.metabolites[row.CHEBI] = deepcopy(model.metabolites[row.CHEBI])
-        model.metabolites[row.CHEBI].compartment = "external"
+        mid *= "_e"
+        if haskey(model.reactions,"EX_$chebi")
+            model.reactions["EX_$chebi"].lower_bound = -1000 
+        else
+            model.reactions["EX_$chebi"] = CM.Reaction(
+                ;
+                name = "$(row.Name) exchange",
+                lower_bound = -1000.0,
+                upper_bound = 0.0,
+                stoichiometry = Dict(mid => 1),
+            )
+            model.metabolites[mid] = deepcopy(model.metabolites[row.CHEBI])
+            model.metabolites[mid].compartment = "external"
+        end
     end
     model
 end
@@ -353,9 +312,10 @@ function add_oxphos!(model)
 end
 
 function change_bounds!(model)
-    df = DataFrame(CSV.File("data/model/unidirectional_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/unidirectional_reactions.csv"))
 
     for row in eachrow(df)
+        !haskey(model.reactions,string(row.RHEA_ID)) && continue
         model.reactions[string(row.RHEA_ID)].lower_bound = row.LOWER_BOUND 
         model.reactions[string(row.RHEA_ID)].upper_bound = row.UPPER_BOUND 
     end
@@ -364,28 +324,26 @@ end
 
 function get_gene_product_molar_mass(gids)
     AA_mass = Dict(
-        'A' => 89,
-        'R' => 174,
-        'N' => 132,
-        'D' => 133,
-        'B' => 133,
-        'C' => 121,
-        'Q' => 146,
-        'E' => 147,
-        'Z' => 147,
-        'G' => 75,
-        'H' => 155,
-        'I' => 131,
-        'L' => 131,
-        'K' => 146,
-        'M' => 149,
-        'F' => 165,
-        'P' => 115,
-        'S' => 105,
-        'T' => 119,
-        'W' => 204,
-        'Y' => 181,
-        'V' => 117,
+        'A' => 71.0788,
+        'R' => 156.1875,
+        'N' => 114.1038,
+        'D' => 115.0886,
+        'C' => 103.1388,
+        'Q' => 128.1307,
+        'E' => 129.1155,
+        'G' => 57.0519,
+        'H' => 137.1411,
+        'I' => 113.1594,
+        'L' => 113.1594,
+        'K' => 128.1741,
+        'M' => 131.1926,
+        'F' => 147.1766,
+        'P' => 97.1167,
+        'S' => 87.0782,
+        'T' => 101.1051,
+        'W' => 186.2132,
+        'Y' => 163.1760,
+        'V' => 99.1326,
     )
     seqs = Dict{String,String}()
     open("data/sequence.txt","r") do io
@@ -402,7 +360,7 @@ function get_gene_product_molar_mass(gids)
 
     gene_product_molar_mass = Dict{String,Float64}()
     for gid in gids 
-        gene_product_molar_mass[gid] = sum([AA_mass[aa] for aa in seqs[gid]]) / 1000 # convert to milligrams
+        gene_product_molar_mass[gid] = sum([AA_mass[aa] for aa in seqs[gid]]) / 1000 # convert to kDa
     end
 
     return gene_product_molar_mass
@@ -422,7 +380,7 @@ function add_isozymes!(reaction_isozymes,kcat_dict,dfs)
         i = length(reaction_isozymes[rid])
         d["isozyme_"*string(i+1)] = Isozyme( # each isozyme gets a unique name
             gene_product_stoichiometry=Dict(grr .=> stoich),
-            kcat_forward=maximum([kcat_dict["$(rid)_f"][g] for g in grr]) * 3.6,
+            kcat_forward=maximum([kcat_dict["$(rid)_f"][g] for g in grr]) * 3.6, #mmol/h
             kcat_reverse=maximum([kcat_dict["$(rid)_r"][g] for g in grr]) * 3.6,
         )
     end
@@ -435,12 +393,15 @@ function get_reaction_isozymes()
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output3.xlsx", "Sheet1")))
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output4.xlsx", "Sheet1")))
     turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output5.xlsx", "Sheet1")))
-    
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output6.xlsx", "Sheet1")))
+    turnup_df = vcat(turnup_df, DataFrame(XLSX.readtable("data/turnup/output7.xlsx", "Sheet1")))
+
     rxn_seq_subs_prods = DataFrame(CSV.File("data/model/isozymes/reaction_sequence_subs_prods.csv"))
     
     turnup_df = DataFrames.rename!(turnup_df,
         "kcat [s^(-1)]" => "kcat",
     )
+
     kcat_df = insertcols(rxn_seq_subs_prods, 5, :kcat => turnup_df.kcat)
     kcat_dict = Dict{String,Dict{String,Float64}}()
     for row in eachrow(kcat_df)
@@ -454,7 +415,7 @@ function get_reaction_isozymes()
         end
     end
     
-    df = DataFrame(CSV.File("data/model/metabolic_reactions.csv"))
+    df = DataFrame(CSV.File("data/model/reactions/metabolic_reactions.csv"))
     
     heteros = @rsubset(df, !iszero(:Isozyme))
     @select!(heteros, :RHEA_ID, :Protein, :Stoichiometry, :Isozyme)
@@ -469,25 +430,30 @@ function get_reaction_isozymes()
     add_isozymes!(reaction_isozymes,kcat_dict,ghomos)
     add_isozymes!(reaction_isozymes,kcat_dict,gheteros)
     
+    
     return reaction_isozymes, kcat_dict
 end
 export get_reaction_isozymes
 
-function add_fake_isozymes!(reaction_isozymes)
+function add_fake_isozymes!(model,reaction_isozymes)
     # use a fake gene g1 for all metabolic reactions with not grr
 
-    avg_kcat = mean(vcat([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y]...))
+    avg_kcat = sum(vcat([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y]...))/length([b.kcat_forward for (x,y) in reaction_isozymes for (a,b) in y])
 
     for (r,rxn) in model.reactions 
         haskey(reaction_isozymes,r) && continue 
+        startswith(r,"EX") && continue 
+        startswith(r,"DF") && continue 
+        r == "biomass" && continue
         if rxn.gene_association_dnf == [["g1"]]
-            reaction_isozymes[r]["isozyme_1"] = Isozyme(
+            reaction_isozymes[r] = Dict("isozyme_1" => Isozyme(
                 gene_product_stoichiometry = Dict("g1" => 1),
-                kcat_forward = avg_kcat,
-                kcat_reverse = avg_kcat
+                kcat_forward = startswith(r,"PERM") ? 60 : avg_kcat,
+                kcat_reverse = startswith(r,"PERM") ? 60 : avg_kcat
+            )
             )
         else
-            println(r)
+            println("fix isozymes of $r")
         end
     end
 
@@ -511,3 +477,63 @@ function find_ec_info(ec_number::String)
     return a
 end
 export find_ec_info
+
+function add_special_isozymes!(reaction_isozymes,kcat_dict,model)
+    for (rid,rxn) in model.reactions 
+        if !haskey(reaction_isozymes,rid) && haskey(kcat_dict,rid*"_f")
+            reaction_isozymes[rid] = Dict(
+                "isozyme_"*string(i) => Isozyme(
+                    gene_product_stoichiometry = Dict(g => 1 for g in grr),
+                    kcat_forward = maximum([kcat_dict["$(rid)_f"][g] for g in grr]) * 3.6,
+                    kcat_reverse = maximum([kcat_dict["$(rid)_r"][g] for g in grr]) * 3.6
+                )
+                for (i,grr) in enumerate(rxn.gene_association_dnf)
+            )
+        end
+    end
+    #make ATPS faster
+    reaction_isozymes["ATPS"] = Dict(
+        id => Isozyme(
+            iso.gene_product_stoichiometry,
+            iso.kcat_forward * 10,
+            iso.kcat_reverse
+        )
+        for (id,iso) in reaction_isozymes["ATPS"]
+    )
+    return reaction_isozymes
+end
+
+function add_genes!(model)
+    for (r,rxn) in model.reactions
+        isnothing(rxn.gene_association_dnf) && continue 
+        for gid in vcat(rxn.gene_association_dnf...)
+            if !haskey(model.genes,gid)
+                model.genes[gid] = CM.Gene(;name = gid)
+            end
+        end
+    end
+    return model 
+end
+
+function _add_kegg_info!(model)
+    for (r,rxn) in model.reactions 
+        println(r)
+        if !isnothing(rxn.name) && !isnothing(tryparse(Int,r))
+            rxn.annotations["NameDB"] = ["Rhea"]
+            kegg_info = get_kegg_info(rxn.annotations["KEGG"][1])
+            model.reactions[r].annotations["Pathway"] = isnothing(kegg_info["pathway"]) ? [""] : kegg_info["pathway"]
+        elseif isnothing(tryparse(Int,r))
+            rxn.annotations["NameDB"] = ["none"]
+        elseif haskey(rxn.annotations,"KEGG") && rxn.annotations["KEGG"] != ["R"]
+            println(r)
+            rxn.annotations["NameDB"] = ["KEGG"]
+            kegg_info = get_kegg_info(rxn.annotations["KEGG"][1])
+            isnothing(kegg_info) && continue
+            model.reactions[r].name = kegg_info["name"]
+            model.reactions[r].annotations["Pathway"] = isnothing(kegg_info["pathway"]) ? [""] : kegg_info["pathway"]
+        end
+    end
+    return model 
+end
+
+
