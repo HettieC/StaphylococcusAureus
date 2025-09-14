@@ -145,10 +145,6 @@ sort!(ofm_df,:OFM_1)
 latexify(ofm_df; env = :table, booktabs = true, latex = false) |> print
 
 # OFM fluxes for escher:
-ofm_escher = Dict(
-    x => OFM_y for (x,y) in OFM_dicts[2]
-)
-
 open("data/ofm1_fluxes.json","w") do io 
     JSON.print(io,OFM_dicts[1])
 end
@@ -307,4 +303,8 @@ for r in A.reactions(model)
 end
 open("data/sens.json","w") do io 
     JSON.print(io,Dict(string.(parameters[order])[i] => data.height1[i] for i in 1:length(data.height1)))
+end
+
+open("data/sens_bold.json","w") do io 
+    JSON.print(io,sens)
 end
